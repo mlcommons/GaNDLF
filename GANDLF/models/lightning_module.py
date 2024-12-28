@@ -128,7 +128,8 @@ class GandlfLightningModule(pl.LightningModule):
         self, images: torch.Tensor
     ) -> Tuple[torch.Tensor, Union[torch.Tensor, None]]:
         attention_map = None
-        if "medcam_enabled" in self.params and self.params["medcam_enabled"]:
+        is_medcam_enabled = self.params.get("medcam_enabled", False)
+        if is_medcam_enabled:
             output, attention_map = self.model(images)
             if self.params["model"]["dimension"] == 2:
                 attention_map = torch.unsqueeze(attention_map, -1)
@@ -145,9 +146,11 @@ class GandlfLightningModule(pl.LightningModule):
         self._initialize_train_logger()
         self._initialize_training_epoch_containers()
 
+        # TODO check out if the disbled by default medcam is indeed what we
+        # meant - it was taken from original code
         if "medcam" in self.params:
             self._inject_medcam_module()
-            self.params["medcam_enabled"] = False  # Medcam
+            self.params["medcam_enabled"] = False
         if "differential_privacy" in self.params:
             self._initialize_differential_privacy()
 
@@ -246,14 +249,20 @@ class GandlfLightningModule(pl.LightningModule):
 
         images = self._prepare_images_batch_from_subject_data(subject)
         labels = self._prepare_labels_batch_from_subject_data(subject)
+        # TODO this is going to block any parallelism, as the spacing is going to unpredicatably change across GPUs
         self._set_spacing_params_for_subject(subject)
+
         images = self._process_images(images)
         labels = self._process_labels(labels)
+
         model_output, _ = self.forward(images)
         model_output, labels = self.pred_target_processor(model_output, labels)
 
         loss = self.loss(model_output, labels)
         metric_results = self.metric_calculators(model_output, labels)
+        metric_results = self._add_stage_suffix_to_metric_results_dict(
+            metric_results, "train"
+        )
         if self._problem_type_is_regression or self._problem_type_is_classification:
             self.train_labels.append(labels.detach().cpu())
             self.train_predictions.append(
@@ -268,6 +277,7 @@ class GandlfLightningModule(pl.LightningModule):
             on_step=True,
             on_epoch=True,
             prog_bar=True,
+            sync_dist=True,
         )
 
         return loss
@@ -308,12 +318,8 @@ class GandlfLightningModule(pl.LightningModule):
         return label
 
     def _set_spacing_params_for_subject(self, subject):
-        if "spacing" in subject:
-            self.params["subject_spacing"] = subject["spacing"]
-        else:
-            self.params["subject_spacing"] = None
+        self.params["subject_spacing"] = subject.get("spacing", None)
 
-    # TODO this shoudl be separate for
     def _process_images(self, images: torch.Tensor):
         """
         Modify the input images and labels as needed for forward pass, loss
@@ -456,6 +462,7 @@ class GandlfLightningModule(pl.LightningModule):
             self._ensure_proper_type_of_metric_values_for_progbar(epoch_metrics),
             on_epoch=True,
             prog_bar=True,
+            sync_dist=True,
         )
 
         if self.params["verbose"]:
@@ -579,11 +586,13 @@ class GandlfLightningModule(pl.LightningModule):
 
     def validation_step(self, subject, batch_idx):
         if self.params["verbose"]:
-            self._print_currently_processed_validation_subject(subject)
-        # TODO spacing in global params is going to effectively block any paralllelism, as the
-        # spacing is going to unpredicatably change across GPUs
-        self.params["subject_spacing"] = subject.get("spacing", None)
+            self._print_currently_processed_subject(subject)
+
+        # TODO this is going to block any parallelism, as the spacing is going to unpredicatably change across GPUs
+        self._set_spacing_params_for_subject(subject)
+
         subject_dict = self._initialize_validation_subject_dict(subject)
+
         if self._problem_type_is_regression or self._problem_type_is_classification:
             model_output = self._regression_or_classification_validation_step(
                 subject_dict, subject["subject_id"][0]
@@ -600,7 +609,9 @@ class GandlfLightningModule(pl.LightningModule):
 
         loss = self.loss(model_output, label)
         metric_results = self.metric_calculators(model_output, label)
-
+        metric_results = self._add_stage_suffix_to_metric_results_dict(
+            metric_results, "val"
+        )
         self.val_losses.append(loss)
         self.validation_metric_values.append(metric_results)
 
@@ -619,11 +630,12 @@ class GandlfLightningModule(pl.LightningModule):
             on_step=True,
             on_epoch=True,
             prog_bar=True,
+            sync_dist=True,
         )
 
         return loss
 
-    def _print_currently_processed_validation_subject(self, subject):
+    def _print_currently_processed_subject(self, subject):
         print("== Current subject:", subject["subject_id"], flush=True)
 
     def _initialize_validation_subject_dict(self, subject):
@@ -727,6 +739,16 @@ class GandlfLightningModule(pl.LightningModule):
             )
         return predicted_segmentation_mask
 
+    def _determine_save_path_to_use(self):
+        if self.trainer.validating or self.trainer.sanity_checking:
+            return self._current_validation_epoch_save_dir
+        elif self.trainer.testing:
+            return self._current_test_epoch_save_dir
+        elif self.trainer.predicting:
+            return self._current_inference_epoch_save_dir
+        else:
+            raise RuntimeError("Output save path cannot be determined for training")
+
     def _get_predictions_on_subject_using_grid_sampler(self, subject_dict):
         def _ensure_output_shape_compatibility_with_torchio(model_output: torch.Tensor):
             # for 2d images where the depth is removed, add it back
@@ -801,7 +823,6 @@ class GandlfLightningModule(pl.LightningModule):
             validation_epoch_average_metrics.update(
                 validation_epoch_average_metrics_overall
             )
-
         val_losses_gathered = self.all_gather(self.val_losses)
         mean_loss = torch.mean(torch.stack(val_losses_gathered)).item()
 
@@ -814,16 +835,23 @@ class GandlfLightningModule(pl.LightningModule):
                 validation_epoch_average_metrics
             ),
         )
+        if not self.trainer.sanity_checking:
+            self._check_if_early_stopping(mean_loss)
+        if self.params["save_outputs"] and (
+            self._problem_type_is_regression or self._problem_type_is_classification
+        ):
+            # TODO here rows to write also needs to be gathered across all GPUs
+            self._save_predictions_for_regression_or_classification(self.rows_to_write)
 
-        self._check_if_early_stopping(mean_loss)
-        if self.params["save_outputs"]:
-            if self._problem_type_is_regression or self._problem_type_is_classification:
-                # Do allgather for predictions and labels
-                self._save_predictions_for_regression_or_classification(
-                    self.rows_to_write
-                )
-            # else:
-            #     self._save_predictions_for_segmentation()
+    @staticmethod
+    def _add_stage_suffix_to_metric_results_dict(
+        metric_results_dict: Dict[str, float], stage: str
+    ):
+        metric_results_dict_with_updated_suffix = {
+            f"{stage}_{metric_name}": metric_value
+            for metric_name, metric_value in metric_results_dict.items()
+        }
+        return metric_results_dict_with_updated_suffix
 
     def _clear_validation_epoch_containers(self):
         self.val_losses = []
@@ -929,8 +957,7 @@ class GandlfLightningModule(pl.LightningModule):
                 interpolator=sitk.sitkNearestNeighbor,
             )
         segmentation_mask_save_path = os.path.join(
-            self._current_validation_epoch_save_dir,
-            "testing",
+            self._determine_save_path_to_use(),
             subject["subject_id"][0],
             f"{subject['subject_id'][0]}_seg_process_rank_{self.global_rank}{image_save_format}",
         )
@@ -941,7 +968,7 @@ class GandlfLightningModule(pl.LightningModule):
         self, rows_to_write: List[List[str]]
     ):
         csv_save_path = os.path.join(
-            self._current_validation_epoch_save_dir, "output_predictions.csv"
+            self._determine_save_path_to_use(), "output_predictions.csv"
         )
         file_contents_merged = self.CLASSIFICATION_REGRESSION_RESULTS_HEADER.join(
             [",".join(row) for row in rows_to_write]
@@ -949,6 +976,7 @@ class GandlfLightningModule(pl.LightningModule):
         with open(csv_save_path, "w") as file:
             file.write(file_contents_merged)
 
+    # TODO separate it into checking and saving functions
     @rank_zero_only
     def _check_if_early_stopping(self, val_loss):
         previous_best_loss = deepcopy(self.current_best_loss)
@@ -975,12 +1003,101 @@ class GandlfLightningModule(pl.LightningModule):
         del previous_best_loss
 
     def on_test_start(self):
-        self.test_metric_values: List[Dict[str, float]] = []
+        self._initialize_test_epoch_containers()
+        self._initialize_test_logger()
+
+    def _initialize_test_logger(self):
         self.test_logger = Logger(
             logger_csv_filename=os.path.join(self.output_dir, "logs_test.csv"),
             metrics=list(self.params["metrics"]),
             mode="test",
         )
+
+    def _initialize_test_epoch_containers(self):
+        self.test_losses: List[torch.Tensor] = []
+        self.test_metric_values: List[Dict[str, float]] = []
+
+    def on_test_epoch_start(self):
+        if self.params["medcam_enabled"]:
+            self.model.enable_medcam()
+            self.params["medcam_enabled"] = True
+
+        self._current_test_epoch_save_dir = os.path.join(
+            self.output_dir, f"output_test", f"epoch_{self.current_epoch}"
+        )
+        self._ensure_path_exists(self._current_test_epoch_save_dir)
+
+    def test_step(self, subject, batch_idx):
+        if self.params["verbose"]:
+            self._print_currently_processed_subject(subject)
+
+        self._set_spacing_params_for_subject(subject)
+
+        subject_dict = self._initialize_validation_subject_dict(subject)
+
+        if self._problem_type_is_regression or self._problem_type_is_classification:
+            model_output = self._regression_or_classification_validation_step(
+                subject_dict, subject["subject_id"][0]
+            )
+            label = self._initialize_validation_label_ground_truth_classification_or_regression(
+                subject
+            )
+        else:
+            model_output = self._segmentation_validation_step(subject, subject_dict)
+            label = self._initialize_validation_label_ground_truth_segmentation(subject)
+
+        label = self._process_labels(label)
+        model_output, label = self.pred_target_processor(model_output, label)
+
+        loss = self.loss(model_output, label)
+        metric_results = self.metric_calculators(model_output, label)
+        metric_results = self._add_stage_suffix_to_metric_results_dict(
+            metric_results, "test"
+        )
+        self.test_losses.append(loss)
+        self.test_metric_values.append(metric_results)
+
+        self.log("test_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
+        self.log_dict(
+            self._ensure_proper_type_of_metric_values_for_progbar(metric_results),
+            on_step=True,
+            on_epoch=True,
+            prog_bar=True,
+            sync_dist=True,
+        )
+
+        return loss
+
+    def on_test_epoch_end(self):
+        test_epoch_average_metrics = {}
+        metric_names = self.test_metric_values[0].keys()
+        for metric_name in metric_names:
+            metric_values = [x[metric_name] for x in self.test_metric_values]
+            test_epoch_average_metrics[
+                metric_name
+            ] = self._compute_metric_mean_across_values_from_batches(metric_values)
+
+        test_losses_gathered = self.all_gather(self.test_losses)
+        mean_loss = torch.mean(torch.stack(test_losses_gathered)).item()
+
+        self._clear_test_epoch_containers()
+
+        self.test_logger.write(
+            self.current_epoch,
+            mean_loss,
+            self._ensure_proper_metric_formatting_for_logging(
+                test_epoch_average_metrics
+            ),
+        )
+
+        if self.params["save_outputs"] and (
+            self._problem_type_is_regression or self._problem_type_is_classification
+        ):
+            self._save_predictions_for_regression_or_classification(self.rows_to_write)
+
+    def _clear_test_epoch_containers(self):
+        self.test_losses = []
+        self.test_metric_values = []
 
     def configure_optimizers(self):
         params = deepcopy(self.params)
