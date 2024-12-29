@@ -589,7 +589,7 @@ class GandlfLightningModule(pl.LightningModule):
         if self._problem_type_is_regression or self._problem_type_is_classification:
             self.val_predictions: List[float] = []
             self.val_labels: List[float] = []
-            if self.params["save_outputs"]:
+            if self.params["save_output"]:
                 self.rows_to_write: List[str] = []
 
     def _initialize_validation_logger(self):
@@ -619,18 +619,20 @@ class GandlfLightningModule(pl.LightningModule):
         # TODO this is going to block any parallelism, as the spacing is going to unpredicatably change across GPUs
         self._set_spacing_params_for_subject(subject)
 
-        subject_dict = self._initialize_validation_subject_dict(subject)
+        subject_dict = self._initialize_subject_dict_nontraining_mode(subject)
 
         if self._problem_type_is_regression or self._problem_type_is_classification:
-            model_output = self._regression_or_classification_validation_step(
+            model_output = self._regression_or_classification_nontraining_step(
                 subject_dict, subject["subject_id"][0]
             )
-            label = self._initialize_validation_label_ground_truth_classification_or_regression(
+            label = self._initialize_nontraining_label_ground_truth_classification_or_regression(
                 subject
             )
         else:
-            model_output = self._segmentation_validation_step(subject, subject_dict)
-            label = self._initialize_validation_label_ground_truth_segmentation(subject)
+            model_output = self._segmentation_nontraining_step(subject, subject_dict)
+            label = self._initialize_nontraining_label_ground_truth_segmentation(
+                subject
+            )
 
         label = self._process_labels(label)
         model_output, label = self.pred_target_processor(model_output, label)
@@ -655,7 +657,7 @@ class GandlfLightningModule(pl.LightningModule):
     def _print_currently_processed_subject(self, subject):
         print("== Current subject:", subject["subject_id"], flush=True)
 
-    def _initialize_validation_subject_dict(self, subject):
+    def _initialize_subject_dict_nontraining_mode(self, subject):
         subject_dict = {}
         subject_dict["label"] = torchio.LabelMap(
             path=subject["label"]["path"],
@@ -675,15 +677,15 @@ class GandlfLightningModule(pl.LightningModule):
             )
         return subject_dict
 
-    def _initialize_validation_label_ground_truth_classification_or_regression(
+    def _initialize_nontraining_label_ground_truth_classification_or_regression(
         self, subject
     ):
         return torch.cat([subject[key] for key in self.params["value_keys"]], dim=0)
 
-    def _initialize_validation_label_ground_truth_segmentation(self, subject):
+    def _initialize_nontraining_label_ground_truth_segmentation(self, subject):
         return subject["label"]["data"]
 
-    def _regression_or_classification_validation_step(self, subject_dict, subject_id):
+    def _regression_or_classification_nontraining_step(self, subject_dict, subject_id):
         def _prepare_row_for_output_csv(
             subject_id: str, prediction_logit: float, epoch: int
         ):
@@ -697,7 +699,7 @@ class GandlfLightningModule(pl.LightningModule):
         prediction_logit = self._get_predictions_on_subject_using_label_sampler(
             subject_dict
         )
-        if self.params["save_outputs"]:
+        if self.params["save_output"]:
             processed_logit = _process_prediction_logit_for_row_writing(
                 prediction_logit, self.params["scaling_factor"]
             )
@@ -746,11 +748,11 @@ class GandlfLightningModule(pl.LightningModule):
 
         return total_logits_for_all_patches / self.params["q_samples_per_volume"]
 
-    def _segmentation_validation_step(self, subject, subject_dict):
+    def _segmentation_nontraining_step(self, subject, subject_dict):
         predicted_segmentation_mask = (
             self._get_predictions_on_subject_using_grid_sampler(subject_dict)
         )
-        if self.params["save_outputs"]:
+        if self.params["save_output"]:
             self._save_predictions_for_segmentation_subject(
                 predicted_segmentation_mask, subject
             )
@@ -772,6 +774,7 @@ class GandlfLightningModule(pl.LightningModule):
         elif self.trainer.testing:
             return self._current_test_epoch_save_dir
         elif self.trainer.predicting:
+            # TODO this is not implemented yet
             return self._current_inference_epoch_save_dir
         else:
             raise RuntimeError("Output save path cannot be determined for training")
@@ -877,7 +880,7 @@ class GandlfLightningModule(pl.LightningModule):
 
         self._check_if_early_stopping(mean_loss)
 
-        if self.params["save_outputs"] and (
+        if self.params["save_output"] and (
             self._problem_type_is_regression or self._problem_type_is_classification
         ):
             # TODO here rows to write also needs to be gathered across all GPUs
@@ -889,7 +892,7 @@ class GandlfLightningModule(pl.LightningModule):
         if self._problem_type_is_regression or self._problem_type_is_classification:
             self.val_predictions = []
             self.val_labels = []
-            if self.params["save_outputs"]:
+            if self.params["save_output"]:
                 self.rows_to_write = []
 
     @rank_zero_only
@@ -959,8 +962,9 @@ class GandlfLightningModule(pl.LightningModule):
         predicted_segmentation_mask_numpy = _postprocess_raw_segmentation_mask(
             predicted_segmentation_mask_numpy, self.params
         )
+        # taking 0-th element as the batch size is 1, and this is required by reverse_one_hot function
         decoded_segmentation_mask = reverse_one_hot(
-            predicted_segmentation_mask_numpy, self.params["model"]["class_list"]
+            predicted_segmentation_mask_numpy[0], self.params["model"]["class_list"]
         )
         decoded_segmentation_mask = _swap_mask_axes_for_sikt_save_format_compatibility(
             decoded_segmentation_mask
@@ -1063,18 +1067,20 @@ class GandlfLightningModule(pl.LightningModule):
 
         self._set_spacing_params_for_subject(subject)
 
-        subject_dict = self._initialize_validation_subject_dict(subject)
+        subject_dict = self._initialize_subject_dict_nontraining_mode(subject)
 
         if self._problem_type_is_regression or self._problem_type_is_classification:
-            model_output = self._regression_or_classification_validation_step(
+            model_output = self._regression_or_classification_nontraining_step(
                 subject_dict, subject["subject_id"][0]
             )
-            label = self._initialize_validation_label_ground_truth_classification_or_regression(
+            label = self._initialize_nontraining_label_ground_truth_classification_or_regression(
                 subject
             )
         else:
-            model_output = self._segmentation_validation_step(subject, subject_dict)
-            label = self._initialize_validation_label_ground_truth_segmentation(subject)
+            model_output = self._segmentation_nontraining_step(subject, subject_dict)
+            label = self._initialize_nontraining_label_ground_truth_segmentation(
+                subject
+            )
 
         label = self._process_labels(label)
         model_output, label = self.pred_target_processor(model_output, label)
@@ -1118,7 +1124,7 @@ class GandlfLightningModule(pl.LightningModule):
             prog_bar=True,
             sync_dist=True,
         )
-        if self.params["save_outputs"] and (
+        if self.params["save_output"] and (
             self._problem_type_is_regression or self._problem_type_is_classification
         ):
             self._save_predictions_for_regression_or_classification(self.rows_to_write)
