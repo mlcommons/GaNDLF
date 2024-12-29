@@ -413,8 +413,6 @@ def validate_network(
                     label_ground_truth = label_ground_truth[0, ...].unsqueeze(0)
                 # we always want the ground truth to be in the same format as the prediction
                 # add batch dim
-                print("label_ground_truth shape:", label_ground_truth.shape, flush=True)
-                print("output_prediction shape:", output_prediction.shape, flush=True)
                 label_ground_truth = label_ground_truth.unsqueeze(0)
                 final_loss, final_metric = get_loss_and_metrics(
                     image,
