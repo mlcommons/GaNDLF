@@ -7,11 +7,14 @@ import torchio
 import warnings
 import numpy as np
 import SimpleITK as sitk
+import lightning.pytorch as pl
+
 from medcam import medcam
 from copy import deepcopy
 from statistics import mean
-import lightning.pytorch as pl
+from multiprocessing import Lock
 from lightning.pytorch.utilities import rank_zero_only
+
 from GANDLF.logger import Logger
 from GANDLF.models import get_model
 from GANDLF.metrics import overall_stats
@@ -39,13 +42,13 @@ from GANDLF.utils import (
     LATEST_MODEL_PATH_END,
 )
 
-from overrides import override
 from typing import Tuple, Union, Dict, List, Any
 
 
 class GandlfLightningModule(pl.LightningModule):
     CLASSIFICATION_REGRESSION_RESULTS_HEADER = "Epoch,SubjectID,PredictedValue\n"
     FLOAT_FORMATTING_PRECISION = 4
+    MULTIPROCESSING_LOCK = Lock()
 
     def __init__(self, params: dict, output_dir: str):
         super().__init__()
@@ -65,22 +68,47 @@ class GandlfLightningModule(pl.LightningModule):
         self._initialize_model_save_paths()
 
     def _initialize_model(self):
+        """
+        Creates the BaseModel instance based on the parameters.
+        """
+
         self.model = get_model(self.params)
 
     def _initialize_loss(self):
+        """
+        Initializes the loss calculator based on the parameters. Loss calculator
+        logic differs for some specific model architectures, see the LossCalculatorFactory
+        for more details.
+        """
+
         self.loss = LossCalculatorFactory(self.params).get_loss_calculator()
 
     def _initialize_metric_calculators(self):
+        """
+        Initializes the metric calculators based on the parameters. Metric calculators
+        logic differs for some specific model architectures, see the MetricCalculatorFactory
+        for more details.
+        """
+
         self.metric_calculators = MetricCalculatorFactory(
             self.params
         ).get_metric_calculator()
 
     def _initialize_preds_target_processor(self):
+        """Initializes the prediction target processor based on the parameters.
+        This processor ensures that the prediction and target tensors are in the correct format,
+        as some architectures may require different formats for the predictions and targets.
+        """
+
         self.pred_target_processor = PredictionTargetProcessorFactory(
             self.params
         ).get_prediction_target_processor()
 
     def _initialize_model_save_paths(self):
+        """
+        Initializes the paths used for saving checkpoints of the model.
+        """
+
         self.model_paths = {
             "best": os.path.join(
                 self.output_dir,
@@ -97,7 +125,15 @@ class GandlfLightningModule(pl.LightningModule):
         }
 
     @rank_zero_only
-    def _save_model(self, epoch, save_path, onnx_export):
+    def _save_model(self, epoch: int, save_path: str, onnx_export: bool):
+        """
+        Saves the model to the specified path, adhering to GANDLF save format.
+
+        Args:
+            epoch (int): The epoch number.
+            save_path (str): The path to save the model to.
+            onnx_export (bool): Whether to export the model to ONNX format
+        """
         save_model(
             {
                 "epoch": epoch,
@@ -114,13 +150,20 @@ class GandlfLightningModule(pl.LightningModule):
     def _prepare_metrics_dict_for_progbar_logging(
         self, metric_results_dict: Dict[str, float]
     ):
+        """
+        Formats the metric results dictionary into format suitable for
+        logging with Lightning's progress bar.
+
+        Args:
+            metric_results_dict (Dict[str, float]): The dictionary containing the metric results.
+        """
         metric_results_dict_with_updated_suffix = (
-            self._add_stage_suffix_to_metric_results_dict(
+            self._add_stage_prefix_to_metric_results_dict(
                 metric_results_dict, self._determine_trainer_stage_string()
             )
         )
         metric_results_dict_with_values_formatted = (
-            self._ensure_proper_type_of_metric_values_for_progbar(
+            self._convert_per_class_metric_results_to_separate_key_value_pairs(
                 metric_results_dict_with_updated_suffix
             )
         )
@@ -129,9 +172,20 @@ class GandlfLightningModule(pl.LightningModule):
         )
 
     @staticmethod
-    def _ensure_proper_type_of_metric_values_for_progbar(
+    def _convert_per_class_metric_results_to_separate_key_value_pairs(
         metric_results_dict: Dict[str, Any]
     ) -> Dict[str, float]:
+        """
+        In case the metric results dictionary contains per-class values, this function
+        takes the values and creates separate key-value pairs for each class in the
+        results dictionary.
+
+        Args:
+            metric_results_dict (Dict[str, Any]): The dictionary containing the metric results.
+
+        Returns:
+            parsed_results_dict (Dict[str, float]): The dictionary containing the parsed results.
+        """
         parsed_results_dict = deepcopy(metric_results_dict)
         for metric_name, metric_value in metric_results_dict.items():
             if isinstance(metric_value, list):
@@ -143,9 +197,12 @@ class GandlfLightningModule(pl.LightningModule):
         return parsed_results_dict
 
     @staticmethod
-    def _add_stage_suffix_to_metric_results_dict(
+    def _add_stage_prefix_to_metric_results_dict(
         metric_results_dict: Dict[str, float], stage: str
     ):
+        """
+        Ensures that metric names in the results dictionary are prefixed with the stage
+        """
         metric_results_dict_with_updated_suffix = {
             f"{stage}_{metric_name}": metric_value
             for metric_name, metric_value in metric_results_dict.items()
@@ -153,16 +210,39 @@ class GandlfLightningModule(pl.LightningModule):
         return metric_results_dict_with_updated_suffix
 
     def _round_metric_values_in_dict(self, metric_results_dict: Dict[str, float]):
+        """
+        Performs rounding of the metric values in the results dictionary.
+
+        Args:
+            metric_results_dict (Dict[str, float]): The dictionary containing the metric results.
+
+        Returns:
+            rounded_metric_results_dict (Dict[str, float]): The dictionary containing the rounded metric results.
+        """
+
         return {
             k: self._round_value_to_precision(v) for k, v in metric_results_dict.items()
         }
 
     def _round_value_to_precision(self, value: float):
+        """
+        Rounds the value to the specified precision, defined as module constant.
+
+        Args:
+            value (float): The value to round.
+
+        Returns:
+            rounded_value (float): The rounded value.
+        """
+
         return round(value, self.FLOAT_FORMATTING_PRECISION)
 
     def forward(
         self, images: torch.Tensor
     ) -> Tuple[torch.Tensor, Union[torch.Tensor, None]]:
+        """
+        Forward pass of the model.
+        """
         attention_map = None
         is_medcam_enabled = self.params.get("medcam_enabled", False)
         if is_medcam_enabled:
@@ -191,6 +271,13 @@ class GandlfLightningModule(pl.LightningModule):
             self._initialize_differential_privacy()
 
     def _try_to_load_previous_best_model(self):
+        """
+        Attempts to load the previous best model from the specified path.
+        If the model is not found, a warning is issued. If the model is found,
+        it is loaded and the training is continued from the last epoch.
+        If an error occurs during loading, a warning is issued and the training
+        is continued from scratch.
+        """
         if os.path.exists(self.model_paths["best"]):
             try:
                 checkpoint_dict = load_model(self.model_paths["best"], self.device)
@@ -215,7 +302,11 @@ class GandlfLightningModule(pl.LightningModule):
                 f"No previous best model found under the path {self.model_paths['best']}; Training from scratch"
             )
 
+    @rank_zero_only
     def _try_to_save_initial_model(self):
+        """
+        Saves the initial model at the specified path if it does not already exist.
+        """
         if not os.path.exists(self.model_paths["initial"]):
             self._save_model(self.current_epoch, self.model_paths["initial"], False)
             print(f"Initial model saved at {self.model_paths['initial']}")
@@ -225,6 +316,9 @@ class GandlfLightningModule(pl.LightningModule):
             )
 
     def _inject_medcam_module(self):
+        """
+        Extends the model with the medcam module, used for generating attention maps.
+        """
         self.model = medcam.inject(
             self.model,
             output_dir=os.path.join(
@@ -237,6 +331,7 @@ class GandlfLightningModule(pl.LightningModule):
             enabled=False,
         )
 
+    @rank_zero_only
     def _initialize_train_logger(self):
         self.train_logger = Logger(
             logger_csv_filename=os.path.join(self.output_dir, "logs_training.csv"),
@@ -250,6 +345,9 @@ class GandlfLightningModule(pl.LightningModule):
 
     @rank_zero_only
     def _print_initialization_info(self):
+        """
+        Basic info printed at the start of the training.
+        """
         if not (os.environ.get("HOSTNAME") is None):
             print("Hostname :", os.environ.get("HOSTNAME"), flush=True)
         if self.params["verbose"]:
@@ -265,7 +363,14 @@ class GandlfLightningModule(pl.LightningModule):
             self.params["patch_size"],
         )
 
+    @rank_zero_only
     def _initialize_training_epoch_containers(self):
+        """
+        Initializes the containers for storing the training epoch data.
+        They are used for accumulating the losses, metrics, predictions and labels
+        for each epoch, so final calculations can be made at the end of the epoch.
+        """
+
         self.train_losses: List[torch.Tensor] = []
         self.training_metric_values: List[Dict[str, float]] = []
         if self._problem_type_is_regression or self._problem_type_is_classification:
@@ -277,6 +382,9 @@ class GandlfLightningModule(pl.LightningModule):
         print("Number of channels : ", self.params["model"]["num_channels"])
 
     def training_step(self, subject, batch_idx):
+        """
+        Single training optimization step.
+        """
         if self.params.get("save_training"):
             write_training_patches(subject, self.params)
 
@@ -288,7 +396,7 @@ class GandlfLightningModule(pl.LightningModule):
         # TODO this is going to block any parallelism, as the spacing is going to unpredicatably change across GPUs
         self._set_spacing_params_for_subject(subject)
 
-        images = self._process_images(images)
+        images = self._ensure_proper_images_tensor_dimensions(images)
         labels = self._process_labels(labels)
 
         model_output, _ = self.forward(images)
@@ -328,17 +436,28 @@ class GandlfLightningModule(pl.LightningModule):
         return images_batch
 
     def _prepare_labels_batch_from_subject_data(self, subject: torchio.Subject):
+        """
+        Creates the label tensor from the subject data.
+
+        Args:
+            subject (torchio.Subject): The torchio.Subject object containing the label.
+
+        Returns:
+            label (torch.Tensor): The label tensor of shape (B, C, H, W, D) for segmentation,
+            or a tensor of shape (B, ) for classification/regression.
+        """
+
         if self._problem_type_is_regression or self._problem_type_is_classification:
             label = torch.cat(
                 [subject[key] for key in self.params["value_keys"]], dim=0
             )
+            # TODO this for sure needs some further investigation
             # min is needed because for certain cases, batch size becomes smaller than the total remaining labels
             label = label.reshape(
                 min(self.params["batch_size"], len(label)),
                 len(self.params["value_keys"]),
             )
         else:
-            # segmentation; label is (B, C, H, W, D) image
             label = subject["label"][torchio.DATA]
 
         return label
@@ -346,22 +465,26 @@ class GandlfLightningModule(pl.LightningModule):
     def _set_spacing_params_for_subject(self, subject):
         self.params["subject_spacing"] = subject.get("spacing", None)
 
-    def _process_images(self, images: torch.Tensor):
+    def _ensure_proper_images_tensor_dimensions(self, images: torch.Tensor):
         """
-        Modify the input images and labels as needed for forward pass, loss
-        and metric calculations.
+        Modify the input images by removing the singular depth dimension added
+        by torchio for 2D images.
+
+        Args:
+            images (torch.Tensor): The input images tensor.
+
+        Returns:
+            images (torch.Tensor): The modified images tensor.
         """
 
         if self.params["model"]["dimension"] == 2:
-            # removing depth, as torchio adds last dimension for 2D images
             images = images.squeeze(-1)
 
         return images
 
     def _process_labels(self, labels: torch.Tensor):
         """
-        Modify the input labels as needed for forward pass, loss
-        and metric calculations.
+        Modifies the labels tensor based on the problem type.
         """
 
         if self._problem_type_is_segmentation:
@@ -401,6 +524,13 @@ class GandlfLightningModule(pl.LightningModule):
             self._print_epoch_start_time()
 
     def _write_epoch_start_process_resource_usage(self, epoch):
+        """
+        Writes the memory usage to a file at the start of the epoch.
+        Ran separately on each process in case of distributed training.
+
+        Args:
+            epoch (int): The current epoch number.
+        """
         filename = f"memory_usage_local_rank_{self.local_rank}_global_rank_{self.global_rank}.csv"
         memory_stats_dir = self._prepare_memory_stats_save_dir()
         full_filepath = os.path.join(memory_stats_dir, filename)
@@ -437,8 +567,12 @@ class GandlfLightningModule(pl.LightningModule):
                 + str(cuda_memory_stats["active.all.allocated"])
             )
         memory_info_string += ",\n"
+
+        # TODO evaluate if this indded works properly in distributed setting
+        self.MULTIPROCESSING_LOCK.acquire()
         with open(full_filepath, file_write_mode) as file_mem:
             file_mem.write(memory_info_string)
+        self.MULTIPROCESSING_LOCK.release()
 
     @rank_zero_only
     def _prepare_memory_stats_save_dir(self):
@@ -454,10 +588,8 @@ class GandlfLightningModule(pl.LightningModule):
     def _set_epoch_start_time(self):
         self.epoch_start_time = time.time()
 
-    # TODO when used with multiple GPUs, this should produce multiple logs
-    # for each GPU. We should think on doing allgather here in a function
-    # that is called on the main process (rank 0)
-
+    # TODO check if it indeed work properly and run only on rank 0
+    @rank_zero_only
     def on_train_epoch_end(self):
         epoch_metrics = {}
         metric_names = self.training_metric_values[0].keys()
@@ -474,9 +606,8 @@ class GandlfLightningModule(pl.LightningModule):
                 self.params,
             )
             epoch_metrics.update(training_epoch_average_metrics_overall)
-        train_losses_gathered = self.all_gather(self.train_losses)
         mean_loss = self._round_value_to_precision(
-            torch.mean(torch.stack(train_losses_gathered)).item()
+            torch.mean(torch.stack(self.train_losses)).item()
         )
 
         self._clear_training_epoch_containers()
@@ -509,6 +640,12 @@ class GandlfLightningModule(pl.LightningModule):
         """
         Given a list of metrics calculated for each batch, computes the mean across all batches.
         Takes into account case where metric is a list of values (e.g. for each class).
+
+        Args:
+            metric_values (List[Union[float, List[float]]]): The list of metric values for each batch.
+
+        Returns:
+            Union[float, List[float]]: The mean value of the metric across all batches.
         """
         if isinstance(metric_values[0], list):
             return [
@@ -520,7 +657,14 @@ class GandlfLightningModule(pl.LightningModule):
     @staticmethod
     def _ensure_proper_metric_formatting_for_logging(metrics_dict: dict) -> dict:
         """
-        Helper function to ensure that all metric values are in the correct format for logging.
+        Helper function to ensure that all metric values are in the correct format for
+        GANDLF's logging system.
+
+        Args:
+            metrics_dict (dict): The dictionary containing the metric values.
+
+        Returns:
+            output_metrics_dict (dict): The dictionary containing the formatted metric values.
         """
         output_metrics_dict = deepcopy(metrics_dict)
         for metric in metrics_dict.keys():
@@ -535,7 +679,11 @@ class GandlfLightningModule(pl.LightningModule):
 
         return output_metrics_dict
 
+    @rank_zero_only
     def _save_epoch_end_checkpoint(self):
+        """
+        Saves the model at the end of the epoch.
+        """
         epoch_save_path = os.path.join(
             self.output_dir,
             self.params["model"]["architecture"]
@@ -555,6 +703,7 @@ class GandlfLightningModule(pl.LightningModule):
             flush=True,
         )
 
+    @rank_zero_only
     def _clear_training_epoch_containers(self):
         self.train_losses = []
         self.training_metric_values = []
@@ -562,6 +711,7 @@ class GandlfLightningModule(pl.LightningModule):
             self.train_predictions = []
             self.train_labels = []
 
+    @rank_zero_only
     def on_train_end(self):
         if os.path.exists(self.model_paths["best"]):
             # Why don't we handle it here with the full save_model function?
@@ -579,10 +729,12 @@ class GandlfLightningModule(pl.LightningModule):
             flush=True,
         )
 
+    @rank_zero_only
     def on_validation_start(self):
         self._initialize_validation_epoch_containers()
         self._initialize_validation_logger()
 
+    @rank_zero_only
     def _initialize_validation_epoch_containers(self):
         self.val_losses: List[torch.Tensor] = []
         self.validation_metric_values: List[Dict[str, float]] = []
@@ -592,6 +744,7 @@ class GandlfLightningModule(pl.LightningModule):
             if self.params["save_output"]:
                 self.rows_to_write: List[str] = []
 
+    @rank_zero_only
     def _initialize_validation_logger(self):
         self.val_logger = Logger(
             logger_csv_filename=os.path.join(self.output_dir, "logs_validation.csv"),
@@ -600,6 +753,7 @@ class GandlfLightningModule(pl.LightningModule):
             add_epsilon=bool(self.params.get("differential_privacy")),
         )
 
+    @rank_zero_only
     def on_validation_epoch_start(self):
         # TODO this is dead code both here and in original loops
         # by default medcam is injected at the training and ["medcam_enabled"] is set to False
@@ -623,7 +777,7 @@ class GandlfLightningModule(pl.LightningModule):
 
         if self._problem_type_is_regression or self._problem_type_is_classification:
             model_output = self._regression_or_classification_nontraining_step(
-                subject_dict, subject["subject_id"][0]
+                subject_dict, str(subject["subject_id"][0])
             )
             label = self._initialize_nontraining_label_ground_truth_classification_or_regression(
                 subject
@@ -654,10 +808,20 @@ class GandlfLightningModule(pl.LightningModule):
 
         return loss
 
-    def _print_currently_processed_subject(self, subject):
+    def _print_currently_processed_subject(self, subject: torchio.Subject):
         print("== Current subject:", subject["subject_id"], flush=True)
 
-    def _initialize_subject_dict_nontraining_mode(self, subject):
+    def _initialize_subject_dict_nontraining_mode(self, subject: torchio.Subject):
+        """
+        Create a dictionary containing the subject data for the non-training mode
+        (validation, testing, inference).
+
+        Args:
+            subject (torchio.Subject): The subject data.
+
+        Returns:
+            subject_dict (Dict[str, torchio.Image]): The dictionary containing the subject data.
+        """
         subject_dict = {}
         subject_dict["label"] = torchio.LabelMap(
             path=subject["label"]["path"],
@@ -678,22 +842,81 @@ class GandlfLightningModule(pl.LightningModule):
         return subject_dict
 
     def _initialize_nontraining_label_ground_truth_classification_or_regression(
-        self, subject
+        self, subject: torchio.Subject
     ):
+        """
+        Initializes the ground truth label for classification or regression problems
+        in the non-training mode (validation, testing, inference).
+
+        Args:
+            subject_dict (torchio.Subject): The dictionary containing the subject data.
+
+        Returns:
+            label (torch.Tensor): The ground truth label tensor.
+        """
         return torch.cat([subject[key] for key in self.params["value_keys"]], dim=0)
 
-    def _initialize_nontraining_label_ground_truth_segmentation(self, subject):
+    def _initialize_nontraining_label_ground_truth_segmentation(
+        self, subject: torchio.Subject
+    ):
+        """
+        Initializes the ground truth label for segmentation problems in the non-training mode
+        (validation, testing, inference).
+
+        Args:
+            subject_dict (torchio.Subject): The dictionary containing the subject data.
+
+        Returns:
+            label (torch.Tensor): The ground truth label tensor
+        """
+
         return subject["label"]["data"]
 
-    def _regression_or_classification_nontraining_step(self, subject_dict, subject_id):
+    def _regression_or_classification_nontraining_step(
+        self, subject_dict: dict, subject_id: str
+    ):
+        """
+        Full processing step for regression and classification problems in the non-training mode
+        (validation, testing, inference).
+
+        Args:
+            subject_dict (dict): The dictionary containing the subject data.
+            subject_id (str): The subject ID.
+
+        Returns:
+            prediction_logit (torch.Tensor): The prediction logits.
+        """
+
         def _prepare_row_for_output_csv(
             subject_id: str, prediction_logit: float, epoch: int
         ):
+            """
+            Helper function to prepare the row for the output CSV file.
+
+            Args:
+                subject_id (str): The subject ID.
+                prediction_logit (float): The prediction logit.
+                epoch (int): The epoch number.
+
+            Returns:
+                row (str): The row to write to the output CSV file.
+            """
+
             return f"{epoch},{subject_id},{prediction_logit}\n"
 
         def _process_prediction_logit_for_row_writing(
             prediction_logit: torch.Tensor, scaling_factor: float
         ):
+            """
+            Processes the prediction logits for writing to the output CSV file.
+
+            Args:
+                prediction_logit (torch.Tensor): The prediction logits.
+                scaling_factor (float): The scaling factor modifying the prediction logit.
+
+            Returns:
+                prediction_logit (float): The processed prediction logit.
+            """
             return prediction_logit.cpu().max().item() / scaling_factor
 
         prediction_logit = self._get_predictions_on_subject_using_label_sampler(
@@ -712,13 +935,33 @@ class GandlfLightningModule(pl.LightningModule):
 
     # TODO this whole logic can be packed into something separate, as it is only used
     # in validation of regression and classification problems
-    def _get_predictions_on_subject_using_label_sampler(self, subject_dict):
-        def _prepare_images_batch_from_patch_regression_or_classification_validation_mode(
-            patches_batch,
+    def _get_predictions_on_subject_using_label_sampler(
+        self, subject_dict: dict
+    ) -> torch.Tensor:
+        """
+        Make predictions on the subject using the label sampler. Used for regression and classification problems.
+
+        Args:
+            subject_dict (dict): The dictionary containing the subject data.
+
+        Returns:
+            total_logits_for_all_patches (torch.Tensor): The total logits for all patches
+        extracted from a subject, normalized by the number of samples per volume.
+        """
+
+        def _prepare_images_batch_from_patch_regression_or_classification_with_label_sampler(
+            patches_batch: torchio.Subject,
         ):
             """
-            Validation mode processing for regression and classification problems requires
-            a different approach to preparing the images batch.
+            Sampling the patches using the label sampler requires a different approach
+            to preparing the images batch (concatenation dimension changes compared to logic
+            in other steps).
+
+            Args:
+                patches_batch (torchio.Subject): The batch of patches for the subject.
+
+            Returns:
+                images_batch_from_patches (torch.Tensor): The images batch from the patches.
             """
             images_batch_from_patches = torch.cat(
                 [
@@ -737,18 +980,36 @@ class GandlfLightningModule(pl.LightningModule):
             tio_subject, num_patches=self.params["q_samples_per_volume"]
         )
 
-        total_logits_for_all_patches = 0.0
+        model_outputs_list: List[torch.Tensor] = []
         for patches_batch in patch_loader:
-            images_from_patches = _prepare_images_batch_from_patch_regression_or_classification_validation_mode(
+            images_from_patches = _prepare_images_batch_from_patch_regression_or_classification_with_label_sampler(
                 patches_batch
             )
-            images_from_patches = self._process_images(images_from_patches)
+            images_from_patches = self._ensure_proper_images_tensor_dimensions(
+                images_from_patches
+            )
             model_output, _ = self.forward(images_from_patches)
-            total_logits_for_all_patches += model_output
+            model_outputs_list.append(model_output)
 
+        total_logits_for_all_patches = torch.cat(model_outputs_list).sum(
+            dim=0, keepdim=True
+        )
         return total_logits_for_all_patches / self.params["q_samples_per_volume"]
 
-    def _segmentation_nontraining_step(self, subject, subject_dict):
+    def _segmentation_nontraining_step(
+        self, subject: torchio.Subject, subject_dict: dict
+    ):
+        """
+        Full processing step for segmentation problems in the non-training mode
+        (validation, testing, inference).
+
+        Args:
+            subject_dict (dict): The dictionary containing the subject data.
+
+        Returns:
+            predicted_segmentation_mask (torch.Tensor): The predicted segmentation mask.
+        """
+
         predicted_segmentation_mask = (
             self._get_predictions_on_subject_using_grid_sampler(subject_dict)
         )
@@ -758,7 +1019,11 @@ class GandlfLightningModule(pl.LightningModule):
             )
         return predicted_segmentation_mask
 
+    @rank_zero_only
     def _determine_trainer_stage_string(self):
+        """
+        Helper function to determine the trainer stage and store it as a module attribute.
+        """
         if self.trainer.validating:
             return "val"
         elif self.trainer.testing:
@@ -769,19 +1034,41 @@ class GandlfLightningModule(pl.LightningModule):
             return "train"
 
     def _determine_save_path_to_use(self):
+        """
+        Helper function to determine the output save path based on the trainer stage.
+        """
         if self.trainer.validating:
             return self._current_validation_epoch_save_dir
         elif self.trainer.testing:
             return self._current_test_epoch_save_dir
         elif self.trainer.predicting:
-            # TODO this is not implemented yet
-            return self._current_inference_epoch_save_dir
+            raise RuntimeError("Not implemented yet")
         else:
             raise RuntimeError("Output save path cannot be determined for training")
 
-    def _get_predictions_on_subject_using_grid_sampler(self, subject_dict):
+    def _get_predictions_on_subject_using_grid_sampler(self, subject_dict: dict):
+        """
+        Make predictions on the subject using the grid sampler. This is used in segmentation
+        problems in validation and testing and for all problems in inference
+        (as no ground truth is available in inference).
+
+        Args:
+            subject_dict (dict): The dictionary containing the subject data.
+
+        Returns:
+            aggregated_predictions (torch.Tensor): The predicted segmentation mask.
+        """
+
         def _ensure_output_shape_compatibility_with_torchio(model_output: torch.Tensor):
-            # for 2d images where the depth is removed, add it back
+            """
+            Helper function to ensure that the output shape is compatible with torchio (4D for 2D segmentation).
+
+            Args:
+                model_output (torch.Tensor): The model output tensor.
+
+            Returns:
+                model_output (torch.Tensor): The model output tensor with the correct shape.
+            """
             if (
                 self.params["model"]["dimension"] == 2
                 and self._problem_type_is_segmentation
@@ -789,9 +1076,9 @@ class GandlfLightningModule(pl.LightningModule):
                 model_output = model_output.unsqueeze(-1)
             return model_output
 
-        grid_sampler, patch_loader = self._prepare_grid_aggregator_and_patch_loader(
-            subject_dict
-        )
+        grid_sampler = self._prepare_grid_sampler(subject_dict)
+        patch_loader = self._prepare_dataloader_from_grid_sampler(grid_sampler)
+
         prediction_aggregator = torchio.inference.GridAggregator(
             grid_sampler,
             overlap_mode=self.params["inference_mechanism"]["grid_aggregator_overlap"],
@@ -807,11 +1094,15 @@ class GandlfLightningModule(pl.LightningModule):
             images_from_patches = self._prepare_images_batch_from_subject_data(
                 patches_batch
             )
-            images_from_patches = self._process_images(images_from_patches)
+            images_from_patches = self._ensure_proper_images_tensor_dimensions(
+                images_from_patches
+            )
             model_output, attention_map = self.forward(images_from_patches)
             model_output = _ensure_output_shape_compatibility_with_torchio(model_output)
             if self.params["medcam_enabled"]:
-                medcam_attention_map_aggregator.add_batch(attention_map)
+                medcam_attention_map_aggregator.add_batch(
+                    attention_map, patches_batch[torchio.LOCATION]  # type: ignore
+                )
             prediction_aggregator.add_batch(
                 model_output, patches_batch[torchio.LOCATION]
             )
@@ -823,18 +1114,40 @@ class GandlfLightningModule(pl.LightningModule):
                 )
         return prediction_aggregator.get_output_tensor().unsqueeze(0)
 
-    def _prepare_grid_aggregator_and_patch_loader(self, subject_dict):
+    def _prepare_grid_sampler(self, subject_dict: dict):
+        """
+        Creates the grid sampler for the grid aggregator.
+
+        Args:
+            subject_dict (dict): The dictionary containing the subject data.
+
+        Returns:
+            grid_sampler (torchio.inference.GridSampler): The grid sampler.
+        """
         grid_sampler = torchio.inference.GridSampler(
             torchio.Subject(subject_dict),
             self.params["patch_size"],
             patch_overlap=self.params["inference_mechanism"]["patch_overlap"],
         )
-        patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
+        return grid_sampler
 
-        return grid_sampler, patch_loader
+    def _prepare_dataloader_from_grid_sampler(
+        self, grid_sampler: torchio.inference.GridSampler
+    ):
+        """
+        Creates the dataloader from the grid sampler.
 
-    # TODO will also suffer from the same issue as the training step with
-    # synchronization across GPUs
+        Args:
+            grid_sampler (torchio.inference.GridSampler): The grid sampler.
+
+        Returns:
+            patch_loader (torch.utils.data.DataLoader): The patch loader.
+        """
+
+        return torch.utils.data.DataLoader(grid_sampler, batch_size=1)  # type: ignore
+
+    # TODO check if it indeed work properly and run only on rank 0
+    @rank_zero_only
     def on_validation_epoch_end(self):
         validation_epoch_average_metrics = {}
         metric_names = self.validation_metric_values[0].keys()
@@ -853,9 +1166,8 @@ class GandlfLightningModule(pl.LightningModule):
             validation_epoch_average_metrics.update(
                 validation_epoch_average_metrics_overall
             )
-        val_losses_gathered = self.all_gather(self.val_losses)
         mean_loss = self._round_value_to_precision(
-            torch.mean(torch.stack(val_losses_gathered)).item()
+            torch.mean(torch.stack(self.val_losses)).item()
         )
 
         self._clear_validation_epoch_containers()
@@ -875,7 +1187,7 @@ class GandlfLightningModule(pl.LightningModule):
             ),
             on_epoch=True,
             prog_bar=True,
-            sync_dist=True,
+            sync_dist=False,
         )
 
         self._check_if_early_stopping(mean_loss)
@@ -883,9 +1195,9 @@ class GandlfLightningModule(pl.LightningModule):
         if self.params["save_output"] and (
             self._problem_type_is_regression or self._problem_type_is_classification
         ):
-            # TODO here rows to write also needs to be gathered across all GPUs
             self._save_predictions_for_regression_or_classification(self.rows_to_write)
 
+    @rank_zero_only
     def _clear_validation_epoch_containers(self):
         self.val_losses = []
         self.validation_metric_values = []
@@ -906,17 +1218,18 @@ class GandlfLightningModule(pl.LightningModule):
         self, predicted_segmentation_mask: torch.Tensor, subject: torchio.Subject
     ):
         """
-        Saves the predicted segmentation mask for a given subject.
+        Saves the predicted segmentation mask for a given subject, performing the necessary postprocessing
+        steps.
 
         Args:
-            predicted_segmentation_mask: The predicted segmentation mask, extracted
+            predicted_segmentation_mask (torch.Tensor): The predicted segmentation mask, extracted
         from the grid aggregator when all validation patches for this subject have
         been processed.
-            subject: The subject for which the segmentation mask was predicted, used
+            subject (torchio.Subject): The subject for which the segmentation mask was predicted, used
         to extract the metadata.
         """
 
-        def _convert_subject_to_sikt_format(subject: torchio.Subject):
+        def _convert_subject_to_sitk_format(subject: torchio.Subject):
             return torchio.ScalarImage(
                 tensor=subject["1"]["data"].squeeze(0),
                 affine=subject["1"]["affine"].squeeze(0),
@@ -933,7 +1246,7 @@ class GandlfLightningModule(pl.LightningModule):
 
             return segmentation_mask
 
-        def _swap_mask_axes_for_sikt_save_format_compatibility(
+        def _swap_mask_axes_for_sitk_save_format_compatibility(
             segmentation_mask: np.ndarray,
         ):
             return np.swapaxes(segmentation_mask, 0, 2)
@@ -966,7 +1279,7 @@ class GandlfLightningModule(pl.LightningModule):
         decoded_segmentation_mask = reverse_one_hot(
             predicted_segmentation_mask_numpy[0], self.params["model"]["class_list"]
         )
-        decoded_segmentation_mask = _swap_mask_axes_for_sikt_save_format_compatibility(
+        decoded_segmentation_mask = _swap_mask_axes_for_sitk_save_format_compatibility(
             decoded_segmentation_mask
         )
         decoded_segmentation_mask = _postprocess_one_hot_reversed_segmentation_mask(
@@ -980,7 +1293,7 @@ class GandlfLightningModule(pl.LightningModule):
         if image_save_format in [".jpg", ".jpeg", ".png"]:
             decoded_segmentation_mask = decoded_segmentation_mask.astype(np.uint8)
 
-        subject_converted_to_sikt_format = _convert_subject_to_sikt_format(subject)
+        subject_converted_to_sikt_format = _convert_subject_to_sitk_format(subject)
         result_sikt_image = sitk.GetImageFromArray(decoded_segmentation_mask)
         result_sikt_image.CopyInformation(subject_converted_to_sikt_format)
 
@@ -998,9 +1311,17 @@ class GandlfLightningModule(pl.LightningModule):
         self._ensure_path_exists(os.path.dirname(segmentation_mask_save_path))
         sitk.WriteImage(result_sikt_image, segmentation_mask_save_path)
 
+    @rank_zero_only
     def _save_predictions_for_regression_or_classification(
         self, rows_to_write: List[List[str]]
     ):
+        """
+        Saves the predictions for regression or classification problems to a CSV file.
+
+        Args:
+            rows_to_write (List[List[str]]): The rows to write to the CSV file.
+        """
+
         csv_save_path = os.path.join(
             self._determine_save_path_to_use(), "output_predictions.csv"
         )
@@ -1010,9 +1331,13 @@ class GandlfLightningModule(pl.LightningModule):
         with open(csv_save_path, "w") as file:
             file.write(file_contents_merged)
 
-    # TODO separate it into checking and saving functions
+    # TODO separate it into checking and saving functions, perhaps even separate class
     @rank_zero_only
-    def _check_if_early_stopping(self, val_loss):
+    def _check_if_early_stopping(self, val_loss: float):
+        """
+        Checks if early stopping should be triggered based on the validation loss.
+        If the loss improves, the best model is saved.
+        """
         previous_best_loss = deepcopy(self.current_best_loss)
         if val_loss < self.current_best_loss:
             self.current_best_loss = val_loss
@@ -1040,6 +1365,7 @@ class GandlfLightningModule(pl.LightningModule):
         self._initialize_test_epoch_containers()
         self._initialize_test_logger()
 
+    @rank_zero_only
     def _initialize_test_logger(self):
         self.test_logger = Logger(
             logger_csv_filename=os.path.join(self.output_dir, "logs_test.csv"),
@@ -1047,6 +1373,7 @@ class GandlfLightningModule(pl.LightningModule):
             mode="test",
         )
 
+    @rank_zero_only
     def _initialize_test_epoch_containers(self):
         self.test_losses: List[torch.Tensor] = []
         self.test_metric_values: List[Dict[str, float]] = []
@@ -1093,6 +1420,7 @@ class GandlfLightningModule(pl.LightningModule):
 
         return loss
 
+    @rank_zero_only
     def on_test_epoch_end(self):
         test_epoch_average_metrics = {}
         metric_names = self.test_metric_values[0].keys()
@@ -1102,9 +1430,8 @@ class GandlfLightningModule(pl.LightningModule):
                 metric_name
             ] = self._compute_metric_mean_across_values_from_batches(metric_values)
 
-        test_losses_gathered = self.all_gather(self.test_losses)
         mean_loss = self._round_value_to_precision(
-            torch.mean(torch.stack(test_losses_gathered)).item()
+            torch.mean(torch.stack(self.test_losses)).item()
         )
 
         self._clear_test_epoch_containers()
@@ -1122,13 +1449,14 @@ class GandlfLightningModule(pl.LightningModule):
             self._prepare_metrics_dict_for_progbar_logging(test_epoch_average_metrics),
             on_epoch=True,
             prog_bar=True,
-            sync_dist=True,
+            sync_dist=False,
         )
         if self.params["save_output"] and (
             self._problem_type_is_regression or self._problem_type_is_classification
         ):
             self._save_predictions_for_regression_or_classification(self.rows_to_write)
 
+    @rank_zero_only
     def _clear_test_epoch_containers(self):
         self.test_losses = []
         self.test_metric_values = []
@@ -1145,6 +1473,10 @@ class GandlfLightningModule(pl.LightningModule):
         return optimizer
 
     def transfer_batch_to_device(self, batch, device, dataloader_idx):
+        """
+        A method called by Lightning to transfer the batch to the device.
+        In case of GANDLF, we need custom logic to transfer the data to the device.
+        """
         batch = self._move_image_data_to_device(batch, device)
         batch = self._move_labels_or_values_to_device(batch, device)
 
@@ -1155,7 +1487,6 @@ class GandlfLightningModule(pl.LightningModule):
             subject[channel_key][torchio.DATA] = subject[channel_key][torchio.DATA].to(
                 device
             )
-
         return subject
 
     def _move_labels_or_values_to_device(self, subject, device):
