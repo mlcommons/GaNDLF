@@ -826,8 +826,11 @@ class GandlfLightningModule(pl.LightningModule):
             )
 
         label = self._process_labels(label)
+        print(f"MODEL OUTPUT BEFORE PROCESSING: {model_output.device}")
         model_output, label = self.pred_target_processor(model_output, label)
-
+        print(f"MODEL OUTPUT DEVICE: {model_output.device}")
+        print(f"LABEL DEVICE: {label.device}")
+        print(f"MODEL PARAMS DEVICE: {next(self.model.parameters()).device}")
         loss = self.loss(model_output, label)
         metric_results = self.metric_calculators(model_output, label)
 
@@ -1129,7 +1132,7 @@ class GandlfLightningModule(pl.LightningModule):
                 patch_loader
             )
 
-        return prediction_aggregator.get_output_tensor().unsqueeze(0)
+        return prediction_aggregator.get_output_tensor().unsqueeze(0).to(self.device)
 
     def _prepare_grid_sampler(self, subject_dict: dict):
         """
@@ -1248,8 +1251,8 @@ class GandlfLightningModule(pl.LightningModule):
 
         def _convert_subject_to_sitk_format(subject: torchio.Subject):
             return torchio.ScalarImage(
-                tensor=subject["1"]["data"].squeeze(0),
-                affine=subject["1"]["affine"].squeeze(0),
+                tensor=subject["1"]["data"].squeeze(0).cpu(),
+                affine=subject["1"]["affine"].squeeze(0).cpu(),
             ).as_sitk()
 
         def _postprocess_raw_segmentation_mask(
@@ -1288,7 +1291,7 @@ class GandlfLightningModule(pl.LightningModule):
             else:
                 return segmentation_mask
 
-        predicted_segmentation_mask_numpy = predicted_segmentation_mask.numpy()
+        predicted_segmentation_mask_numpy = predicted_segmentation_mask.cpu().numpy()
         predicted_segmentation_mask_numpy = _postprocess_raw_segmentation_mask(
             predicted_segmentation_mask_numpy, self.params
         )
@@ -1544,7 +1547,7 @@ class GandlfLightningModule(pl.LightningModule):
             )
 
     def _radiology_inference_step(self, subject: torchio.Subject):
-        label_present = "label" in subject or "value_keys" in self.params
+        label_present = subject["label"] != ["NA"] or "value_keys" in self.params
         subject_dict = self._initialize_subject_dict_nontraining_mode(subject)
         if label_present:
             subject_dict = self._extend_nontraining_subject_dict_with_label(
@@ -1668,7 +1671,7 @@ class GandlfLightningModule(pl.LightningModule):
         if "value_keys" in self.params:
             for value_key in self.params["value_keys"]:
                 subject[value_key] = subject[value_key].to(device)
-        else:
+        elif subject["label"] != ["NA"]:
             subject["label"][torchio.DATA] = subject["label"][torchio.DATA].to(device)
 
         return subject
