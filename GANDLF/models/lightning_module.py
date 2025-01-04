@@ -303,9 +303,10 @@ class GandlfLightningModule(pl.LightningModule):
                 # params["previous_parameters"] = main_dict.get("parameters", None)
 
                 self.model.load_state_dict(checkpoint_dict["model_state_dict"])
-                self.optimizers().optimizer.load_state_dict(
-                    checkpoint_dict["optimizer_state_dict"]
-                )
+                if self.trainer.training:
+                    self.optimizers(False).load_state_dict(
+                        checkpoint_dict["optimizer_state_dict"]
+                    )
                 self.trainer.fit_loop.epoch_progress.current.completed = (
                     checkpoint_dict["epoch"]
                 )
@@ -792,16 +793,34 @@ class GandlfLightningModule(pl.LightningModule):
         self._set_spacing_params_for_subject(subject)
 
         subject_dict = self._initialize_subject_dict_nontraining_mode(subject)
+        subject_dict = self._extend_nontraining_subject_dict_with_label(
+            subject, subject_dict
+        )
 
         if self._problem_type_is_regression or self._problem_type_is_classification:
-            model_output = self._regression_or_classification_nontraining_step(
-                subject_dict, str(subject["subject_id"][0])
+            model_output = self._get_predictions_on_subject_using_label_sampler(
+                subject_dict
             )
+
+            if self.params["save_output"]:
+                processed_logit = self._process_prediction_logit_for_row_writing(
+                    model_output, self.params["scaling_factor"]
+                )
+                self.rows_to_write.append(
+                    self._prepare_row_for_output_csv(
+                        subject["subject_id"][0], processed_logit, self.current_epoch
+                    )
+                )
+
             label = self._initialize_nontraining_label_ground_truth_classification_or_regression(
                 subject
             )
         else:
-            model_output = self._segmentation_nontraining_step(subject, subject_dict)
+            model_output = self._get_predictions_on_subject_using_grid_sampler(
+                subject_dict
+            )
+            if self.params["save_output"]:
+                self._save_predictions_for_segmentation_subject(model_output, subject)
             label = self._initialize_nontraining_label_ground_truth_segmentation(
                 subject
             )
@@ -826,6 +845,41 @@ class GandlfLightningModule(pl.LightningModule):
 
         return loss
 
+    @staticmethod
+    def _prepare_row_for_output_csv(
+        subject_id: str, prediction_logit: float, epoch: int
+    ):
+        """
+        Helper function to prepare the row for the output CSV file.
+
+        Args:
+            subject_id (str): The subject ID.
+            prediction_logit (float): The prediction logit.
+            epoch (int): The epoch number.
+
+        Returns:
+            row (str): The row to write to the output CSV file.
+        """
+
+        return f"{epoch},{subject_id},{prediction_logit}\n"
+
+    @staticmethod
+    def _process_prediction_logit_for_row_writing(
+        prediction_logit: torch.Tensor, scaling_factor: float = 1.0
+    ):
+        """
+        Processes the prediction logits for writing to the output CSV file.
+
+        Args:
+            prediction_logit (torch.Tensor): The prediction logits.
+            scaling_factor (float): The scaling factor modifying the prediction logit.
+            Default is 1 (no scaling).
+
+        Returns:
+            prediction_logit (float): The processed prediction logit.
+        """
+        return prediction_logit.cpu().max().item() / scaling_factor
+
     def _print_currently_processed_subject(self, subject: torchio.Subject):
         print("== Current subject:", subject["subject_id"], flush=True)
 
@@ -841,6 +895,29 @@ class GandlfLightningModule(pl.LightningModule):
             subject_dict (Dict[str, torchio.Image]): The dictionary containing the subject data.
         """
         subject_dict = {}
+
+        for channel_key in self.params["channel_keys"]:
+            subject_dict[channel_key] = torchio.ScalarImage(
+                path=subject[channel_key]["path"],
+                tensor=subject[channel_key]["data"].squeeze(0),
+                affine=subject[channel_key]["affine"].squeeze(0),
+            )
+        return subject_dict
+
+    def _extend_nontraining_subject_dict_with_label(
+        self, subject: torchio.Subject, subject_dict: dict
+    ) -> dict:
+        """
+        Extends the subject dictionary with the label data for the non-training mode.
+
+        Args:
+            subject (torchio.Subject): The subject data.
+            subject_dict (dict): The dictionary containing the subject data.
+
+        Returns:
+            subject_dict (dict): The dictionary containing the subject data with the label data.
+        """
+
         subject_dict["label"] = torchio.LabelMap(
             path=subject["label"]["path"],
             tensor=subject["label"]["data"].squeeze(0),
@@ -851,12 +928,6 @@ class GandlfLightningModule(pl.LightningModule):
             for key in self.params["value_keys"]:
                 subject_dict["value_" + key] = subject[key]
 
-        for channel_key in self.params["channel_keys"]:
-            subject_dict[channel_key] = torchio.ScalarImage(
-                path=subject[channel_key]["path"],
-                tensor=subject[channel_key]["data"].squeeze(0),
-                affine=subject[channel_key]["affine"].squeeze(0),
-            )
         return subject_dict
 
     def _initialize_nontraining_label_ground_truth_classification_or_regression(
@@ -889,67 +960,6 @@ class GandlfLightningModule(pl.LightningModule):
         """
 
         return subject["label"]["data"]
-
-    def _regression_or_classification_nontraining_step(
-        self, subject_dict: dict, subject_id: str
-    ):
-        """
-        Full processing step for regression and classification problems in the non-training mode
-        (validation, testing, inference).
-
-        Args:
-            subject_dict (dict): The dictionary containing the subject data.
-            subject_id (str): The subject ID.
-
-        Returns:
-            prediction_logit (torch.Tensor): The prediction logits.
-        """
-
-        def _prepare_row_for_output_csv(
-            subject_id: str, prediction_logit: float, epoch: int
-        ):
-            """
-            Helper function to prepare the row for the output CSV file.
-
-            Args:
-                subject_id (str): The subject ID.
-                prediction_logit (float): The prediction logit.
-                epoch (int): The epoch number.
-
-            Returns:
-                row (str): The row to write to the output CSV file.
-            """
-
-            return f"{epoch},{subject_id},{prediction_logit}\n"
-
-        def _process_prediction_logit_for_row_writing(
-            prediction_logit: torch.Tensor, scaling_factor: float
-        ):
-            """
-            Processes the prediction logits for writing to the output CSV file.
-
-            Args:
-                prediction_logit (torch.Tensor): The prediction logits.
-                scaling_factor (float): The scaling factor modifying the prediction logit.
-
-            Returns:
-                prediction_logit (float): The processed prediction logit.
-            """
-            return prediction_logit.cpu().max().item() / scaling_factor
-
-        prediction_logit = self._get_predictions_on_subject_using_label_sampler(
-            subject_dict
-        )
-        if self.params["save_output"]:
-            processed_logit = _process_prediction_logit_for_row_writing(
-                prediction_logit, self.params["scaling_factor"]
-            )
-            self.rows_to_write.append(
-                _prepare_row_for_output_csv(
-                    subject_id, processed_logit, self.current_epoch
-                )
-            )
-        return prediction_logit
 
     # TODO this whole logic can be packed into something separate, as it is only used
     # in validation of regression and classification problems
@@ -1014,29 +1024,6 @@ class GandlfLightningModule(pl.LightningModule):
         )
         return total_logits_for_all_patches / self.params["q_samples_per_volume"]
 
-    def _segmentation_nontraining_step(
-        self, subject: torchio.Subject, subject_dict: dict
-    ):
-        """
-        Full processing step for segmentation problems in the non-training mode
-        (validation, testing, inference).
-
-        Args:
-            subject_dict (dict): The dictionary containing the subject data.
-
-        Returns:
-            predicted_segmentation_mask (torch.Tensor): The predicted segmentation mask.
-        """
-
-        predicted_segmentation_mask = (
-            self._get_predictions_on_subject_using_grid_sampler(subject_dict)
-        )
-        if self.params["save_output"]:
-            self._save_predictions_for_segmentation_subject(
-                predicted_segmentation_mask, subject
-            )
-        return predicted_segmentation_mask
-
     @rank_zero_only
     def _determine_trainer_stage_string(self):
         """
@@ -1048,8 +1035,7 @@ class GandlfLightningModule(pl.LightningModule):
             return "test"
         elif self.trainer.predicting:
             return "inference"
-        else:
-            return "train"
+        return "train"
 
     def _determine_save_path_to_use(self):
         """
@@ -1060,7 +1046,7 @@ class GandlfLightningModule(pl.LightningModule):
         elif self.trainer.testing:
             return self._current_test_epoch_save_dir
         elif self.trainer.predicting:
-            raise RuntimeError("Not implemented yet")
+            return self._current_inference_save_dir
         else:
             raise RuntimeError("Output save path cannot be determined for training")
 
@@ -1108,6 +1094,9 @@ class GandlfLightningModule(pl.LightningModule):
                     "grid_aggregator_overlap"
                 ],
             )
+        if self._problem_type_is_regression or self._problem_type_is_classification:
+            model_outputs_list: List[torch.Tensor] = []
+
         for patches_batch in patch_loader:
             images_from_patches = self._prepare_images_batch_from_subject_data(
                 patches_batch
@@ -1121,15 +1110,25 @@ class GandlfLightningModule(pl.LightningModule):
                 medcam_attention_map_aggregator.add_batch(
                     attention_map, patches_batch[torchio.LOCATION]  # type: ignore
                 )
-            prediction_aggregator.add_batch(
-                model_output, patches_batch[torchio.LOCATION]
-            )
+            if self._problem_type_is_segmentation:
+                prediction_aggregator.add_batch(
+                    model_output, patches_batch[torchio.LOCATION]
+                )
+            else:
+                model_outputs_list.append(model_output)
+
         if self.params["medcam_enabled"]:
             attention_map = medcam_attention_map_aggregator.get_output_tensor()
             for i, n in enumerate(attention_map):
                 self.model.save_attention_map(
                     n.squeeze(), raw_input=images_from_patches[i].squeeze(-1)
                 )
+
+        if self._problem_type_is_regression or self._problem_type_is_classification:
+            return torch.cat(model_outputs_list).sum(dim=0, keepdim=True) / len(
+                patch_loader
+            )
+
         return prediction_aggregator.get_output_tensor().unsqueeze(0)
 
     def _prepare_grid_sampler(self, subject_dict: dict):
@@ -1188,8 +1187,6 @@ class GandlfLightningModule(pl.LightningModule):
             torch.mean(torch.stack(self.val_losses)).item()
         )
 
-        self._clear_validation_epoch_containers()
-
         self.val_logger.write(
             self.current_epoch,
             mean_loss,
@@ -1214,6 +1211,8 @@ class GandlfLightningModule(pl.LightningModule):
             self._problem_type_is_regression or self._problem_type_is_classification
         ):
             self._save_predictions_for_regression_or_classification(self.rows_to_write)
+
+        self._clear_validation_epoch_containers()
 
     @rank_zero_only
     def _clear_validation_epoch_containers(self):
@@ -1343,11 +1342,11 @@ class GandlfLightningModule(pl.LightningModule):
         csv_save_path = os.path.join(
             self._determine_save_path_to_use(), "output_predictions.csv"
         )
-        file_contents_merged = self.CLASSIFICATION_REGRESSION_RESULTS_HEADER.join(
-            [",".join(row) for row in rows_to_write]
-        )
+        merged_output = self.CLASSIFICATION_REGRESSION_RESULTS_HEADER
+        for row in rows_to_write:
+            merged_output += row
         with open(csv_save_path, "w") as file:
-            file.write(file_contents_merged)
+            file.write(merged_output)
 
     # TODO separate it into checking and saving functions, perhaps even separate class
     @rank_zero_only
@@ -1413,16 +1412,33 @@ class GandlfLightningModule(pl.LightningModule):
         self._set_spacing_params_for_subject(subject)
 
         subject_dict = self._initialize_subject_dict_nontraining_mode(subject)
-
+        subject_dict = self._extend_nontraining_subject_dict_with_label(
+            subject, subject_dict
+        )
         if self._problem_type_is_regression or self._problem_type_is_classification:
-            model_output = self._regression_or_classification_nontraining_step(
-                subject_dict, subject["subject_id"][0]
+            model_output = self._get_predictions_on_subject_using_label_sampler(
+                subject_dict
             )
+
+            if self.params["save_output"]:
+                processed_logit = self._process_prediction_logit_for_row_writing(
+                    model_output, self.params["scaling_factor"]
+                )
+                self.rows_to_write.append(
+                    self._prepare_row_for_output_csv(
+                        subject["subject_id"][0], processed_logit, self.current_epoch
+                    )
+                )
+
             label = self._initialize_nontraining_label_ground_truth_classification_or_regression(
                 subject
             )
         else:
-            model_output = self._segmentation_nontraining_step(subject, subject_dict)
+            model_output = self._get_predictions_on_subject_using_grid_sampler(
+                subject_dict
+            )
+            if self.params["save_output"]:
+                self._save_predictions_for_segmentation_subject(model_output, subject)
             label = self._initialize_nontraining_label_ground_truth_segmentation(
                 subject
             )
@@ -1452,8 +1468,6 @@ class GandlfLightningModule(pl.LightningModule):
             torch.mean(torch.stack(self.test_losses)).item()
         )
 
-        self._clear_test_epoch_containers()
-
         self.test_logger.write(
             self.current_epoch,
             mean_loss,
@@ -1473,6 +1487,7 @@ class GandlfLightningModule(pl.LightningModule):
             self._problem_type_is_regression or self._problem_type_is_classification
         ):
             self._save_predictions_for_regression_or_classification(self.rows_to_write)
+        self._clear_test_epoch_containers()
 
     @rank_zero_only
     def _clear_test_epoch_containers(self):
@@ -1497,8 +1512,15 @@ class GandlfLightningModule(pl.LightningModule):
 
     @rank_zero_only
     def _initialize_inference_containers(self):
-        self.predictions = []
-        self.subject_ids = []
+        self._current_inference_save_dir = os.path.join(
+            self.output_dir, f"output_inference"
+        )  # TODO here we need some mechanism for separate outputs for nested inference
+        self._ensure_path_exists(self._current_inference_save_dir)
+        self.inference_losses = []
+        self.inference_metric_values = []
+        if self._problem_type_is_regression or self._problem_type_is_classification:
+            self.rows_to_write = []
+            self.subject_classification_logits_mapping: Dict[str, torch.Tensor] = {}
 
     @rank_zero_only
     def _print_inference_initialization_info(self):
@@ -1510,6 +1532,109 @@ class GandlfLightningModule(pl.LightningModule):
         self._print_host_info()
         if self.params["model"]["print_summary"]:
             self._print_model_summary()
+
+    def predict_step(self, subject, batch_idx):
+        if self.params["verbose"]:
+            self._print_currently_processed_subject(subject)
+        if self.params["modality"] == "rad":
+            return self._radiology_inference_step(subject)
+        else:
+            raise NotImplementedError(
+                "Inference for non-radiology modalities is not implemented yet."
+            )
+
+    def _radiology_inference_step(self, subject: torchio.Subject):
+        label_present = "label" in subject or "value_keys" in self.params
+        subject_dict = self._initialize_subject_dict_nontraining_mode(subject)
+        if label_present:
+            subject_dict = self._extend_nontraining_subject_dict_with_label(
+                subject, subject_dict
+            )
+            if self._problem_type_is_regression or self._problem_type_is_classification:
+                model_output = self._get_predictions_on_subject_using_label_sampler(
+                    subject_dict
+                )
+
+                processed_logit = self._process_prediction_logit_for_row_writing(
+                    model_output, self.params["scaling_factor"]
+                )
+                self.rows_to_write.append(
+                    self._prepare_row_for_output_csv(
+                        subject["subject_id"][0], processed_logit, self.current_epoch
+                    )
+                )
+
+                label = self._initialize_nontraining_label_ground_truth_classification_or_regression(
+                    subject
+                )
+            else:
+                model_output = self._get_predictions_on_subject_using_grid_sampler(
+                    subject_dict
+                )
+                self._save_predictions_for_segmentation_subject(model_output, subject)
+                label = self._initialize_nontraining_label_ground_truth_segmentation(
+                    subject
+                )
+            label = self._process_labels(label)
+            model_output, label = self.pred_target_processor(model_output, label)
+
+            loss = self.loss(model_output, label)
+            metric_results = self.metric_calculators(model_output, label)
+
+            self.inference_losses.append(loss)
+            self.inference_metric_values.append(metric_results)
+        else:
+            model_output = self._get_predictions_on_subject_using_grid_sampler(
+                subject_dict
+            )
+            if self._problem_type_is_classification or self._problem_type_is_regression:
+                processed_logit = self._process_prediction_logit_for_row_writing(
+                    model_output
+                )
+                self.rows_to_write.append(
+                    self._prepare_row_for_output_csv(
+                        subject["subject_id"][0], processed_logit, self.current_epoch
+                    )
+                )
+            else:
+                self._save_predictions_for_segmentation_subject(model_output, subject)
+
+        # loss = self.loss(model_output, label)
+        # metric_results = self.metric_calculators(model_output, label)
+        if self._problem_type_is_classification:
+            self.subject_classification_logits_mapping[
+                subject["subject_id"][0]
+            ] = model_output
+
+    @rank_zero_only
+    def on_predict_end(self):
+        if self.inference_metric_values:
+            inference_epoch_average_metrics = {}
+            metric_names = self.inference_metric_values[0].keys()
+            for metric_name in metric_names:
+                metric_values = [x[metric_name] for x in self.inference_metric_values]
+                inference_epoch_average_metrics[
+                    metric_name
+                ] = self._compute_metric_mean_across_values_from_batches(metric_values)
+
+            mean_loss = self._round_value_to_precision(
+                torch.mean(torch.stack(self.inference_losses)).item()
+            )
+
+            print("Inference results:")
+            print(f"Loss: {mean_loss}")
+            print(f"Metrics: {inference_epoch_average_metrics}")
+        if self._problem_type_is_regression or self._problem_type_is_classification:
+            self._save_predictions_for_regression_or_classification(self.rows_to_write)
+
+        self._clear_inference_containers()
+
+    @rank_zero_only
+    def _clear_inference_containers(self):
+        self.inference_losses = []
+        self.inference_metric_values = []
+        if self._problem_type_is_regression or self._problem_type_is_classification:
+            self.rows_to_write = []
 
     def configure_optimizers(self):
         params = deepcopy(self.params)

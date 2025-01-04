@@ -597,3 +597,101 @@ def test_port_model_3d_rad_classification_single_device_single_node(device):
         )
         trainer.fit(module, train_dataloader, val_dataloader)
         trainer.test(module, test_dataloader)
+
+
+def test_port_model_3d_rad_classification_inference_single_device_single_node(device):
+    # with TrainerTestsContextManager():
+    parameters = parseConfig(
+        TESTS_DIRPATH + "/config_classification.yaml", version_check_flag=False
+    )
+    parameters["modality"] = "rad"
+    parameters["track_memory_usage"] = True
+    parameters["patch_size"] = PATCH_SIZE["3D"]
+    parameters["model"]["dimension"] = 3
+    parameters["model"]["final_layer"] = "logits"
+    training_data, parameters["headers"] = parseTrainingCSV(
+        TEST_DATA_DIRPATH + "/train_3d_rad_classification.csv"
+    )
+    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    parameters["model"]["architecture"] = "densenet121"
+    parameters["save_output"] = True
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+
+    dataset = ImagesFromDataFrame(
+        training_data, parameters, train=True, loader_type="train"
+    )
+    dataset_val = ImagesFromDataFrame(
+        training_data, parameters, train=False, loader_type="validation"
+    )
+    dataset_test = ImagesFromDataFrame(
+        training_data, parameters, train=False, loader_type="test"
+    )
+    train_dataloader = torch.utils.data.DataLoader(
+        dataset, batch_size=parameters["batch_size"], shuffle=True
+    )
+    val_dataloader = torch.utils.data.DataLoader(
+        dataset_val, batch_size=parameters["batch_size"], shuffle=False
+    )
+    test_dataloader = torch.utils.data.DataLoader(
+        dataset_test, batch_size=parameters["batch_size"], shuffle=False
+    )
+    parameters = populate_channel_keys_in_params(train_dataloader, parameters)
+    module = GandlfLightningModule(parameters, output_dir=TEST_DATA_OUTPUT_DIRPATH)
+    trainer = pl.Trainer(
+        accelerator="auto",
+        strategy="auto",
+        fast_dev_run=False,
+        devices=1,
+        num_nodes=1,
+        max_epochs=parameters["num_epochs"],
+        sync_batchnorm=False,
+        enable_checkpointing=False,
+        logger=False,
+        num_sanity_val_steps=0,
+    )
+    trainer.fit(module, train_dataloader, val_dataloader)
+    trainer.test(module, test_dataloader)
+
+    # training_data.drop("ValueToPredict", axis=1, inplace=True)
+    # training_data.drop("Label", axis=1, inplace=True)
+    # temp_infer_csv = os.path.join(TEST_DATA_OUTPUT_DIRPATH, "temp_infer_csv.csv")
+    # training_data.to_csv(temp_infer_csv, index=False)
+    training_data, parameters["headers"] = parseTrainingCSV(
+        TEST_DATA_DIRPATH + "/train_3d_rad_classification.csv"
+    )
+
+    parameters["output_dir"] = TEST_DATA_OUTPUT_DIRPATH  # this is in inference mode
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = PATCH_SIZE["3D"]
+    parameters["model"]["dimension"] = 3
+    parameters["model"]["final_layer"] = "logits"
+    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["architecture"] = "densenet121"
+    parameters["model"]["onnx_export"] = False
+    parameters["differential_privacy"] = False
+    parameters["save_output"] = True
+
+    dataset = ImagesFromDataFrame(
+        training_data, parameters, train=False, loader_type="testing"
+    )
+
+    inference_dataloader = torch.utils.data.DataLoader(
+        dataset, batch_size=parameters["batch_size"], shuffle=True
+    )
+    module = GandlfLightningModule(parameters, output_dir=TEST_DATA_OUTPUT_DIRPATH)
+    trainer = pl.Trainer(
+        accelerator="auto",
+        strategy="auto",
+        fast_dev_run=False,
+        devices=1,
+        num_nodes=1,
+        max_epochs=parameters["num_epochs"],
+        sync_batchnorm=False,
+        enable_checkpointing=False,
+        logger=False,
+        num_sanity_val_steps=0,
+    )
+    trainer.predict(module, inference_dataloader)
