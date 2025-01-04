@@ -254,10 +254,10 @@ class GandlfLightningModule(pl.LightningModule):
         return output, attention_map
 
     def on_train_start(self):
-        self._print_initialization_info()
+        self._print_training_initialization_info()
         self._set_training_start_time()
         self._print_channels_info()
-        self._try_to_load_previous_best_model()
+        self._try_to_load_model_training_start()
         self._try_to_save_initial_model()
         self._initialize_train_logger()
         self._initialize_training_epoch_containers()
@@ -270,17 +270,32 @@ class GandlfLightningModule(pl.LightningModule):
         if "differential_privacy" in self.params:
             self._initialize_differential_privacy()
 
-    def _try_to_load_previous_best_model(self):
+    def _try_to_load_model_training_start(self):
         """
-        Attempts to load the previous best model from the specified path.
-        If the model is not found, a warning is issued. If the model is found,
-        it is loaded and the training is continued from the last epoch.
-        If an error occurs during loading, a warning is issued and the training
-        is continued from scratch.
+        Attempts to load the model at the start of the training.
         """
-        if os.path.exists(self.model_paths["best"]):
+        if self._try_to_load_model(self.model_paths["best"]):
+            print(f"Previous best model loaded from {self.model_paths['best']}.")
+        elif self._try_to_load_model(self.model_paths["latest"]):
+            print(f"Previous latest model loaded from {self.model_paths['latest']}.")
+        else:
+            print(
+                f"Could not load any previous model, training from scratch.", flush=True
+            )
+
+    def _try_to_load_model(self, load_path: str):
+        """
+        Attempts to load the model from the specified path.
+
+        Args:
+            load_path (str): The path to the model to load.
+
+        Returns:
+            bool: Whether the model was successfully loaded.
+        """
+        if os.path.exists(load_path):
             try:
-                checkpoint_dict = load_model(self.model_paths["best"], self.device)
+                checkpoint_dict = load_model(load_path, self.device)
                 version_check(
                     self.params["version"], version_to_check=checkpoint_dict["version"]
                 )
@@ -291,16 +306,16 @@ class GandlfLightningModule(pl.LightningModule):
                 self.optimizers().optimizer.load_state_dict(
                     checkpoint_dict["optimizer_state_dict"]
                 )
-                self.current_epoch = checkpoint_dict["epoch"]
+                self.trainer.fit_loop.epoch_progress.current.completed = (
+                    checkpoint_dict["epoch"]
+                )
                 self.trainer.callback_metrics["val_loss"] = checkpoint_dict["loss"]
+                return True
             except Exception as e:
                 warnings.warn(
-                    f"Previous best model found under path {self.model_paths['best']}, but error occurred during loading: {e}; Continuing training with new model"
+                    f"Model found under path {load_path}, but error occurred during loading: {e}"
                 )
-        else:
-            warnings.warn(
-                f"No previous best model found under the path {self.model_paths['best']}; Training from scratch"
-            )
+        return False
 
     @rank_zero_only
     def _try_to_save_initial_model(self):
@@ -344,16 +359,19 @@ class GandlfLightningModule(pl.LightningModule):
         self.training_start_time = time.time()
 
     @rank_zero_only
-    def _print_initialization_info(self):
+    def _print_training_initialization_info(self):
         """
         Basic info printed at the start of the training.
         """
-        if not (os.environ.get("HOSTNAME") is None):
-            print("Hostname :", os.environ.get("HOSTNAME"), flush=True)
+        self._print_host_info()
         if self.params["verbose"]:
             print("Initializing training at :", get_date_time(), flush=True)
         if self.params["model"]["print_summary"]:
             self._print_model_summary()
+
+    def _print_host_info(self):
+        if os.environ.get("HOSTNAME"):
+            print("Hostname :", os.environ.get("HOSTNAME"), flush=True)
 
     def _print_model_summary(self):
         print_model_summary(
@@ -1460,6 +1478,38 @@ class GandlfLightningModule(pl.LightningModule):
     def _clear_test_epoch_containers(self):
         self.test_losses = []
         self.test_metric_values = []
+
+    def on_predict_start(self):
+        self._initialize_inference_containers()
+        self._try_to_load_model_inference_start()
+        if self.params["differential_privacy"]:
+            self._initialize_differential_privacy()  # placeholder
+
+    def _try_to_load_model_inference_start(self):
+        if self._try_to_load_model(self.model_paths["best"]):
+            print(f"Previous best model loaded from {self.model_paths['best']}.")
+        elif self._try_to_load_model(self.model_paths["latest"]):
+            print(f"Previous latest model loaded from {self.model_paths['latest']}.")
+        else:
+            raise RuntimeError(
+                "No model found to load. Please train the model before running inference."
+            )
+
+    @rank_zero_only
+    def _initialize_inference_containers(self):
+        self.predictions = []
+        self.subject_ids = []
+
+    @rank_zero_only
+    def _print_inference_initialization_info(self):
+        print("Current model type : ", self.params["model"]["type"])
+        print("Number of dims     : ", self.params["model"]["dimension"])
+        if "num_channels" in self.params["model"]:
+            print("Number of channels : ", self.params["model"]["num_channels"])
+        print("Number of classes  : ", len(self.params["model"]["class_list"]))
+        self._print_host_info()
+        if self.params["model"]["print_summary"]:
+            self._print_model_summary()
 
     def configure_optimizers(self):
         params = deepcopy(self.params)
