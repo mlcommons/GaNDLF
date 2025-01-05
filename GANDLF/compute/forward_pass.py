@@ -143,8 +143,6 @@ def validate_network(
                 label_ground_truth = torch.cat(
                     [subject[key] for key in params["value_keys"]], dim=0
                 )
-                # Here I think the code is missing the following line:
-                # label_present = True
 
         for key in params["channel_keys"]:
             subject_dict[key] = torchio.ScalarImage(
