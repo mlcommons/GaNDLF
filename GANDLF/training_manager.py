@@ -1,6 +1,7 @@
 import pandas as pd
 import os, pickle, shutil
 from pathlib import Path
+from torch.profiler import profile, ProfilerActivity
 
 from GANDLF.compute import training_loop
 from GANDLF.utils import get_dataframe, split_data
@@ -145,6 +146,8 @@ def TrainingManager_split(
     device: str,
     resume: bool,
     reset: bool,
+    profile_:bool,
+
 ):
     """
     This is the training manager that ties all the training functionality together
@@ -158,6 +161,8 @@ def TrainingManager_split(
         device (str): The device to perform computations on.
         resume (bool): Whether the previous run will be resumed or not.
         reset (bool): Whether the previous run will be reset or not.
+        profile_(bool):Whether the we want the profile activity or not.
+
     """
     currentModelConfigPickle = os.path.join(outputDir, "parameters.pkl")
     currentModelConfigYaml = os.path.join(outputDir, "config.yaml")
@@ -178,11 +183,25 @@ def TrainingManager_split(
         with open(currentModelConfigYaml, "w") as handle:
             yaml.dump(parameters, handle, default_flow_style=False)
 
-    training_loop(
-        training_data=dataframe_train,
-        validation_data=dataframe_validation,
-        output_dir=outputDir,
-        device=device,
-        params=parameters,
-        testing_data=dataframe_testing,
-    )
+    if  profile_:       
+        with profile(activities=[ProfilerActivity.CPU,ProfilerActivity.CUDA],profile_memory=True,record_shapes=True) as prof:
+
+            training_loop(
+                training_data=dataframe_train,
+                validation_data=dataframe_validation,
+                output_dir=outputDir,
+                device=device,
+                params=parameters,
+                testing_data=dataframe_testing,
+            )
+        print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=10))    
+    else:
+
+            training_loop(
+                training_data=dataframe_train,
+                validation_data=dataframe_validation,
+                output_dir=outputDir,
+                device=device,
+                params=parameters,
+                testing_data=dataframe_testing,
+            )

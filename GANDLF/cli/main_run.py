@@ -19,6 +19,7 @@ def main_run(
     device: str,
     resume: bool,
     reset: bool,
+    profile_: Optional[bool] = False,
     output_dir: Optional[str] = None,
 ) -> None:
     """
@@ -98,6 +99,8 @@ def main_run(
                 device=device,
                 resume=resume,
                 reset=reset,
+                profile_=profile_,
+
             )
     else:
         data_full, headers = parseTrainingCSV(file_data_full, train=train_mode)
@@ -110,6 +113,7 @@ def main_run(
                 device=device,
                 resume=resume,
                 reset=reset,
+
             )
         else:
             _, data_full, headers = parseTestingCSV(
