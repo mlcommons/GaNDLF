@@ -5,6 +5,8 @@ import math
 import pytest
 import shutil
 from pathlib import Path
+import pandas as pd
+import numpy as np
 import lightning.pytorch as pl
 from GANDLF.models.lightning_module import GandlfLightningModule
 from GANDLF.losses.loss_calculators import (
@@ -27,15 +29,30 @@ from GANDLF.utils.pred_target_processors import (
     IdentityPredictionTargetProcessor,
     DeepSupervisionPredictionTargetProcessor,
 )
+from GANDLF.config_manager import ConfigManager
 from GANDLF.parseConfig import parseConfig
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils.write_parse import parseTrainingCSV
 from GANDLF.utils import populate_header_in_parameters, populate_channel_keys_in_params
 
+from GANDLF.cli import patch_extraction
+
 TESTS_DIRPATH = Path(__file__).parent.absolute().__str__()
 TEST_DATA_DIRPATH = os.path.join(TESTS_DIRPATH, "data")
 TEST_DATA_OUTPUT_DIRPATH = os.path.join(TESTS_DIRPATH, "data_output")
 PATCH_SIZE = {"2D": [128, 128, 1], "3D": [32, 32, 32]}
+
+
+def write_temp_config_path(parameters_to_write):
+    print("02_2: Creating path for temporary config file")
+    temp_config_path = os.path.join(TESTS_DIRPATH, "config_temp.yaml")
+    # if found in previous run, discard.
+    if os.path.exists(temp_config_path):
+        os.remove(temp_config_path)
+    if parameters_to_write is not None:
+        with open(temp_config_path, "w") as file:
+            yaml.dump(parameters_to_write, file)
+    return temp_config_path
 
 
 class TrainerTestsContextManager:
@@ -705,3 +722,96 @@ def test_port_model_3d_rad_classification_inference_single_device_single_node(de
             num_sanity_val_steps=0,
         )
         trainer.predict(module, inference_dataloader)
+
+
+def test_port_model_inference_classification_histology_2d(device):
+    with TrainerTestsContextManager():
+        output_dir_patches = os.path.join(TEST_DATA_OUTPUT_DIRPATH, "histo_patches")
+        if os.path.isdir(output_dir_patches):
+            shutil.rmtree(output_dir_patches)
+        Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
+        output_dir_patches_output = os.path.join(
+            output_dir_patches, "histo_patches_output"
+        )
+
+        parameters_patch = {}
+        # extracting minimal number of patches to ensure that the test does not take too long
+        parameters_patch["patch_size"] = [128, 128]
+
+        for num_patches in [-1, 3]:
+            parameters_patch["num_patches"] = num_patches
+            file_config_temp = write_temp_config_path(parameters_patch)
+
+            if os.path.exists(output_dir_patches_output):
+                shutil.rmtree(output_dir_patches_output)
+            # this ensures that the output directory for num_patches=3 is preserved
+            Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
+            patch_extraction(
+                TEST_DATA_DIRPATH + "/train_2d_histo_classification.csv",
+                output_dir_patches_output,
+                file_config_temp,
+            )
+
+        file_for_Training = os.path.join(output_dir_patches_output, "opm_train.csv")
+        temp_df = pd.read_csv(file_for_Training)
+        temp_df.drop("Label", axis=1, inplace=True)
+        temp_df["valuetopredict"] = np.random.randint(2, size=6)
+        temp_df.to_csv(file_for_Training, index=False)
+        # read and parse csv
+        parameters = ConfigManager(
+            TESTS_DIRPATH + "/config_classification.yaml", version_check_flag=False
+        )
+        parameters["modality"] = "histo"
+        parameters["patch_size"] = 128
+        file_config_temp = write_temp_config_path(parameters)
+        parameters = ConfigManager(file_config_temp, version_check_flag=False)
+        parameters["model"]["dimension"] = 2
+        # read and parse csv
+        training_data, parameters["headers"] = parseTrainingCSV(file_for_Training)
+        parameters["model"]["num_channels"] = 3
+        parameters["model"]["architecture"] = "densenet121"
+        parameters["model"]["norm_type"] = "none"
+        parameters["data_preprocessing"]["rgba2rgb"] = ""
+        parameters = populate_header_in_parameters(parameters, parameters["headers"])
+        parameters["nested_training"]["testing"] = 1
+        parameters["nested_training"]["validation"] = -2
+        parameters["model"]["print_summary"] = False
+        modelDir = os.path.join(TEST_DATA_OUTPUT_DIRPATH, "modelDir")
+        if os.path.isdir(modelDir):
+            shutil.rmtree(modelDir)
+        Path(modelDir).mkdir(parents=True, exist_ok=True)
+
+        dataset = ImagesFromDataFrame(
+            training_data, parameters, train=True, loader_type="train"
+        )
+        dataset_val = ImagesFromDataFrame(
+            training_data, parameters, train=False, loader_type="validation"
+        )
+        dataset_test = ImagesFromDataFrame(
+            training_data, parameters, train=False, loader_type="test"
+        )
+        train_dataloader = torch.utils.data.DataLoader(
+            dataset, batch_size=parameters["batch_size"], shuffle=True
+        )
+        val_dataloader = torch.utils.data.DataLoader(
+            dataset_val, batch_size=parameters["batch_size"], shuffle=False
+        )
+        test_dataloader = torch.utils.data.DataLoader(
+            dataset_test, batch_size=parameters["batch_size"], shuffle=False
+        )
+
+        parameters = populate_channel_keys_in_params(train_dataloader, parameters)
+        module = GandlfLightningModule(parameters, output_dir=TEST_DATA_OUTPUT_DIRPATH)
+        trainer = pl.Trainer(
+            accelerator="auto",
+            strategy="auto",
+            fast_dev_run=False,
+            devices=1,
+            num_nodes=1,
+            max_epochs=parameters["num_epochs"],
+            sync_batchnorm=False,
+            enable_checkpointing=False,
+            logger=False,
+            num_sanity_val_steps=0,
+        )
+        trainer.fit(module, train_dataloader, val_dataloader)
