@@ -768,6 +768,7 @@ def test_port_model_inference_classification_histology_2d(device):
         parameters["model"]["dimension"] = 2
         # read and parse csv
         training_data, parameters["headers"] = parseTrainingCSV(file_for_Training)
+        print(f"HEADERS: {parameters['headers']}")
         parameters["model"]["num_channels"] = 3
         parameters["model"]["architecture"] = "densenet121"
         parameters["model"]["norm_type"] = "none"
@@ -776,6 +777,7 @@ def test_port_model_inference_classification_histology_2d(device):
         parameters["nested_training"]["testing"] = 1
         parameters["nested_training"]["validation"] = -2
         parameters["model"]["print_summary"] = False
+        parameters["model"]["onnx_export"] = False
         modelDir = os.path.join(TEST_DATA_OUTPUT_DIRPATH, "modelDir")
         if os.path.isdir(modelDir):
             shutil.rmtree(modelDir)
@@ -815,3 +817,4 @@ def test_port_model_inference_classification_histology_2d(device):
             num_sanity_val_steps=0,
         )
         trainer.fit(module, train_dataloader, val_dataloader)
+        # trainer.test(module, test_dataloader)

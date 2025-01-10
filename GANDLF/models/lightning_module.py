@@ -800,11 +800,19 @@ class GandlfLightningModule(pl.LightningModule):
         self._set_spacing_params_for_subject(subject)
 
         subject_dict = self._initialize_subject_dict_nontraining_mode(subject)
-        subject_dict = self._extend_nontraining_subject_dict_with_label(
-            subject, subject_dict
-        )
+        label_present = subject["label"] != ["NA"]
+        value_keys_present = "value_keys" in self.params
+        label = None
+        if label_present:
+            subject_dict = self._extend_nontraining_subject_dict_with_label(
+                subject, subject_dict
+            )
 
-        if self._problem_type_is_regression or self._problem_type_is_classification:
+        if (
+            self._problem_type_is_regression
+            or self._problem_type_is_classification
+            and label_present
+        ):
             model_output = self._get_predictions_on_subject_using_label_sampler(
                 subject_dict
             )
@@ -828,23 +836,34 @@ class GandlfLightningModule(pl.LightningModule):
             )
             if self.params["save_output"]:
                 self._save_predictions_for_segmentation_subject(model_output, subject)
-            label = self._initialize_nontraining_label_ground_truth_segmentation(
-                subject
-            )
 
-        label = self._process_labels(label)
-        print(f"MODEL OUTPUT BEFORE PROCESSING: {model_output.device}")
-        model_output, label = self.pred_target_processor(model_output, label)
-        print(f"MODEL OUTPUT DEVICE: {model_output.device}")
-        print(f"LABEL DEVICE: {label.device}")
-        print(f"MODEL PARAMS DEVICE: {next(self.model.parameters()).device}")
-        loss = self.loss(model_output, label)
-        metric_results = self.metric_calculators(model_output, label)
+            if self._problem_type_is_segmentation and label_present:
+                label = self._initialize_nontraining_label_ground_truth_segmentation(
+                    subject
+                )
+            elif (
+                self._problem_type_is_classification
+                or self._problem_type_is_regression
+                and value_keys_present
+            ):
+                label = self._initialize_nontraining_label_ground_truth_classification_or_regression(
+                    subject
+                )
 
-        self.val_losses.append(loss)
-        self.validation_metric_values.append(metric_results)
+        if label:
+            label = self._process_labels(label)
+            model_output, label = self.pred_target_processor(model_output, label)
+            loss = self.loss(model_output, label)
+            metric_results = self.metric_calculators(model_output, label)
 
-        if self._problem_type_is_regression or self._problem_type_is_classification:
+            self.val_losses.append(loss)
+            self.validation_metric_values.append(metric_results)
+
+        if (
+            self._problem_type_is_regression
+            or self._problem_type_is_classification
+            and label
+        ):
             model_prediction = (
                 torch.argmax(model_output[0], 0)
                 if self._problem_type_is_classification
@@ -852,8 +871,6 @@ class GandlfLightningModule(pl.LightningModule):
             )  # TODO am I right here? For regression, we should not take argmax
             self.val_predictions.append(model_prediction.item())
             self.val_labels.append(label.item())
-
-        return loss
 
     @staticmethod
     def _prepare_row_for_output_csv(
@@ -931,6 +948,10 @@ class GandlfLightningModule(pl.LightningModule):
                 tensor=subject[channel_key]["data"].squeeze(0),
                 affine=subject[channel_key]["affine"].squeeze(0),
             )
+        if self._problem_type_is_regression or self._problem_type_is_classification:
+            for key in self.params["value_keys"]:
+                subject_dict["value_" + key] = subject[key]
+
         return subject_dict
 
     def _extend_nontraining_subject_dict_with_label(
@@ -946,16 +967,11 @@ class GandlfLightningModule(pl.LightningModule):
         Returns:
             subject_dict (dict): The dictionary containing the subject data with the label data.
         """
-
         subject_dict["label"] = torchio.LabelMap(
             path=subject["label"]["path"],
             tensor=subject["label"]["data"].squeeze(0),
             affine=subject["label"]["affine"].squeeze(0),
         )
-
-        if self._problem_type_is_regression or self._problem_type_is_classification:
-            for key in self.params["value_keys"]:
-                subject_dict["value_" + key] = subject[key]
 
         return subject_dict
 
@@ -1455,10 +1471,18 @@ class GandlfLightningModule(pl.LightningModule):
         self._set_spacing_params_for_subject(subject)
 
         subject_dict = self._initialize_subject_dict_nontraining_mode(subject)
-        subject_dict = self._extend_nontraining_subject_dict_with_label(
-            subject, subject_dict
-        )
-        if self._problem_type_is_regression or self._problem_type_is_classification:
+        label_present = subject["label"] != ["NA"]
+        value_keys_present = "value_keys" in self.params
+        label = None
+        if label_present:
+            subject_dict = self._extend_nontraining_subject_dict_with_label(
+                subject, subject_dict
+            )
+        if (
+            self._problem_type_is_regression
+            or self._problem_type_is_classification
+            and label_present
+        ):
             model_output = self._get_predictions_on_subject_using_label_sampler(
                 subject_dict
             )
@@ -1482,20 +1506,27 @@ class GandlfLightningModule(pl.LightningModule):
             )
             if self.params["save_output"]:
                 self._save_predictions_for_segmentation_subject(model_output, subject)
-            label = self._initialize_nontraining_label_ground_truth_segmentation(
-                subject
-            )
+            if self._problem_type_is_segmentation and label_present:
+                label = self._initialize_nontraining_label_ground_truth_segmentation(
+                    subject
+                )
+            elif (
+                self._problem_type_is_classification
+                or self._problem_type_is_regression
+                and value_keys_present
+            ):
+                label = self._initialize_nontraining_label_ground_truth_classification_or_regression(
+                    subject
+                )
+        if label:
+            label = self._process_labels(label)
+            model_output, label = self.pred_target_processor(model_output, label)
 
-        label = self._process_labels(label)
-        model_output, label = self.pred_target_processor(model_output, label)
+            loss = self.loss(model_output, label)
+            metric_results = self.metric_calculators(model_output, label)
 
-        loss = self.loss(model_output, label)
-        metric_results = self.metric_calculators(model_output, label)
-
-        self.test_losses.append(loss)
-        self.test_metric_values.append(metric_results)
-
-        return loss
+            self.test_losses.append(loss)
+            self.test_metric_values.append(metric_results)
 
     @rank_zero_only
     def on_test_epoch_end(self):
@@ -1588,13 +1619,17 @@ class GandlfLightningModule(pl.LightningModule):
             return self._histopathology_inference_step(batch)
 
     def _radiology_inference_step(self, subject: torchio.Subject):
-        label_present = subject["label"] != ["NA"] or "value_keys" in self.params
+        label_present = subject["label"] != ["NA"]
         subject_dict = self._initialize_subject_dict_nontraining_mode(subject)
         if label_present:
             subject_dict = self._extend_nontraining_subject_dict_with_label(
                 subject, subject_dict
             )
-            if self._problem_type_is_regression or self._problem_type_is_classification:
+            if (
+                self._problem_type_is_regression
+                or self._problem_type_is_classification
+                and label_present
+            ):
                 model_output = self._get_predictions_on_subject_using_label_sampler(
                     subject_dict
                 )
