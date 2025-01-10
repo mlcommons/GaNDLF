@@ -948,7 +948,12 @@ class GandlfLightningModule(pl.LightningModule):
                 tensor=subject[channel_key]["data"].squeeze(0),
                 affine=subject[channel_key]["affine"].squeeze(0),
             )
-        if self._problem_type_is_regression or self._problem_type_is_classification:
+        value_keys_present = "value_keys" in self.params
+        if (
+            self._problem_type_is_regression
+            or self._problem_type_is_classification
+            and value_keys_present
+        ):
             for key in self.params["value_keys"]:
                 subject_dict["value_" + key] = subject[key]
 
