@@ -1,11 +1,14 @@
 import os
 import sys
+import cv2
 import time
 import psutil
 import torch
 import torchio
 import warnings
+import openslide
 import numpy as np
+import pandas as pd
 import SimpleITK as sitk
 import lightning.pytorch as pl
 
@@ -23,6 +26,8 @@ from GANDLF.schedulers import get_scheduler
 from GANDLF.data.post_process import global_postprocessing_dict
 from GANDLF.losses.loss_calculators import LossCalculatorFactory
 from GANDLF.metrics.metric_calculators import MetricCalculatorFactory
+from GANDLF.data.preprocessing import get_transforms_for_preprocessing
+from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
 from GANDLF.utils.pred_target_processors import PredictionTargetProcessorFactory
 
 from GANDLF.utils import (
@@ -40,6 +45,7 @@ from GANDLF.utils import (
     BEST_MODEL_PATH_END,
     INITIAL_MODEL_PATH_END,
     LATEST_MODEL_PATH_END,
+    MapSaver,
 )
 
 from typing import Tuple, Union, Dict, List, Any
@@ -47,6 +53,7 @@ from typing import Tuple, Union, Dict, List, Any
 
 class GandlfLightningModule(pl.LightningModule):
     CLASSIFICATION_REGRESSION_RESULTS_HEADER = "Epoch,SubjectID,PredictedValue\n"
+    CLASSIFICATION_REGRESSION_RESULTS_HEADER_HISTOPATH = "SubjectID,x_coords,y_coords"
     FLOAT_FORMATTING_PRECISION = 4
     MULTIPROCESSING_LOCK = Lock()
 
@@ -867,6 +874,25 @@ class GandlfLightningModule(pl.LightningModule):
         return f"{epoch},{subject_id},{prediction_logit}\n"
 
     @staticmethod
+    def _prepare_row_for_output_csv_histopathology_inference(
+        subject_name, x_coord, y_coord, output_for_given_class
+    ):
+        """
+        Helper function to prepare the row for the output CSV file in histopathology inference.
+
+        Args:
+            subject_name (str): The subject name.
+            x_coord (int): The x coordinate.
+            y_coord (int): The y coordinate.
+            output_for_given_class (float) : output value for given class
+
+        Returns:
+            row (str): The row to write to the output CSV file.
+        """
+
+        return f"{subject_name},{x_coord},{y_coord}, {output_for_given_class}\n"
+
+    @staticmethod
     def _process_prediction_logit_for_row_writing(
         prediction_logit: torch.Tensor, scaling_factor: float = 1.0
     ):
@@ -1213,7 +1239,9 @@ class GandlfLightningModule(pl.LightningModule):
         if self.params["save_output"] and (
             self._problem_type_is_regression or self._problem_type_is_classification
         ):
-            self._save_predictions_for_regression_or_classification(self.rows_to_write)
+            self._save_predictions_csv_for_regression_or_classification(
+                self.rows_to_write, self._determine_save_path_to_use()
+            )
 
         self._clear_validation_epoch_containers()
 
@@ -1332,20 +1360,32 @@ class GandlfLightningModule(pl.LightningModule):
         sitk.WriteImage(result_sikt_image, segmentation_mask_save_path)
 
     @rank_zero_only
-    def _save_predictions_for_regression_or_classification(
-        self, rows_to_write: List[List[str]]
+    def _save_predictions_csv_for_regression_or_classification(
+        self, rows_to_write: List[str], save_path: str
     ):
         """
         Saves the predictions for regression or classification problems to a CSV file.
 
         Args:
-            rows_to_write (List[List[str]]): The rows to write to the CSV file.
+            rows_to_write (List[str]): The rows to write to the CSV file. Each element of
+        the list is a row.
+            save_path (str): The save path for the CSV file.
         """
 
-        csv_save_path = os.path.join(
-            self._determine_save_path_to_use(), "output_predictions.csv"
-        )
-        merged_output = self.CLASSIFICATION_REGRESSION_RESULTS_HEADER
+        def _determine_header_to_use():
+            if self.trainer.predicting:
+                if self.params["modality"] in ["hist", "path"]:
+                    header = self.CLASSIFICATION_REGRESSION_RESULTS_HEADER_HISTOPATH
+                    if self._problem_type_is_regression:
+                        return header + ",output\n"
+                    elif self._problem_type_is_classification:
+                        for class_num in self.params["model"]["num_classes"]:
+                            header += f",probability_{class_num}"
+                        return header + "\n"
+            return self.CLASSIFICATION_REGRESSION_RESULTS_HEADER
+
+        csv_save_path = os.path.join(save_path, "output_predictions.csv")
+        merged_output = _determine_header_to_use()
         for row in rows_to_write:
             merged_output += row
         with open(csv_save_path, "w") as file:
@@ -1489,7 +1529,9 @@ class GandlfLightningModule(pl.LightningModule):
         if self.params["save_output"] and (
             self._problem_type_is_regression or self._problem_type_is_classification
         ):
-            self._save_predictions_for_regression_or_classification(self.rows_to_write)
+            self._save_predictions_csv_for_regression_or_classification(
+                self.rows_to_write, self._determine_save_path_to_use()
+            )
         self._clear_test_epoch_containers()
 
     @rank_zero_only
@@ -1536,11 +1578,11 @@ class GandlfLightningModule(pl.LightningModule):
         if self.params["model"]["print_summary"]:
             self._print_model_summary()
 
-    def predict_step(self, subject, batch_idx):
+    def predict_step(self, batch, batch_idx):
         if self.params["verbose"]:
-            self._print_currently_processed_subject(subject)
+            self._print_currently_processed_subject(batch)
         if self.params["modality"] == "rad":
-            return self._radiology_inference_step(subject)
+            return self._radiology_inference_step(batch)
         else:
             raise NotImplementedError(
                 "Inference for non-radiology modalities is not implemented yet."
@@ -1602,12 +1644,225 @@ class GandlfLightningModule(pl.LightningModule):
             else:
                 self._save_predictions_for_segmentation_subject(model_output, subject)
 
-        # loss = self.loss(model_output, label)
-        # metric_results = self.metric_calculators(model_output, label)
         if self._problem_type_is_classification:
             self.subject_classification_logits_mapping[
                 subject["subject_id"][0]
             ] = model_output
+
+    # TODO this has to be somewhow handled in different way, we
+    # are mixing too much logic in this single module
+    def _histo_path_inference_step(self, row: pd.Series):
+        """
+        Inference step for the histopathology modality. This function is called with an assumption that the highest
+        level dataloader is an iterator over the rows of the dataframe. The function is called for each row of the
+        dataframe.
+
+        Args:
+            row (pd.Series): The row of the dataframe containing the information about the slide to be processed.
+
+        """
+
+        subject_name = row[self.params["headers"]["subjectIDHeader"]]
+        inference_results_save_dir_for_subject = os.path.join(
+            self._current_inference_save_dir, "histopathology", subject_name
+        )
+        self._ensure_path_exists(inference_results_save_dir_for_subject)
+        self._prepare_histopath_default_inference_params()
+        openslide_image = openslide.open_slide(
+            row[self.params["headers"]["channelHeaders"]].values[0]
+        )
+        max_defined_slide_level = openslide_image.level_count - 1
+        row_slide_level = min(self.params["slide_level"], max_defined_slide_level)
+        row_slide_level = min(row_slide_level, 0)
+        level_width, level_height = openslide_image.level_dimensions[row_slide_level]
+        patch_size = self._ensure_patch_size_is_2D(self.params["patch_size"])
+        count_map = self._initialize_count_map(level_width, level_height)
+        probabilities_map = self._initialize_probability_map(
+            self.params["model"]["num_classes"], level_width, level_height
+        )
+
+        # TODO this should be done by other object or method
+        transform_requested = get_transforms_for_preprocessing(
+            self.params, [], False, False
+        )
+        patient_dataset = InferTumorSegDataset(
+            row[self.params["headers"]["channelHeaders"]].values[0],
+            patch_size=patch_size,
+            stride_size=self.params["stride_size"],
+            selected_level=row_slide_level,
+            mask_level=self.params["mask_level"],
+            transform=transform_requested,
+        )
+        histopathology_dataloader = torch.utils.data.DataLoader(
+            patient_dataset,
+            batch_size=1,
+            shuffle=False,
+            num_workers=self.params["q_num_workers"],
+        )
+        patch_size_updated_after_transforms = patient_dataset.get_patch_size()
+        if self.params["model"]["print_summary"]:
+            print_model_summary(
+                self.model,
+                self.params["batch_size"],
+                self.params["model"]["num_channels"],
+                patch_size_updated_after_transforms,
+            )
+        count_map, probabilities_map = self._iterate_over_hisopathology_loader(
+            histopathology_dataloader,
+            count_map,
+            probabilities_map,
+            patch_size_updated_after_transforms,
+            self.params["model"]["num_classes"],
+            subject_name,
+        )
+
+        map_saver = MapSaver(
+            num_classes=self.params["model"]["num_classes"],
+            slide_level=row_slide_level,
+            blending_alpha=self.params["blending_alpha"],
+            level_height=level_height,
+            level_width=level_width,
+        )
+        map_saver.save_count_map(
+            count_map, save_dir=inference_results_save_dir_for_subject
+        )
+
+        map_saver.save_probability_and_segmentation_maps(
+            probabilities_map,
+            openslide_image,
+            save_dir=inference_results_save_dir_for_subject,
+        )
+        if self._problem_type_is_classification or self._problem_type_is_regression:
+            self._save_predictions_csv_for_regression_or_classification(
+                self.rows_to_write, inference_results_save_dir_for_subject
+            )
+
+    def _iterate_over_hisopathology_loader(
+        self,
+        histopathology_dataloader,
+        count_map,
+        probability_map,
+        patch_size,
+        num_classes,
+        subject_name,
+    ):
+        for image_patches, (x_coord, y_coord) in histopathology_dataloader:
+            x_coord, y_coord = (
+                x_coord.numpy(),
+                y_coord.numpy(),
+            )  # TODO the dataset should do that when fetching
+            image_patches = image_patches.to(self.device)
+            output, _ = self.forward(image_patches)
+            output = output.cpu().detach().numpy()
+            self._increment_value_of_count_map_at_given_position(
+                count_map, x_coord, y_coord, self.params["patch_size"]
+            )
+            for i in range(output.shape[0]):
+                self._increment_value_of_count_map_at_given_position(
+                    count_map, x_coord[i], y_coord[i], patch_size
+                )
+                for class_index in range(num_classes):
+                    self._add_value_to_probability_map_at_given_position(
+                        probability_map,
+                        x_coord[i],
+                        y_coord[i],
+                        patch_size,
+                        output[i, class_index],
+                        class_index,
+                    )
+                    if (
+                        self._problem_type_is_regression
+                        or self._problem_type_is_classification
+                    ):
+                        row_for_csv_saving = (
+                            self._prepare_row_for_output_csv_histopathology_inference(
+                                subject_name,
+                                x_coord[i],
+                                y_coord[i],
+                                output[i, class_index],
+                            )
+                        )
+                        self.rows_to_write.append(row_for_csv_saving)
+        probability_map = np.divide(probability_map, count_map)
+        return count_map, probability_map
+
+    @staticmethod
+    def _increment_value_of_count_map_at_given_position(
+        count_map, x_coord, y_coord, patch_size
+    ):
+        count_map[
+            y_coord : y_coord + patch_size[1], x_coord : x_coord + patch_size[0]
+        ] += 1
+
+    @staticmethod
+    def _add_value_to_probability_map_at_given_position(
+        prob_map, x_coord, y_coord, patch_size, value, class_index
+    ):
+        prob_map[
+            class_index,
+            y_coord : y_coord + patch_size[1],
+            x_coord : x_coord + patch_size[0],
+        ] += value
+
+    # TODO this should be handled by the config parser
+    @rank_zero_only
+    def _prepare_histopath_default_inference_params(self):
+        """
+        Sets the parameters necessary for histopath inference.
+        """
+        self.params["stride_size"] = self.params.get("stride_size", None)
+        self.params["slide_level"] = self.params.get("slide_level", 0)
+        self.params["mask_level"] = self.params.get(
+            "mask_level", self.params["slide_level"]
+        )
+        self.params["blending_alpha"] = float(self.params.get("blending_alpha", 0.5))
+
+    @staticmethod
+    def _initialize_count_map(level_width: int, level_height: int):
+        """
+        Initializes the count maps for the histopathology inference.
+
+        Args:
+            level_width (int): The width of the level.
+            level_height (int): The height of the level.
+
+        Returns:
+            count_map (np.ndarray): The count map.
+        """
+        return np.zeros((level_height, level_width), dtype=np.uint8)
+
+    @staticmethod
+    def _initialize_probability_map(
+        num_classes: int, level_width: int, level_height: int
+    ):
+        """
+        Initializes the probability maps for the histopathology inference.
+        Called for classification and segmentation problems.
+
+        Args:
+            num_classes (int): The number of classes.
+            level_width (int): The width of the level.
+            level_height (int): The height of the level.
+
+        Returns:
+            probs_map (np.ndarray): The probability map.
+        """
+        return np.zeros((num_classes, level_height, level_width), dtype=np.float16)
+
+    @staticmethod
+    def _ensure_patch_size_is_2D(patch_size: List[int]):
+        """
+        Ensures that the patch size is 2D.
+
+        Args:
+            patch_size (List[int]): The patch size.
+
+        Returns:
+            patch_size (List[int]): The 2D patch size.
+        """
+        if len(patch_size) == 3:
+            return patch_size[:-1]
+        return patch_size
 
     @rank_zero_only
     def on_predict_end(self):
@@ -1627,8 +1882,6 @@ class GandlfLightningModule(pl.LightningModule):
             print("Inference results:")
             print(f"Loss: {mean_loss}")
             print(f"Metrics: {inference_epoch_average_metrics}")
-        if self._problem_type_is_regression or self._problem_type_is_classification:
-            self._save_predictions_for_regression_or_classification(self.rows_to_write)
 
         self._clear_inference_containers()
 
@@ -1655,9 +1908,11 @@ class GandlfLightningModule(pl.LightningModule):
         A method called by Lightning to transfer the batch to the device.
         In case of GANDLF, we need custom logic to transfer the data to the device.
         """
-        batch = self._move_image_data_to_device(batch, device)
-        batch = self._move_labels_or_values_to_device(batch, device)
-
+        if not (
+            self.trainer.predicting and self.params["modality"] in ["path", "histo"]
+        ):
+            batch = self._move_image_data_to_device(batch, device)
+            batch = self._move_labels_or_values_to_device(batch, device)
         return batch
 
     def _move_image_data_to_device(self, subject, device):
