@@ -850,7 +850,7 @@ class GandlfLightningModule(pl.LightningModule):
                     subject
                 )
 
-        if label:
+        if label is not None:
             label = self._process_labels(label)
             model_output, label = self.pred_target_processor(model_output, label)
             loss = self.loss(model_output, label)
@@ -1518,7 +1518,7 @@ class GandlfLightningModule(pl.LightningModule):
                 label = self._initialize_nontraining_label_ground_truth_classification_or_regression(
                     subject
                 )
-        if label:
+        if label is not None:
             label = self._process_labels(label)
             model_output, label = self.pred_target_processor(model_output, label)
 
