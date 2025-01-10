@@ -1581,12 +1581,11 @@ class GandlfLightningModule(pl.LightningModule):
     def predict_step(self, batch, batch_idx):
         if self.params["verbose"]:
             self._print_currently_processed_subject(batch)
+        # TODO both of those below should return something - check it
         if self.params["modality"] == "rad":
             return self._radiology_inference_step(batch)
         else:
-            raise NotImplementedError(
-                "Inference for non-radiology modalities is not implemented yet."
-            )
+            return self._histopathology_inference_step(batch)
 
     def _radiology_inference_step(self, subject: torchio.Subject):
         label_present = subject["label"] != ["NA"] or "value_keys" in self.params
@@ -1651,7 +1650,7 @@ class GandlfLightningModule(pl.LightningModule):
 
     # TODO this has to be somewhow handled in different way, we
     # are mixing too much logic in this single module
-    def _histo_path_inference_step(self, row: pd.Series):
+    def _histopathology_inference_step(self, row: pd.Series):
         """
         Inference step for the histopathology modality. This function is called with an assumption that the highest
         level dataloader is an iterator over the rows of the dataframe. The function is called for each row of the
