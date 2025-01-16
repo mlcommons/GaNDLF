@@ -10,6 +10,7 @@ from .imaging import (
     write_training_patches,
     get_correct_padding_size,
     applyCustomColorMap,
+    MapSaver,
 )
 
 from .tensor import (

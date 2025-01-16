@@ -1,11 +1,14 @@
 import os
 import sys
+import cv2
 import time
 import psutil
 import torch
 import torchio
 import warnings
+import openslide
 import numpy as np
+import pandas as pd
 import SimpleITK as sitk
 import lightning.pytorch as pl
 
@@ -23,6 +26,8 @@ from GANDLF.schedulers import get_scheduler
 from GANDLF.data.post_process import global_postprocessing_dict
 from GANDLF.losses.loss_calculators import LossCalculatorFactory
 from GANDLF.metrics.metric_calculators import MetricCalculatorFactory
+from GANDLF.data.preprocessing import get_transforms_for_preprocessing
+from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
 from GANDLF.utils.pred_target_processors import PredictionTargetProcessorFactory
 
 from GANDLF.utils import (
@@ -40,6 +45,7 @@ from GANDLF.utils import (
     BEST_MODEL_PATH_END,
     INITIAL_MODEL_PATH_END,
     LATEST_MODEL_PATH_END,
+    MapSaver,
 )
 
 from typing import Tuple, Union, Dict, List, Any
@@ -47,6 +53,7 @@ from typing import Tuple, Union, Dict, List, Any
 
 class GandlfLightningModule(pl.LightningModule):
     CLASSIFICATION_REGRESSION_RESULTS_HEADER = "Epoch,SubjectID,PredictedValue\n"
+    CLASSIFICATION_REGRESSION_RESULTS_HEADER_HISTOPATH = "SubjectID,x_coords,y_coords"
     FLOAT_FORMATTING_PRECISION = 4
     MULTIPROCESSING_LOCK = Lock()
 
@@ -254,33 +261,50 @@ class GandlfLightningModule(pl.LightningModule):
         return output, attention_map
 
     def on_train_start(self):
-        self._print_initialization_info()
+        self._print_training_initialization_info()
         self._set_training_start_time()
         self._print_channels_info()
-        self._try_to_load_previous_best_model()
+        self._try_to_load_model_training_start()
         self._try_to_save_initial_model()
         self._initialize_train_logger()
         self._initialize_training_epoch_containers()
 
-        # TODO check out if the disbled by default medcam is indeed what we
+        # TODO check out if the disabled by default medcam is indeed what we
         # meant - it was taken from original code
         if "medcam" in self.params:
-            self._inject_medcam_module()
-            self.params["medcam_enabled"] = False
+            if self.params["medcam"]:
+                self._inject_medcam_module()
+                self.params["medcam_enabled"] = False
         if "differential_privacy" in self.params:
-            self._initialize_differential_privacy()
+            if self.params["differential_privacy"]:
+                self._initialize_differential_privacy()
 
-    def _try_to_load_previous_best_model(self):
+    def _try_to_load_model_training_start(self):
         """
-        Attempts to load the previous best model from the specified path.
-        If the model is not found, a warning is issued. If the model is found,
-        it is loaded and the training is continued from the last epoch.
-        If an error occurs during loading, a warning is issued and the training
-        is continued from scratch.
+        Attempts to load the model at the start of the training.
         """
-        if os.path.exists(self.model_paths["best"]):
+        if self._try_to_load_model(self.model_paths["best"]):
+            print(f"Previous best model loaded from {self.model_paths['best']}.")
+        elif self._try_to_load_model(self.model_paths["latest"]):
+            print(f"Previous latest model loaded from {self.model_paths['latest']}.")
+        else:
+            print(
+                f"Could not load any previous model, training from scratch.", flush=True
+            )
+
+    def _try_to_load_model(self, load_path: str):
+        """
+        Attempts to load the model from the specified path.
+
+        Args:
+            load_path (str): The path to the model to load.
+
+        Returns:
+            bool: Whether the model was successfully loaded.
+        """
+        if os.path.exists(load_path):
             try:
-                checkpoint_dict = load_model(self.model_paths["best"], self.device)
+                checkpoint_dict = load_model(load_path, self.device)
                 version_check(
                     self.params["version"], version_to_check=checkpoint_dict["version"]
                 )
@@ -288,19 +312,20 @@ class GandlfLightningModule(pl.LightningModule):
                 # params["previous_parameters"] = main_dict.get("parameters", None)
 
                 self.model.load_state_dict(checkpoint_dict["model_state_dict"])
-                self.optimizers().optimizer.load_state_dict(
-                    checkpoint_dict["optimizer_state_dict"]
+                if self.trainer.training:
+                    self.optimizers(False).load_state_dict(
+                        checkpoint_dict["optimizer_state_dict"]
+                    )
+                self.trainer.fit_loop.epoch_progress.current.completed = (
+                    checkpoint_dict["epoch"]
                 )
-                self.current_epoch = checkpoint_dict["epoch"]
                 self.trainer.callback_metrics["val_loss"] = checkpoint_dict["loss"]
+                return True
             except Exception as e:
                 warnings.warn(
-                    f"Previous best model found under path {self.model_paths['best']}, but error occurred during loading: {e}; Continuing training with new model"
+                    f"Model found under path {load_path}, but error occurred during loading: {e}"
                 )
-        else:
-            warnings.warn(
-                f"No previous best model found under the path {self.model_paths['best']}; Training from scratch"
-            )
+        return False
 
     @rank_zero_only
     def _try_to_save_initial_model(self):
@@ -344,16 +369,19 @@ class GandlfLightningModule(pl.LightningModule):
         self.training_start_time = time.time()
 
     @rank_zero_only
-    def _print_initialization_info(self):
+    def _print_training_initialization_info(self):
         """
         Basic info printed at the start of the training.
         """
-        if not (os.environ.get("HOSTNAME") is None):
-            print("Hostname :", os.environ.get("HOSTNAME"), flush=True)
+        self._print_host_info()
         if self.params["verbose"]:
             print("Initializing training at :", get_date_time(), flush=True)
         if self.params["model"]["print_summary"]:
             self._print_model_summary()
+
+    def _print_host_info(self):
+        if os.environ.get("HOSTNAME"):
+            print("Hostname :", os.environ.get("HOSTNAME"), flush=True)
 
     def _print_model_summary(self):
         print_model_summary(
@@ -393,7 +421,7 @@ class GandlfLightningModule(pl.LightningModule):
 
         images = self._prepare_images_batch_from_subject_data(subject)
         labels = self._prepare_labels_batch_from_subject_data(subject)
-        # TODO this is going to block any parallelism, as the spacing is going to unpredicatably change across GPUs
+        # TODO this is going to block any parallelism, as the spacing is going to unpredictably change across GPUs
         self._set_spacing_params_for_subject(subject)
 
         images = self._ensure_proper_images_tensor_dimensions(images)
@@ -568,7 +596,7 @@ class GandlfLightningModule(pl.LightningModule):
             )
         memory_info_string += ",\n"
 
-        # TODO evaluate if this indded works properly in distributed setting
+        # TODO evaluate if this indeed works properly in distributed setting
         self.MULTIPROCESSING_LOCK.acquire()
         with open(full_filepath, file_write_mode) as file_mem:
             file_mem.write(memory_info_string)
@@ -770,34 +798,74 @@ class GandlfLightningModule(pl.LightningModule):
         if self.params["verbose"]:
             self._print_currently_processed_subject(subject)
 
-        # TODO this is going to block any parallelism, as the spacing is going to unpredicatably change across GPUs
+        # TODO this is going to block any parallelism, as the spacing is going to unpredictably change across GPUs
         self._set_spacing_params_for_subject(subject)
 
         subject_dict = self._initialize_subject_dict_nontraining_mode(subject)
-
-        if self._problem_type_is_regression or self._problem_type_is_classification:
-            model_output = self._regression_or_classification_nontraining_step(
-                subject_dict, str(subject["subject_id"][0])
+        label_present = subject["label"] != ["NA"]
+        value_keys_present = "value_keys" in self.params
+        label = None
+        if label_present:
+            subject_dict = self._extend_nontraining_subject_dict_with_label(
+                subject, subject_dict
             )
+
+        if (
+            self._problem_type_is_regression
+            or self._problem_type_is_classification
+            and label_present
+        ):
+            model_output = self._get_predictions_on_subject_using_label_sampler(
+                subject_dict
+            )
+
+            if self.params["save_output"]:
+                processed_logit = self._process_prediction_logit_for_row_writing(
+                    model_output, self.params["scaling_factor"]
+                )
+                self.rows_to_write.append(
+                    self._prepare_row_for_output_csv(
+                        subject["subject_id"][0], processed_logit, self.current_epoch
+                    )
+                )
+
             label = self._initialize_nontraining_label_ground_truth_classification_or_regression(
                 subject
             )
         else:
-            model_output = self._segmentation_nontraining_step(subject, subject_dict)
-            label = self._initialize_nontraining_label_ground_truth_segmentation(
-                subject
+            model_output = self._get_predictions_on_subject_using_grid_sampler(
+                subject_dict
             )
+            if self.params["save_output"]:
+                self._save_predictions_for_segmentation_subject(model_output, subject)
 
-        label = self._process_labels(label)
-        model_output, label = self.pred_target_processor(model_output, label)
+            if self._problem_type_is_segmentation and label_present:
+                label = self._initialize_nontraining_label_ground_truth_segmentation(
+                    subject
+                )
+            elif (
+                self._problem_type_is_classification
+                or self._problem_type_is_regression
+                and value_keys_present
+            ):
+                label = self._initialize_nontraining_label_ground_truth_classification_or_regression(
+                    subject
+                )
 
-        loss = self.loss(model_output, label)
-        metric_results = self.metric_calculators(model_output, label)
+        if label is not None:
+            label = self._process_labels(label)
+            model_output, label = self.pred_target_processor(model_output, label)
+            loss = self.loss(model_output, label)
+            metric_results = self.metric_calculators(model_output, label)
 
-        self.val_losses.append(loss)
-        self.validation_metric_values.append(metric_results)
+            self.val_losses.append(loss)
+            self.validation_metric_values.append(metric_results)
 
-        if self._problem_type_is_regression or self._problem_type_is_classification:
+        if (
+            self._problem_type_is_regression
+            or self._problem_type_is_classification
+            and label
+        ):
             model_prediction = (
                 torch.argmax(model_output[0], 0)
                 if self._problem_type_is_classification
@@ -806,10 +874,73 @@ class GandlfLightningModule(pl.LightningModule):
             self.val_predictions.append(model_prediction.item())
             self.val_labels.append(label.item())
 
-        return loss
+    @staticmethod
+    def _prepare_row_for_output_csv(
+        subject_id: str, prediction_logit: float, epoch: int
+    ):
+        """
+        Helper function to prepare the row for the output CSV file.
 
-    def _print_currently_processed_subject(self, subject: torchio.Subject):
-        print("== Current subject:", subject["subject_id"], flush=True)
+        Args:
+            subject_id (str): The subject ID.
+            prediction_logit (float): The prediction logit.
+            epoch (int): The epoch number.
+
+        Returns:
+            row (str): The row to write to the output CSV file.
+        """
+
+        return f"{epoch},{subject_id},{prediction_logit}\n"
+
+    @staticmethod
+    def _prepare_row_for_output_csv_histopathology_inference(
+        subject_name, x_coord, y_coord, output_matrix
+    ):
+        """
+        Helper function to prepare the row for the output CSV file in histopathology inference.
+
+        Args:
+            subject_name (str): The subject name.
+            x_coord (int): The x coordinate.
+            y_coord (int): The y coordinate.
+            output_matrix (np.array) : output matrix of the model, a set of
+        predicted 2D matrices for each class
+
+        Returns:
+            row (str): The row to write to the output CSV file.
+        """
+        base_string = f"{subject_name},{x_coord},{y_coord}"
+        for output_for_class in output_matrix:
+            base_string += f",{output_for_class}"
+        return base_string + "\n"
+
+    @staticmethod
+    def _process_prediction_logit_for_row_writing(
+        prediction_logit: torch.Tensor, scaling_factor: float = 1.0
+    ):
+        """
+        Processes the prediction logits for writing to the output CSV file.
+
+        Args:
+            prediction_logit (torch.Tensor): The prediction logits.
+            scaling_factor (float): The scaling factor modifying the prediction logit.
+            Default is 1 (no scaling).
+
+        Returns:
+            prediction_logit (float): The processed prediction logit.
+        """
+        return prediction_logit.cpu().max().item() / scaling_factor
+
+    def _print_currently_processed_subject(self, subject):
+        if isinstance(subject, torchio.Subject):
+            subject_id = subject["subject_id"]
+        elif isinstance(subject, tuple):
+            # ugly corner histology inference handling, when incoming batch is
+            # a row from dataframe, not a torchio.Subject. This should be solved
+            # via some kind of polymorphism in the future
+            subject_data = subject[1]
+            subject_id = subject_data[self.params["headers"]["subjectIDHeader"]]
+        print("== Current subject:", subject_id, flush=True)
 
     def _initialize_subject_dict_nontraining_mode(self, subject: torchio.Subject):
         """
@@ -823,15 +954,6 @@ class GandlfLightningModule(pl.LightningModule):
             subject_dict (Dict[str, torchio.Image]): The dictionary containing the subject data.
         """
         subject_dict = {}
-        subject_dict["label"] = torchio.LabelMap(
-            path=subject["label"]["path"],
-            tensor=subject["label"]["data"].squeeze(0),
-            affine=subject["label"]["affine"].squeeze(0),
-        )
-
-        if self._problem_type_is_regression or self._problem_type_is_classification:
-            for key in self.params["value_keys"]:
-                subject_dict["value_" + key] = subject[key]
 
         for channel_key in self.params["channel_keys"]:
             subject_dict[channel_key] = torchio.ScalarImage(
@@ -839,6 +961,36 @@ class GandlfLightningModule(pl.LightningModule):
                 tensor=subject[channel_key]["data"].squeeze(0),
                 affine=subject[channel_key]["affine"].squeeze(0),
             )
+        value_keys_present = "value_keys" in self.params
+        if (
+            self._problem_type_is_regression
+            or self._problem_type_is_classification
+            and value_keys_present
+        ):
+            for key in self.params["value_keys"]:
+                subject_dict["value_" + key] = subject[key]
+
+        return subject_dict
+
+    def _extend_nontraining_subject_dict_with_label(
+        self, subject: torchio.Subject, subject_dict: dict
+    ) -> dict:
+        """
+        Extends the subject dictionary with the label data for the non-training mode.
+
+        Args:
+            subject (torchio.Subject): The subject data.
+            subject_dict (dict): The dictionary containing the subject data.
+
+        Returns:
+            subject_dict (dict): The dictionary containing the subject data with the label data.
+        """
+        subject_dict["label"] = torchio.LabelMap(
+            path=subject["label"]["path"],
+            tensor=subject["label"]["data"].squeeze(0),
+            affine=subject["label"]["affine"].squeeze(0),
+        )
+
         return subject_dict
 
     def _initialize_nontraining_label_ground_truth_classification_or_regression(
@@ -871,67 +1023,6 @@ class GandlfLightningModule(pl.LightningModule):
         """
 
         return subject["label"]["data"]
-
-    def _regression_or_classification_nontraining_step(
-        self, subject_dict: dict, subject_id: str
-    ):
-        """
-        Full processing step for regression and classification problems in the non-training mode
-        (validation, testing, inference).
-
-        Args:
-            subject_dict (dict): The dictionary containing the subject data.
-            subject_id (str): The subject ID.
-
-        Returns:
-            prediction_logit (torch.Tensor): The prediction logits.
-        """
-
-        def _prepare_row_for_output_csv(
-            subject_id: str, prediction_logit: float, epoch: int
-        ):
-            """
-            Helper function to prepare the row for the output CSV file.
-
-            Args:
-                subject_id (str): The subject ID.
-                prediction_logit (float): The prediction logit.
-                epoch (int): The epoch number.
-
-            Returns:
-                row (str): The row to write to the output CSV file.
-            """
-
-            return f"{epoch},{subject_id},{prediction_logit}\n"
-
-        def _process_prediction_logit_for_row_writing(
-            prediction_logit: torch.Tensor, scaling_factor: float
-        ):
-            """
-            Processes the prediction logits for writing to the output CSV file.
-
-            Args:
-                prediction_logit (torch.Tensor): The prediction logits.
-                scaling_factor (float): The scaling factor modifying the prediction logit.
-
-            Returns:
-                prediction_logit (float): The processed prediction logit.
-            """
-            return prediction_logit.cpu().max().item() / scaling_factor
-
-        prediction_logit = self._get_predictions_on_subject_using_label_sampler(
-            subject_dict
-        )
-        if self.params["save_output"]:
-            processed_logit = _process_prediction_logit_for_row_writing(
-                prediction_logit, self.params["scaling_factor"]
-            )
-            self.rows_to_write.append(
-                _prepare_row_for_output_csv(
-                    subject_id, processed_logit, self.current_epoch
-                )
-            )
-        return prediction_logit
 
     # TODO this whole logic can be packed into something separate, as it is only used
     # in validation of regression and classification problems
@@ -996,29 +1087,6 @@ class GandlfLightningModule(pl.LightningModule):
         )
         return total_logits_for_all_patches / self.params["q_samples_per_volume"]
 
-    def _segmentation_nontraining_step(
-        self, subject: torchio.Subject, subject_dict: dict
-    ):
-        """
-        Full processing step for segmentation problems in the non-training mode
-        (validation, testing, inference).
-
-        Args:
-            subject_dict (dict): The dictionary containing the subject data.
-
-        Returns:
-            predicted_segmentation_mask (torch.Tensor): The predicted segmentation mask.
-        """
-
-        predicted_segmentation_mask = (
-            self._get_predictions_on_subject_using_grid_sampler(subject_dict)
-        )
-        if self.params["save_output"]:
-            self._save_predictions_for_segmentation_subject(
-                predicted_segmentation_mask, subject
-            )
-        return predicted_segmentation_mask
-
     @rank_zero_only
     def _determine_trainer_stage_string(self):
         """
@@ -1030,8 +1098,7 @@ class GandlfLightningModule(pl.LightningModule):
             return "test"
         elif self.trainer.predicting:
             return "inference"
-        else:
-            return "train"
+        return "train"
 
     def _determine_save_path_to_use(self):
         """
@@ -1042,7 +1109,7 @@ class GandlfLightningModule(pl.LightningModule):
         elif self.trainer.testing:
             return self._current_test_epoch_save_dir
         elif self.trainer.predicting:
-            raise RuntimeError("Not implemented yet")
+            return self._current_inference_save_dir
         else:
             raise RuntimeError("Output save path cannot be determined for training")
 
@@ -1090,6 +1157,9 @@ class GandlfLightningModule(pl.LightningModule):
                     "grid_aggregator_overlap"
                 ],
             )
+        if self._problem_type_is_regression or self._problem_type_is_classification:
+            model_outputs_list: List[torch.Tensor] = []
+
         for patches_batch in patch_loader:
             images_from_patches = self._prepare_images_batch_from_subject_data(
                 patches_batch
@@ -1103,16 +1173,26 @@ class GandlfLightningModule(pl.LightningModule):
                 medcam_attention_map_aggregator.add_batch(
                     attention_map, patches_batch[torchio.LOCATION]  # type: ignore
                 )
-            prediction_aggregator.add_batch(
-                model_output, patches_batch[torchio.LOCATION]
-            )
+            if self._problem_type_is_segmentation:
+                prediction_aggregator.add_batch(
+                    model_output, patches_batch[torchio.LOCATION]
+                )
+            else:
+                model_outputs_list.append(model_output)
+
         if self.params["medcam_enabled"]:
             attention_map = medcam_attention_map_aggregator.get_output_tensor()
             for i, n in enumerate(attention_map):
                 self.model.save_attention_map(
                     n.squeeze(), raw_input=images_from_patches[i].squeeze(-1)
                 )
-        return prediction_aggregator.get_output_tensor().unsqueeze(0)
+
+        if self._problem_type_is_regression or self._problem_type_is_classification:
+            return torch.cat(model_outputs_list).sum(dim=0, keepdim=True) / len(
+                patch_loader
+            )
+
+        return prediction_aggregator.get_output_tensor().unsqueeze(0).to(self.device)
 
     def _prepare_grid_sampler(self, subject_dict: dict):
         """
@@ -1170,8 +1250,6 @@ class GandlfLightningModule(pl.LightningModule):
             torch.mean(torch.stack(self.val_losses)).item()
         )
 
-        self._clear_validation_epoch_containers()
-
         self.val_logger.write(
             self.current_epoch,
             mean_loss,
@@ -1195,7 +1273,11 @@ class GandlfLightningModule(pl.LightningModule):
         if self.params["save_output"] and (
             self._problem_type_is_regression or self._problem_type_is_classification
         ):
-            self._save_predictions_for_regression_or_classification(self.rows_to_write)
+            self._save_predictions_csv_for_regression_or_classification(
+                self.rows_to_write, self._determine_save_path_to_use()
+            )
+
+        self._clear_validation_epoch_containers()
 
     @rank_zero_only
     def _clear_validation_epoch_containers(self):
@@ -1231,8 +1313,8 @@ class GandlfLightningModule(pl.LightningModule):
 
         def _convert_subject_to_sitk_format(subject: torchio.Subject):
             return torchio.ScalarImage(
-                tensor=subject["1"]["data"].squeeze(0),
-                affine=subject["1"]["affine"].squeeze(0),
+                tensor=subject["1"]["data"].squeeze(0).cpu(),
+                affine=subject["1"]["affine"].squeeze(0).cpu(),
             ).as_sitk()
 
         def _postprocess_raw_segmentation_mask(
@@ -1271,7 +1353,7 @@ class GandlfLightningModule(pl.LightningModule):
             else:
                 return segmentation_mask
 
-        predicted_segmentation_mask_numpy = predicted_segmentation_mask.numpy()
+        predicted_segmentation_mask_numpy = predicted_segmentation_mask.cpu().numpy()
         predicted_segmentation_mask_numpy = _postprocess_raw_segmentation_mask(
             predicted_segmentation_mask_numpy, self.params
         )
@@ -1293,14 +1375,14 @@ class GandlfLightningModule(pl.LightningModule):
         if image_save_format in [".jpg", ".jpeg", ".png"]:
             decoded_segmentation_mask = decoded_segmentation_mask.astype(np.uint8)
 
-        subject_converted_to_sikt_format = _convert_subject_to_sitk_format(subject)
-        result_sikt_image = sitk.GetImageFromArray(decoded_segmentation_mask)
-        result_sikt_image.CopyInformation(subject_converted_to_sikt_format)
+        subject_converted_to_sitk_format = _convert_subject_to_sitk_format(subject)
+        result_sitk_image = sitk.GetImageFromArray(decoded_segmentation_mask)
+        result_sitk_image.CopyInformation(subject_converted_to_sitk_format)
 
         if "resample" in self.params["data_preprocessing"]:
-            result_sikt_image = resample_image(
-                result_sikt_image,
-                subject_converted_to_sikt_format.GetSpacing(),
+            result_sitk_image = resample_image(
+                result_sitk_image,
+                subject_converted_to_sitk_format.GetSpacing(),
                 interpolator=sitk.sitkNearestNeighbor,
             )
         segmentation_mask_save_path = os.path.join(
@@ -1309,27 +1391,39 @@ class GandlfLightningModule(pl.LightningModule):
             f"{subject['subject_id'][0]}_seg_process_rank_{self.global_rank}{image_save_format}",
         )
         self._ensure_path_exists(os.path.dirname(segmentation_mask_save_path))
-        sitk.WriteImage(result_sikt_image, segmentation_mask_save_path)
+        sitk.WriteImage(result_sitk_image, segmentation_mask_save_path)
 
     @rank_zero_only
-    def _save_predictions_for_regression_or_classification(
-        self, rows_to_write: List[List[str]]
+    def _save_predictions_csv_for_regression_or_classification(
+        self, rows_to_write: List[str], save_path: str
     ):
         """
         Saves the predictions for regression or classification problems to a CSV file.
 
         Args:
-            rows_to_write (List[List[str]]): The rows to write to the CSV file.
+            rows_to_write (List[str]): The rows to write to the CSV file. Each element of
+        the list is a row.
+            save_path (str): The save path for the CSV file.
         """
 
-        csv_save_path = os.path.join(
-            self._determine_save_path_to_use(), "output_predictions.csv"
-        )
-        file_contents_merged = self.CLASSIFICATION_REGRESSION_RESULTS_HEADER.join(
-            [",".join(row) for row in rows_to_write]
-        )
+        def _determine_header_to_use():
+            if self.trainer.predicting:
+                if self.params["modality"] in ["histo", "path"]:
+                    header = self.CLASSIFICATION_REGRESSION_RESULTS_HEADER_HISTOPATH
+                    if self._problem_type_is_regression:
+                        return header + ",output\n"
+                    elif self._problem_type_is_classification:
+                        for class_num in range(self.params["model"]["num_classes"]):
+                            header += f",probability_{class_num}"
+                        return header + "\n"
+            return self.CLASSIFICATION_REGRESSION_RESULTS_HEADER
+
+        csv_save_path = os.path.join(save_path, "output_predictions.csv")
+        merged_output = _determine_header_to_use()
+        for row in rows_to_write:
+            merged_output += row
         with open(csv_save_path, "w") as file:
-            file.write(file_contents_merged)
+            file.write(merged_output)
 
     # TODO separate it into checking and saving functions, perhaps even separate class
     @rank_zero_only
@@ -1395,30 +1489,62 @@ class GandlfLightningModule(pl.LightningModule):
         self._set_spacing_params_for_subject(subject)
 
         subject_dict = self._initialize_subject_dict_nontraining_mode(subject)
-
-        if self._problem_type_is_regression or self._problem_type_is_classification:
-            model_output = self._regression_or_classification_nontraining_step(
-                subject_dict, subject["subject_id"][0]
+        label_present = subject["label"] != ["NA"]
+        value_keys_present = "value_keys" in self.params
+        label = None
+        if label_present:
+            subject_dict = self._extend_nontraining_subject_dict_with_label(
+                subject, subject_dict
             )
+        if (
+            self._problem_type_is_regression
+            or self._problem_type_is_classification
+            and label_present
+        ):
+            model_output = self._get_predictions_on_subject_using_label_sampler(
+                subject_dict
+            )
+
+            if self.params["save_output"]:
+                processed_logit = self._process_prediction_logit_for_row_writing(
+                    model_output, self.params["scaling_factor"]
+                )
+                self.rows_to_write.append(
+                    self._prepare_row_for_output_csv(
+                        subject["subject_id"][0], processed_logit, self.current_epoch
+                    )
+                )
+
             label = self._initialize_nontraining_label_ground_truth_classification_or_regression(
                 subject
             )
         else:
-            model_output = self._segmentation_nontraining_step(subject, subject_dict)
-            label = self._initialize_nontraining_label_ground_truth_segmentation(
-                subject
+            model_output = self._get_predictions_on_subject_using_grid_sampler(
+                subject_dict
             )
+            if self.params["save_output"]:
+                self._save_predictions_for_segmentation_subject(model_output, subject)
+            if self._problem_type_is_segmentation and label_present:
+                label = self._initialize_nontraining_label_ground_truth_segmentation(
+                    subject
+                )
+            elif (
+                self._problem_type_is_classification
+                or self._problem_type_is_regression
+                and value_keys_present
+            ):
+                label = self._initialize_nontraining_label_ground_truth_classification_or_regression(
+                    subject
+                )
+        if label is not None:
+            label = self._process_labels(label)
+            model_output, label = self.pred_target_processor(model_output, label)
 
-        label = self._process_labels(label)
-        model_output, label = self.pred_target_processor(model_output, label)
+            loss = self.loss(model_output, label)
+            metric_results = self.metric_calculators(model_output, label)
 
-        loss = self.loss(model_output, label)
-        metric_results = self.metric_calculators(model_output, label)
-
-        self.test_losses.append(loss)
-        self.test_metric_values.append(metric_results)
-
-        return loss
+            self.test_losses.append(loss)
+            self.test_metric_values.append(metric_results)
 
     @rank_zero_only
     def on_test_epoch_end(self):
@@ -1433,8 +1559,6 @@ class GandlfLightningModule(pl.LightningModule):
         mean_loss = self._round_value_to_precision(
             torch.mean(torch.stack(self.test_losses)).item()
         )
-
-        self._clear_test_epoch_containers()
 
         self.test_logger.write(
             self.current_epoch,
@@ -1454,12 +1578,367 @@ class GandlfLightningModule(pl.LightningModule):
         if self.params["save_output"] and (
             self._problem_type_is_regression or self._problem_type_is_classification
         ):
-            self._save_predictions_for_regression_or_classification(self.rows_to_write)
+            self._save_predictions_csv_for_regression_or_classification(
+                self.rows_to_write, self._determine_save_path_to_use()
+            )
+        self._clear_test_epoch_containers()
 
     @rank_zero_only
     def _clear_test_epoch_containers(self):
         self.test_losses = []
         self.test_metric_values = []
+
+    def on_predict_start(self):
+        self._initialize_inference_containers()
+        self._try_to_load_model_inference_start()
+
+        if "differential_privacy" in self.params:
+            if self.params["differential_privacy"]:
+                self._initialize_differential_privacy()
+
+    def _try_to_load_model_inference_start(self):
+        if self._try_to_load_model(self.model_paths["best"]):
+            print(f"Previous best model loaded from {self.model_paths['best']}.")
+        elif self._try_to_load_model(self.model_paths["latest"]):
+            print(f"Previous latest model loaded from {self.model_paths['latest']}.")
+        else:
+            raise RuntimeError(
+                "No model found to load. Please train the model before running inference."
+            )
+
+    @rank_zero_only
+    def _initialize_inference_containers(self):
+        self._current_inference_save_dir = os.path.join(
+            self.output_dir, f"output_inference"
+        )  # TODO here we need some mechanism for separate outputs for nested inference
+        self._ensure_path_exists(self._current_inference_save_dir)
+        self.inference_losses = []
+        self.inference_metric_values = []
+        if self._problem_type_is_regression or self._problem_type_is_classification:
+            self.rows_to_write = []
+            self.subject_classification_logits_mapping: Dict[str, torch.Tensor] = {}
+
+    @rank_zero_only
+    def _print_inference_initialization_info(self):
+        print("Current model type : ", self.params["model"]["type"])
+        print("Number of dims     : ", self.params["model"]["dimension"])
+        if "num_channels" in self.params["model"]:
+            print("Number of channels : ", self.params["model"]["num_channels"])
+        print("Number of classes  : ", len(self.params["model"]["class_list"]))
+        self._print_host_info()
+        if self.params["model"]["print_summary"]:
+            self._print_model_summary()
+
+    def predict_step(self, batch, batch_idx):
+        if self.params["verbose"]:
+            self._print_currently_processed_subject(batch)
+        # TODO both of those below should return something - check it
+        if self.params["modality"] == "rad":
+            return self._radiology_inference_step(batch)
+        else:
+            return self._histopathology_inference_step(batch)
+
+    def _radiology_inference_step(self, subject: torchio.Subject):
+        label_present = subject["label"] != ["NA"]
+        subject_dict = self._initialize_subject_dict_nontraining_mode(subject)
+        if label_present:
+            subject_dict = self._extend_nontraining_subject_dict_with_label(
+                subject, subject_dict
+            )
+            if (
+                self._problem_type_is_regression
+                or self._problem_type_is_classification
+                and label_present
+            ):
+                model_output = self._get_predictions_on_subject_using_label_sampler(
+                    subject_dict
+                )
+
+                processed_logit = self._process_prediction_logit_for_row_writing(
+                    model_output, self.params["scaling_factor"]
+                )
+                self.rows_to_write.append(
+                    self._prepare_row_for_output_csv(
+                        subject["subject_id"][0], processed_logit, self.current_epoch
+                    )
+                )
+
+                label = self._initialize_nontraining_label_ground_truth_classification_or_regression(
+                    subject
+                )
+            else:
+                model_output = self._get_predictions_on_subject_using_grid_sampler(
+                    subject_dict
+                )
+                self._save_predictions_for_segmentation_subject(model_output, subject)
+                label = self._initialize_nontraining_label_ground_truth_segmentation(
+                    subject
+                )
+            label = self._process_labels(label)
+            model_output, label = self.pred_target_processor(model_output, label)
+
+            loss = self.loss(model_output, label)
+            metric_results = self.metric_calculators(model_output, label)
+
+            self.inference_losses.append(loss)
+            self.inference_metric_values.append(metric_results)
+        else:
+            model_output = self._get_predictions_on_subject_using_grid_sampler(
+                subject_dict
+            )
+            if self._problem_type_is_classification or self._problem_type_is_regression:
+                processed_logit = self._process_prediction_logit_for_row_writing(
+                    model_output
+                )
+                self.rows_to_write.append(
+                    self._prepare_row_for_output_csv(
+                        subject["subject_id"][0], processed_logit, self.current_epoch
+                    )
+                )
+            else:
+                self._save_predictions_for_segmentation_subject(model_output, subject)
+
+        if self._problem_type_is_classification:
+            self.subject_classification_logits_mapping[
+                subject["subject_id"][0]
+            ] = model_output
+
+    # TODO this has to be somehow handled in different way, we
+    # are mixing too much logic in this single module
+    def _histopathology_inference_step(self, row_index_tuple):
+        """
+        Inference step for the histopathology modality. This function is called with an assumption that the highest
+        level dataloader is an iterator over the rows of the dataframe. The function is called for each row of the
+        dataframe.
+
+        Args:
+            row (pd.Series): The row of the dataframe containing the information about the slide to be processed.
+
+        """
+        row = row_index_tuple[1]
+        subject_name = row[self.params["headers"]["subjectIDHeader"]]
+        inference_results_save_dir_for_subject = os.path.join(
+            self._current_inference_save_dir, "histopathology", str(subject_name)
+        )
+        self._ensure_path_exists(inference_results_save_dir_for_subject)
+        self._prepare_histopath_default_inference_params()
+        openslide_image = openslide.open_slide(
+            row[self.params["headers"]["channelHeaders"]].values[0]
+        )
+        max_defined_slide_level = openslide_image.level_count - 1
+        row_slide_level = min(self.params["slide_level"], max_defined_slide_level)
+        row_slide_level = min(row_slide_level, 0)
+        level_width, level_height = openslide_image.level_dimensions[row_slide_level]
+        patch_size = self._ensure_patch_size_is_2D(self.params["patch_size"])
+        count_map = self._initialize_count_map(level_width, level_height)
+        probabilities_map = self._initialize_probability_map(
+            self.params["model"]["num_classes"], level_width, level_height
+        )
+
+        # TODO this should be done by other object or method
+        transform_requested = get_transforms_for_preprocessing(
+            self.params, [], False, False
+        )
+        patient_dataset = InferTumorSegDataset(
+            row[self.params["headers"]["channelHeaders"]].values[0],
+            patch_size=patch_size,
+            stride_size=self.params["stride_size"],
+            selected_level=row_slide_level,
+            mask_level=self.params["mask_level"],
+            transform=transform_requested,
+        )
+        histopathology_dataloader = torch.utils.data.DataLoader(
+            patient_dataset,
+            batch_size=1,
+            shuffle=False,
+            num_workers=self.params["q_num_workers"],
+        )
+        patch_size_updated_after_transforms = patient_dataset.get_patch_size()
+        if self.params["model"]["print_summary"]:
+            print_model_summary(
+                self.model,
+                self.params["batch_size"],
+                self.params["model"]["num_channels"],
+                patch_size_updated_after_transforms,
+            )
+        count_map, probabilities_map = self._iterate_over_histopathology_loader(
+            histopathology_dataloader,
+            count_map,
+            probabilities_map,
+            patch_size_updated_after_transforms,
+            self.params["model"]["num_classes"],
+            subject_name,
+        )
+
+        map_saver = MapSaver(
+            num_classes=self.params["model"]["num_classes"],
+            slide_level=row_slide_level,
+            blending_alpha=self.params["blending_alpha"],
+            level_height=level_height,
+            level_width=level_width,
+        )
+        map_saver.save_count_map(
+            count_map, save_dir=inference_results_save_dir_for_subject
+        )
+
+        map_saver.save_probability_and_segmentation_maps(
+            probabilities_map,
+            openslide_image,
+            save_dir=inference_results_save_dir_for_subject,
+        )
+        if self._problem_type_is_classification or self._problem_type_is_regression:
+            self._save_predictions_csv_for_regression_or_classification(
+                self.rows_to_write, inference_results_save_dir_for_subject
+            )
+
+    def _iterate_over_histopathology_loader(
+        self,
+        histopathology_dataloader,
+        count_map,
+        probability_map,
+        patch_size,
+        num_classes,
+        subject_name,
+    ):
+        for image_patches, (x_coord, y_coord) in histopathology_dataloader:
+            x_coord, y_coord = (
+                x_coord.numpy(),
+                y_coord.numpy(),
+            )  # TODO the dataset should do that when fetching
+            image_patches = image_patches.to(self.device)
+            output, _ = self.forward(image_patches)
+            output = output.cpu().detach().numpy()
+            for i in range(output.shape[0]):
+                self._increment_value_of_count_map_at_given_position(
+                    count_map, x_coord[i], y_coord[i], patch_size
+                )
+                for class_index in range(num_classes):
+                    self._add_value_to_probability_map_at_given_position(
+                        probability_map,
+                        x_coord[i],
+                        y_coord[i],
+                        patch_size,
+                        output[i][class_index],
+                        class_index,
+                    )
+                if (
+                    self._problem_type_is_regression
+                    or self._problem_type_is_classification
+                ):
+                    row_for_csv_saving = (
+                        self._prepare_row_for_output_csv_histopathology_inference(
+                            subject_name, x_coord[i], y_coord[i], output[i]
+                        )
+                    )
+                    self.rows_to_write.append(row_for_csv_saving)
+        probability_map = np.divide(probability_map, count_map)
+        return count_map, probability_map
+
+    @staticmethod
+    def _increment_value_of_count_map_at_given_position(
+        count_map, x_coord, y_coord, patch_size
+    ):
+        count_map[
+            y_coord : y_coord + patch_size[1], x_coord : x_coord + patch_size[0]
+        ] += 1
+
+    @staticmethod
+    def _add_value_to_probability_map_at_given_position(
+        prob_map, x_coord, y_coord, patch_size, value, class_index
+    ):
+        prob_map[
+            class_index,
+            y_coord : y_coord + patch_size[1],
+            x_coord : x_coord + patch_size[0],
+        ] += value
+
+    # TODO this should be handled by the config parser
+    @rank_zero_only
+    def _prepare_histopath_default_inference_params(self):
+        """
+        Sets the parameters necessary for histopath inference.
+        """
+        self.params["stride_size"] = self.params.get("stride_size", None)
+        self.params["slide_level"] = self.params.get("slide_level", 0)
+        self.params["mask_level"] = self.params.get(
+            "mask_level", self.params["slide_level"]
+        )
+        self.params["blending_alpha"] = float(self.params.get("blending_alpha", 0.5))
+
+    @staticmethod
+    def _initialize_count_map(level_width: int, level_height: int):
+        """
+        Initializes the count maps for the histopathology inference.
+
+        Args:
+            level_width (int): The width of the level.
+            level_height (int): The height of the level.
+
+        Returns:
+            count_map (np.ndarray): The count map.
+        """
+        return np.zeros((level_height, level_width), dtype=np.uint8)
+
+    @staticmethod
+    def _initialize_probability_map(
+        num_classes: int, level_width: int, level_height: int
+    ):
+        """
+        Initializes the probability maps for the histopathology inference.
+        Called for classification and segmentation problems.
+
+        Args:
+            num_classes (int): The number of classes.
+            level_width (int): The width of the level.
+            level_height (int): The height of the level.
+
+        Returns:
+            probs_map (np.ndarray): The probability map.
+        """
+        return np.zeros((num_classes, level_height, level_width), dtype=np.float16)
+
+    @staticmethod
+    def _ensure_patch_size_is_2D(patch_size: List[int]):
+        """
+        Ensures that the patch size is 2D.
+
+        Args:
+            patch_size (List[int]): The patch size.
+
+        Returns:
+            patch_size (List[int]): The 2D patch size.
+        """
+        if len(patch_size) == 3:
+            return patch_size[:-1]
+        return patch_size
+
+    @rank_zero_only
+    def on_predict_end(self):
+        if self.inference_metric_values:
+            inference_epoch_average_metrics = {}
+            metric_names = self.inference_metric_values[0].keys()
+            for metric_name in metric_names:
+                metric_values = [x[metric_name] for x in self.inference_metric_values]
+                inference_epoch_average_metrics[
+                    metric_name
+                ] = self._compute_metric_mean_across_values_from_batches(metric_values)
+
+            mean_loss = self._round_value_to_precision(
+                torch.mean(torch.stack(self.inference_losses)).item()
+            )
+
+            print("Inference results:")
+            print(f"Loss: {mean_loss}")
+            print(f"Metrics: {inference_epoch_average_metrics}")
+
+        self._clear_inference_containers()
+
+    @rank_zero_only
+    def _clear_inference_containers(self):
+        self.inference_losses = []
+        self.inference_metric_values = []
+        if self._problem_type_is_regression or self._problem_type_is_classification:
+            self.rows_to_write = []
 
     def configure_optimizers(self):
         params = deepcopy(self.params)
@@ -1477,9 +1956,11 @@ class GandlfLightningModule(pl.LightningModule):
         A method called by Lightning to transfer the batch to the device.
         In case of GANDLF, we need custom logic to transfer the data to the device.
         """
-        batch = self._move_image_data_to_device(batch, device)
-        batch = self._move_labels_or_values_to_device(batch, device)
-
+        if not (
+            self.trainer.predicting and self.params["modality"] in ["path", "histo"]
+        ):
+            batch = self._move_image_data_to_device(batch, device)
+            batch = self._move_labels_or_values_to_device(batch, device)
         return batch
 
     def _move_image_data_to_device(self, subject, device):
@@ -1493,7 +1974,7 @@ class GandlfLightningModule(pl.LightningModule):
         if "value_keys" in self.params:
             for value_key in self.params["value_keys"]:
                 subject[value_key] = subject[value_key].to(device)
-        else:
+        elif subject["label"] != ["NA"]:
             subject["label"][torchio.DATA] = subject["label"][torchio.DATA].to(device)
 
         return subject
