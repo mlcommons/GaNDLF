@@ -150,7 +150,6 @@ def validate_network(
                 tensor=subject[key]["data"].squeeze(0),
                 affine=subject[key]["affine"].squeeze(0),
             )
-
         # regression/classification problem AND label is present
         if (params["problem_type"] != "segmentation") and label_present:
             sampler = torchio.data.LabelSampler(params["patch_size"])
