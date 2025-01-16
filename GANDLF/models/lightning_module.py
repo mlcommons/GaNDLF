@@ -1704,7 +1704,6 @@ class GandlfLightningModule(pl.LightningModule):
             row (pd.Series): The row of the dataframe containing the information about the slide to be processed.
 
         """
-        # row = row[1].to_list()
         row = row_index_tuple[1]
         subject_name = row[self.params["headers"]["subjectIDHeader"]]
         inference_results_save_dir_for_subject = os.path.join(
@@ -1798,9 +1797,6 @@ class GandlfLightningModule(pl.LightningModule):
             image_patches = image_patches.to(self.device)
             output, _ = self.forward(image_patches)
             output = output.cpu().detach().numpy()
-            self._increment_value_of_count_map_at_given_position(
-                count_map, x_coord, y_coord, self.params["patch_size"]
-            )
             for i in range(output.shape[0]):
                 self._increment_value_of_count_map_at_given_position(
                     count_map, x_coord[i], y_coord[i], patch_size
