@@ -269,7 +269,7 @@ class GandlfLightningModule(pl.LightningModule):
         self._initialize_train_logger()
         self._initialize_training_epoch_containers()
 
-        # TODO check out if the disbled by default medcam is indeed what we
+        # TODO check out if the disabled by default medcam is indeed what we
         # meant - it was taken from original code
         if "medcam" in self.params:
             if self.params["medcam"]:
@@ -421,7 +421,7 @@ class GandlfLightningModule(pl.LightningModule):
 
         images = self._prepare_images_batch_from_subject_data(subject)
         labels = self._prepare_labels_batch_from_subject_data(subject)
-        # TODO this is going to block any parallelism, as the spacing is going to unpredicatably change across GPUs
+        # TODO this is going to block any parallelism, as the spacing is going to unpredictably change across GPUs
         self._set_spacing_params_for_subject(subject)
 
         images = self._ensure_proper_images_tensor_dimensions(images)
@@ -596,7 +596,7 @@ class GandlfLightningModule(pl.LightningModule):
             )
         memory_info_string += ",\n"
 
-        # TODO evaluate if this indded works properly in distributed setting
+        # TODO evaluate if this indeed works properly in distributed setting
         self.MULTIPROCESSING_LOCK.acquire()
         with open(full_filepath, file_write_mode) as file_mem:
             file_mem.write(memory_info_string)
@@ -798,7 +798,7 @@ class GandlfLightningModule(pl.LightningModule):
         if self.params["verbose"]:
             self._print_currently_processed_subject(subject)
 
-        # TODO this is going to block any parallelism, as the spacing is going to unpredicatably change across GPUs
+        # TODO this is going to block any parallelism, as the spacing is going to unpredictably change across GPUs
         self._set_spacing_params_for_subject(subject)
 
         subject_dict = self._initialize_subject_dict_nontraining_mode(subject)
@@ -1375,14 +1375,14 @@ class GandlfLightningModule(pl.LightningModule):
         if image_save_format in [".jpg", ".jpeg", ".png"]:
             decoded_segmentation_mask = decoded_segmentation_mask.astype(np.uint8)
 
-        subject_converted_to_sikt_format = _convert_subject_to_sitk_format(subject)
-        result_sikt_image = sitk.GetImageFromArray(decoded_segmentation_mask)
-        result_sikt_image.CopyInformation(subject_converted_to_sikt_format)
+        subject_converted_to_sitk_format = _convert_subject_to_sitk_format(subject)
+        result_sitk_image = sitk.GetImageFromArray(decoded_segmentation_mask)
+        result_sitk_image.CopyInformation(subject_converted_to_sitk_format)
 
         if "resample" in self.params["data_preprocessing"]:
-            result_sikt_image = resample_image(
-                result_sikt_image,
-                subject_converted_to_sikt_format.GetSpacing(),
+            result_sitk_image = resample_image(
+                result_sitk_image,
+                subject_converted_to_sitk_format.GetSpacing(),
                 interpolator=sitk.sitkNearestNeighbor,
             )
         segmentation_mask_save_path = os.path.join(
@@ -1391,7 +1391,7 @@ class GandlfLightningModule(pl.LightningModule):
             f"{subject['subject_id'][0]}_seg_process_rank_{self.global_rank}{image_save_format}",
         )
         self._ensure_path_exists(os.path.dirname(segmentation_mask_save_path))
-        sitk.WriteImage(result_sikt_image, segmentation_mask_save_path)
+        sitk.WriteImage(result_sitk_image, segmentation_mask_save_path)
 
     @rank_zero_only
     def _save_predictions_csv_for_regression_or_classification(
@@ -1703,7 +1703,7 @@ class GandlfLightningModule(pl.LightningModule):
                 subject["subject_id"][0]
             ] = model_output
 
-    # TODO this has to be somewhow handled in different way, we
+    # TODO this has to be somehow handled in different way, we
     # are mixing too much logic in this single module
     def _histopathology_inference_step(self, row_index_tuple):
         """
