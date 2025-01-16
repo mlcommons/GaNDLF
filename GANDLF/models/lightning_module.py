@@ -272,10 +272,12 @@ class GandlfLightningModule(pl.LightningModule):
         # TODO check out if the disbled by default medcam is indeed what we
         # meant - it was taken from original code
         if "medcam" in self.params:
-            self._inject_medcam_module()
-            self.params["medcam_enabled"] = False
+            if self.params["medcam"]:
+                self._inject_medcam_module()
+                self.params["medcam_enabled"] = False
         if "differential_privacy" in self.params:
-            self._initialize_differential_privacy()
+            if self.params["differential_privacy"]:
+                self._initialize_differential_privacy()
 
     def _try_to_load_model_training_start(self):
         """
@@ -1578,8 +1580,10 @@ class GandlfLightningModule(pl.LightningModule):
     def on_predict_start(self):
         self._initialize_inference_containers()
         self._try_to_load_model_inference_start()
-        if self.params["differential_privacy"]:
-            self._initialize_differential_privacy()  # placeholder
+
+        if "differential_privacy" in self.params:
+            if self.params["differential_privacy"]:
+                self._initialize_differential_privacy()
 
     def _try_to_load_model_inference_start(self):
         if self._try_to_load_model(self.model_paths["best"]):
@@ -1690,7 +1694,7 @@ class GandlfLightningModule(pl.LightningModule):
 
     # TODO this has to be somewhow handled in different way, we
     # are mixing too much logic in this single module
-    def _histopathology_inference_step(self, row: pd.Series):
+    def _histopathology_inference_step(self, row_index_tuple):
         """
         Inference step for the histopathology modality. This function is called with an assumption that the highest
         level dataloader is an iterator over the rows of the dataframe. The function is called for each row of the
@@ -1700,10 +1704,11 @@ class GandlfLightningModule(pl.LightningModule):
             row (pd.Series): The row of the dataframe containing the information about the slide to be processed.
 
         """
-
+        # row = row[1].to_list()
+        row = row_index_tuple[1]
         subject_name = row[self.params["headers"]["subjectIDHeader"]]
         inference_results_save_dir_for_subject = os.path.join(
-            self._current_inference_save_dir, "histopathology", subject_name
+            self._current_inference_save_dir, "histopathology", str(subject_name)
         )
         self._ensure_path_exists(inference_results_save_dir_for_subject)
         self._prepare_histopath_default_inference_params()
