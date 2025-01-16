@@ -765,6 +765,7 @@ def test_port_model_inference_classification_histology_2d(device):
         parameters["patch_size"] = 128
         file_config_temp = write_temp_config_path(parameters)
         parameters = ConfigManager(file_config_temp, version_check_flag=False)
+        os.remove(file_config_temp)
         parameters["model"]["dimension"] = 2
         # read and parse csv
         training_data, parameters["headers"] = parseTrainingCSV(file_for_Training)
@@ -860,6 +861,7 @@ def test_port_model_inference_segmentation_histology_2d():
         parameters["modality"] = "histo"
         parameters["model"]["dimension"] = 2
         parameters["model"]["class_list"] = [0, 255]
+        parameters["penalty_weights"] = [1, 1]
         parameters["model"]["amp"] = True
         parameters["model"]["num_channels"] = 3
         parameters = populate_header_in_parameters(parameters, parameters["headers"])
@@ -912,11 +914,5 @@ def test_port_model_inference_segmentation_histology_2d():
             TEST_DATA_DIRPATH + "/train_2d_histo_segmentation.csv"
         )
         inference_data.drop(index=inference_data.index[-1], axis=0, inplace=True)
-        inference_dataloader = torch.utils.data.DataLoader(
-            ImagesFromDataFrame(
-                inference_data, parameters, train=False, loader_type="testing"
-            ),
-            batch_size=parameters["batch_size"],
-            shuffle=False,
-        )
-        trainer.predict(module, inference_dataloader)
+
+        trainer.predict(module, inference_data.iterrows())

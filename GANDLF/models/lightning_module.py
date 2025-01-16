@@ -931,8 +931,16 @@ class GandlfLightningModule(pl.LightningModule):
         """
         return prediction_logit.cpu().max().item() / scaling_factor
 
-    def _print_currently_processed_subject(self, subject: torchio.Subject):
-        print("== Current subject:", subject["subject_id"], flush=True)
+    def _print_currently_processed_subject(self, subject):
+        if isinstance(subject, torchio.Subject):
+            subject_id = subject["subject_id"]
+        elif isinstance(subject, tuple):
+            # ugly corner histology inference handling, when incoming batch is
+            # a row from dataframe, not a torchio.Subject. This should be solved
+            # via some kind of polymorphism in the future
+            subject_data = subject[1]
+            subject_id = subject_data[self.params["headers"]["subjectIDHeader"]]
+        print("== Current subject:", subject_id, flush=True)
 
     def _initialize_subject_dict_nontraining_mode(self, subject: torchio.Subject):
         """
@@ -1753,7 +1761,7 @@ class GandlfLightningModule(pl.LightningModule):
                 self.params["model"]["num_channels"],
                 patch_size_updated_after_transforms,
             )
-        count_map, probabilities_map = self._iterate_over_hisopathology_loader(
+        count_map, probabilities_map = self._iterate_over_histopathology_loader(
             histopathology_dataloader,
             count_map,
             probabilities_map,
@@ -1783,7 +1791,7 @@ class GandlfLightningModule(pl.LightningModule):
                 self.rows_to_write, inference_results_save_dir_for_subject
             )
 
-    def _iterate_over_hisopathology_loader(
+    def _iterate_over_histopathology_loader(
         self,
         histopathology_dataloader,
         count_map,
