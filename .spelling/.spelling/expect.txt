@@ -730,6 +730,5 @@ autograd
 cudagraph
 kwonly
 torchscript
-Stdnet
 angi
 progbar
