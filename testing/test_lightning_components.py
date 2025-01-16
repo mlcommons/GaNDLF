@@ -777,6 +777,7 @@ def test_port_model_inference_classification_histology_2d(device):
         parameters["nested_training"]["validation"] = -2
         parameters["model"]["print_summary"] = False
         parameters["model"]["onnx_export"] = False
+        parameters["differential_privacy"] = False
         modelDir = os.path.join(TEST_DATA_OUTPUT_DIRPATH, "modelDir")
         if os.path.isdir(modelDir):
             shutil.rmtree(modelDir)
@@ -818,4 +819,104 @@ def test_port_model_inference_classification_histology_2d(device):
         trainer.fit(module, train_dataloader, val_dataloader)
         trainer.test(module, test_dataloader)
 
-        trainer.predict(module, test_dataloader)
+        inference_data, parameters["headers"] = parseTrainingCSV(
+            TEST_DATA_DIRPATH + "/train_2d_histo_classification.csv", train=False
+        )
+        trainer.predict(module, inference_data.iterrows())
+
+
+def test_port_model_inference_segmentation_histology_2d():
+    with TrainerTestsContextManager():
+        output_dir_patches = os.path.join(TEST_DATA_OUTPUT_DIRPATH, "histo_patches")
+        if os.path.isdir(output_dir_patches):
+            shutil.rmtree(output_dir_patches)
+        Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
+        output_dir_patches_output = os.path.join(
+            output_dir_patches, "histo_patches_output"
+        )
+        Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
+
+        parameters_patch = {}
+        # extracting minimal number of patches to ensure that the test does not take too long
+        parameters_patch["num_patches"] = 10
+        parameters_patch["read_type"] = "sequential"
+        # define patches to be extracted in terms of microns
+        parameters_patch["patch_size"] = ["1000m", "1000m"]
+
+        file_config_temp = write_temp_config_path(parameters_patch)
+
+        patch_extraction(
+            TEST_DATA_DIRPATH + "/train_2d_histo_segmentation.csv",
+            output_dir_patches_output,
+            file_config_temp,
+        )
+
+        file_for_Training = os.path.join(output_dir_patches_output, "opm_train.csv")
+        parameters = ConfigManager(
+            TESTS_DIRPATH + "/config_segmentation.yaml", version_check_flag=False
+        )
+        training_data, parameters["headers"] = parseTrainingCSV(file_for_Training)
+        parameters["patch_size"] = PATCH_SIZE["2D"]
+        parameters["modality"] = "histo"
+        parameters["model"]["dimension"] = 2
+        parameters["model"]["class_list"] = [0, 255]
+        parameters["model"]["amp"] = True
+        parameters["model"]["num_channels"] = 3
+        parameters = populate_header_in_parameters(parameters, parameters["headers"])
+        parameters["model"]["architecture"] = "resunet"
+        parameters["nested_training"]["testing"] = 1
+        parameters["nested_training"]["validation"] = -2
+        parameters["metrics"] = ["dice"]
+        parameters["model"]["onnx_export"] = True
+        parameters["model"]["print_summary"] = True
+        parameters["data_preprocessing"]["resize_image"] = [128, 128]
+        modelDir = os.path.join(TEST_DATA_OUTPUT_DIRPATH, "modelDir")
+        Path(modelDir).mkdir(parents=True, exist_ok=True)
+        dataset = ImagesFromDataFrame(
+            training_data, parameters, train=True, loader_type="train"
+        )
+        dataset_val = ImagesFromDataFrame(
+            training_data, parameters, train=False, loader_type="validation"
+        )
+        dataset_test = ImagesFromDataFrame(
+            training_data, parameters, train=False, loader_type="test"
+        )
+        train_dataloader = torch.utils.data.DataLoader(
+            dataset, batch_size=parameters["batch_size"], shuffle=True
+        )
+        val_dataloader = torch.utils.data.DataLoader(
+            dataset_val, batch_size=parameters["batch_size"], shuffle=False
+        )
+        test_dataloader = torch.utils.data.DataLoader(
+            dataset_test, batch_size=parameters["batch_size"], shuffle=False
+        )
+
+        parameters = populate_channel_keys_in_params(train_dataloader, parameters)
+        module = GandlfLightningModule(parameters, output_dir=TEST_DATA_OUTPUT_DIRPATH)
+        trainer = pl.Trainer(
+            accelerator="auto",
+            strategy="auto",
+            fast_dev_run=False,
+            devices=1,
+            num_nodes=1,
+            max_epochs=parameters["num_epochs"],
+            sync_batchnorm=False,
+            enable_checkpointing=False,
+            logger=False,
+            num_sanity_val_steps=0,
+        )
+        trainer.fit(module, train_dataloader, val_dataloader)
+        trainer.test(module, test_dataloader)
+
+        inference_data, parameters["headers"] = parseTrainingCSV(
+            TEST_DATA_DIRPATH + "/train_2d_histo_segmentation.csv"
+        )
+        inference_data.drop(index=inference_data.index[-1], axis=0, inplace=True)
+        inference_dataloader = torch.utils.data.DataLoader(
+            ImagesFromDataFrame(
+                inference_data, parameters, train=False, loader_type="testing"
+            ),
+            batch_size=parameters["batch_size"],
+            shuffle=False,
+        )
+        trainer.predict(module, inference_dataloader)

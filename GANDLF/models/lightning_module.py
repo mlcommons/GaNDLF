@@ -894,7 +894,7 @@ class GandlfLightningModule(pl.LightningModule):
 
     @staticmethod
     def _prepare_row_for_output_csv_histopathology_inference(
-        subject_name, x_coord, y_coord, output_for_given_class
+        subject_name, x_coord, y_coord, output_matrix
     ):
         """
         Helper function to prepare the row for the output CSV file in histopathology inference.
@@ -903,13 +903,16 @@ class GandlfLightningModule(pl.LightningModule):
             subject_name (str): The subject name.
             x_coord (int): The x coordinate.
             y_coord (int): The y coordinate.
-            output_for_given_class (float) : output value for given class
+            output_matrix (np.array) : output matrix of the model, a set of
+        predicted 2D matrices for each class
 
         Returns:
             row (str): The row to write to the output CSV file.
         """
-
-        return f"{subject_name},{x_coord},{y_coord}, {output_for_given_class}\n"
+        base_string = f"{subject_name},{x_coord},{y_coord}"
+        for output_for_class in output_matrix:
+            base_string += f",{output_for_class}"
+        return base_string + "\n"
 
     @staticmethod
     def _process_prediction_logit_for_row_writing(
@@ -1397,12 +1400,12 @@ class GandlfLightningModule(pl.LightningModule):
 
         def _determine_header_to_use():
             if self.trainer.predicting:
-                if self.params["modality"] in ["hist", "path"]:
+                if self.params["modality"] in ["histo", "path"]:
                     header = self.CLASSIFICATION_REGRESSION_RESULTS_HEADER_HISTOPATH
                     if self._problem_type_is_regression:
                         return header + ",output\n"
                     elif self._problem_type_is_classification:
-                        for class_num in self.params["model"]["num_classes"]:
+                        for class_num in range(self.params["model"]["num_classes"]):
                             header += f",probability_{class_num}"
                         return header + "\n"
             return self.CLASSIFICATION_REGRESSION_RESULTS_HEADER
@@ -1807,22 +1810,19 @@ class GandlfLightningModule(pl.LightningModule):
                         x_coord[i],
                         y_coord[i],
                         patch_size,
-                        output[i, class_index],
+                        output[i][class_index],
                         class_index,
                     )
-                    if (
-                        self._problem_type_is_regression
-                        or self._problem_type_is_classification
-                    ):
-                        row_for_csv_saving = (
-                            self._prepare_row_for_output_csv_histopathology_inference(
-                                subject_name,
-                                x_coord[i],
-                                y_coord[i],
-                                output[i, class_index],
-                            )
+                if (
+                    self._problem_type_is_regression
+                    or self._problem_type_is_classification
+                ):
+                    row_for_csv_saving = (
+                        self._prepare_row_for_output_csv_histopathology_inference(
+                            subject_name, x_coord[i], y_coord[i], output[i]
                         )
-                        self.rows_to_write.append(row_for_csv_saving)
+                    )
+                    self.rows_to_write.append(row_for_csv_saving)
         probability_map = np.divide(probability_map, count_map)
         return count_map, probability_map
 
