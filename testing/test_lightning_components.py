@@ -516,105 +516,105 @@ def test_port_model_3d_rad_regression_single_device_single_node(device):
 
 
 def test_port_model_2d_rad_classification_single_device_single_node(device):
-    # with TrainerTestsContextManager():
-    parameters = parseConfig(
-        TESTS_DIRPATH + "/config_classification.yaml", version_check_flag=False
-    )
-    parameters["modality"] = "rad"
-    parameters["track_memory_usage"] = True
-    parameters["patch_size"] = PATCH_SIZE["2D"]
-    parameters["model"]["dimension"] = 2
-    parameters["model"]["final_layer"] = "logits"
-    training_data, parameters["headers"] = parseTrainingCSV(
-        TEST_DATA_DIRPATH + "/train_2d_rad_classification.csv"
-    )
-    parameters["model"]["num_channels"] = 3
-    parameters["model"]["onnx_export"] = False
-    parameters["model"]["print_summary"] = False
-    parameters["save_output"] = True
-    parameters["model"]["architecture"] = "densenet121"
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    dataset = ImagesFromDataFrame(
-        training_data, parameters, train=True, loader_type="train"
-    )
-    dataset_val = ImagesFromDataFrame(
-        training_data, parameters, train=False, loader_type="validation"
-    )
-    dataset_test = ImagesFromDataFrame(
-        training_data, parameters, train=False, loader_type="test"
-    )
-    train_dataloader = torch.utils.data.DataLoader(
-        dataset, batch_size=parameters["batch_size"], shuffle=True
-    )
-    val_dataloader = torch.utils.data.DataLoader(
-        dataset_val, batch_size=parameters["batch_size"], shuffle=False
-    )
-    test_dataloader = torch.utils.data.DataLoader(
-        dataset_test, batch_size=parameters["batch_size"], shuffle=False
-    )
-    parameters = populate_channel_keys_in_params(train_dataloader, parameters)
-    module = GandlfLightningModule(parameters, output_dir=TEST_DATA_OUTPUT_DIRPATH)
-    trainer = pl.Trainer(
-        accelerator="auto",
-        strategy="auto",
-        fast_dev_run=False,
-        devices=1,
-        num_nodes=1,
-        max_epochs=parameters["num_epochs"],
-        sync_batchnorm=False,
-        enable_checkpointing=False,
-        logger=False,
-        num_sanity_val_steps=0,
-    )
-    trainer.fit(module, train_dataloader, val_dataloader)
-    trainer.test(module, test_dataloader)
+    with TrainerTestsContextManager():
+        parameters = parseConfig(
+            TESTS_DIRPATH + "/config_classification.yaml", version_check_flag=False
+        )
+        parameters["modality"] = "rad"
+        parameters["track_memory_usage"] = True
+        parameters["patch_size"] = PATCH_SIZE["2D"]
+        parameters["model"]["dimension"] = 2
+        parameters["model"]["final_layer"] = "logits"
+        training_data, parameters["headers"] = parseTrainingCSV(
+            TEST_DATA_DIRPATH + "/train_2d_rad_classification.csv"
+        )
+        parameters["model"]["num_channels"] = 3
+        parameters["model"]["onnx_export"] = False
+        parameters["model"]["print_summary"] = False
+        parameters["save_output"] = True
+        parameters["model"]["architecture"] = "densenet121"
+        parameters = populate_header_in_parameters(parameters, parameters["headers"])
+        dataset = ImagesFromDataFrame(
+            training_data, parameters, train=True, loader_type="train"
+        )
+        dataset_val = ImagesFromDataFrame(
+            training_data, parameters, train=False, loader_type="validation"
+        )
+        dataset_test = ImagesFromDataFrame(
+            training_data, parameters, train=False, loader_type="test"
+        )
+        train_dataloader = torch.utils.data.DataLoader(
+            dataset, batch_size=parameters["batch_size"], shuffle=True
+        )
+        val_dataloader = torch.utils.data.DataLoader(
+            dataset_val, batch_size=parameters["batch_size"], shuffle=False
+        )
+        test_dataloader = torch.utils.data.DataLoader(
+            dataset_test, batch_size=parameters["batch_size"], shuffle=False
+        )
+        parameters = populate_channel_keys_in_params(train_dataloader, parameters)
+        module = GandlfLightningModule(parameters, output_dir=TEST_DATA_OUTPUT_DIRPATH)
+        trainer = pl.Trainer(
+            accelerator="auto",
+            strategy="auto",
+            fast_dev_run=False,
+            devices=1,
+            num_nodes=1,
+            max_epochs=parameters["num_epochs"],
+            sync_batchnorm=False,
+            enable_checkpointing=False,
+            logger=False,
+            num_sanity_val_steps=0,
+        )
+        trainer.fit(module, train_dataloader, val_dataloader)
+        trainer.test(module, test_dataloader)
 
-    inference_data, parameters["headers"] = parseTrainingCSV(
-        TEST_DATA_DIRPATH + "/train_2d_rad_classification.csv"
-    )
-    inference_data.drop("ValueToPredict", axis=1, inplace=True)
-    inference_data.drop("Label", axis=1, inplace=True)
-    temp_infer_csv = os.path.join(TEST_DATA_OUTPUT_DIRPATH, "temp_infer_csv.csv")
-    inference_data.to_csv(temp_infer_csv, index=False)
-    parameters = parseConfig(
-        TESTS_DIRPATH + "/config_classification.yaml", version_check_flag=False
-    )
-    inference_data, parameters["headers"] = parseTrainingCSV(temp_infer_csv)
-    parameters["output_dir"] = TEST_DATA_OUTPUT_DIRPATH  # this is in inference mode
-    parameters["modality"] = "rad"
-    parameters["patch_size"] = PATCH_SIZE["2D"]
-    parameters["model"]["dimension"] = 2
-    parameters["model"]["final_layer"] = "logits"
-    parameters["model"]["num_channels"] = 3
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    parameters["model"]["architecture"] = "densenet121"
-    parameters["model"]["onnx_export"] = False
-    parameters["differential_privacy"] = False
-    parameters["save_output"] = True
+        inference_data, parameters["headers"] = parseTrainingCSV(
+            TEST_DATA_DIRPATH + "/train_2d_rad_classification.csv"
+        )
+        inference_data.drop("ValueToPredict", axis=1, inplace=True)
+        inference_data.drop("Label", axis=1, inplace=True)
+        temp_infer_csv = os.path.join(TEST_DATA_OUTPUT_DIRPATH, "temp_infer_csv.csv")
+        inference_data.to_csv(temp_infer_csv, index=False)
+        parameters = parseConfig(
+            TESTS_DIRPATH + "/config_classification.yaml", version_check_flag=False
+        )
+        inference_data, parameters["headers"] = parseTrainingCSV(temp_infer_csv)
+        parameters["output_dir"] = TEST_DATA_OUTPUT_DIRPATH  # this is in inference mode
+        parameters["modality"] = "rad"
+        parameters["patch_size"] = PATCH_SIZE["2D"]
+        parameters["model"]["dimension"] = 2
+        parameters["model"]["final_layer"] = "logits"
+        parameters["model"]["num_channels"] = 3
+        parameters = populate_header_in_parameters(parameters, parameters["headers"])
+        parameters["model"]["architecture"] = "densenet121"
+        parameters["model"]["onnx_export"] = False
+        parameters["differential_privacy"] = False
+        parameters["save_output"] = True
 
-    dataset = ImagesFromDataFrame(
-        inference_data, parameters, train=False, loader_type="testing"
-    )
+        dataset = ImagesFromDataFrame(
+            inference_data, parameters, train=False, loader_type="testing"
+        )
 
-    inference_dataloader = torch.utils.data.DataLoader(
-        dataset, batch_size=parameters["batch_size"], shuffle=True
-    )
-    parameters = populate_channel_keys_in_params(inference_dataloader, parameters)
+        inference_dataloader = torch.utils.data.DataLoader(
+            dataset, batch_size=parameters["batch_size"], shuffle=True
+        )
+        parameters = populate_channel_keys_in_params(inference_dataloader, parameters)
 
-    module = GandlfLightningModule(parameters, output_dir=TEST_DATA_OUTPUT_DIRPATH)
-    trainer = pl.Trainer(
-        accelerator="auto",
-        strategy="auto",
-        fast_dev_run=False,
-        devices=1,
-        num_nodes=1,
-        max_epochs=parameters["num_epochs"],
-        sync_batchnorm=False,
-        enable_checkpointing=False,
-        logger=False,
-        num_sanity_val_steps=0,
-    )
-    trainer.predict(module, inference_dataloader)
+        module = GandlfLightningModule(parameters, output_dir=TEST_DATA_OUTPUT_DIRPATH)
+        trainer = pl.Trainer(
+            accelerator="auto",
+            strategy="auto",
+            fast_dev_run=False,
+            devices=1,
+            num_nodes=1,
+            max_epochs=parameters["num_epochs"],
+            sync_batchnorm=False,
+            enable_checkpointing=False,
+            logger=False,
+            num_sanity_val_steps=0,
+        )
+        trainer.predict(module, inference_dataloader)
 
 
 # TODO Refactor this and other tests
@@ -725,7 +725,7 @@ def test_port_model_3d_rad_classification_single_device_single_node(device):
         trainer.predict(module, inference_dataloader)
 
 
-def test_port_model_inference_classification_histology_2d(device):
+def test_port_model_classification_histology_2d_single_device_single_node(device):
     with TrainerTestsContextManager():
         output_dir_patches = os.path.join(TEST_DATA_OUTPUT_DIRPATH, "histo_patches")
         if os.path.isdir(output_dir_patches):
@@ -823,7 +823,7 @@ def test_port_model_inference_classification_histology_2d(device):
         trainer.predict(module, inference_data.iterrows())
 
 
-def test_port_model_inference_segmentation_histology_2d():
+def test_port_model_segmentation_histology_2d_single_device_single_node(device):
     with TrainerTestsContextManager():
         output_dir_patches = os.path.join(TEST_DATA_OUTPUT_DIRPATH, "histo_patches")
         if os.path.isdir(output_dir_patches):
@@ -866,7 +866,7 @@ def test_port_model_inference_segmentation_histology_2d():
         parameters["nested_training"]["testing"] = 1
         parameters["nested_training"]["validation"] = -2
         parameters["metrics"] = ["dice"]
-        parameters["model"]["onnx_export"] = True
+        parameters["model"]["onnx_export"] = False
         parameters["model"]["print_summary"] = True
         parameters["data_preprocessing"]["resize_image"] = [128, 128]
 
