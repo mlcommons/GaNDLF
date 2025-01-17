@@ -66,19 +66,17 @@ def get_testing_loader(params):
     Returns:
         torch.utils.data.DataLoader: The testing loader.
     """
-    if params["testing_data"] is None:
-        return None
-    else:
-        queue_from_dataframe = ImagesFromDataFrame(
-            get_dataframe(params["testing_data"]),
-            params,
-            train=False,
-            loader_type="testing",
-        )
-        if not ("channel_keys" in params):
-            params = populate_channel_keys_in_params(queue_from_dataframe, params)
-        return DataLoader(
-            queue_from_dataframe,
-            batch_size=1,
-            pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
-        )
+
+    queue_from_dataframe = ImagesFromDataFrame(
+        get_dataframe(params["testing_data"]),
+        params,
+        train=False,
+        loader_type="testing",
+    )
+    if not ("channel_keys" in params):
+        params = populate_channel_keys_in_params(queue_from_dataframe, params)
+    return DataLoader(
+        queue_from_dataframe,
+        batch_size=1,
+        pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
+    )

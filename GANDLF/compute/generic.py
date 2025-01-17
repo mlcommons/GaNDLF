@@ -2,17 +2,93 @@ from typing import Optional, Tuple
 from pandas.util import hash_pandas_object
 import torch
 from torch.utils.data import DataLoader
-
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from GANDLF.models import get_model
 from GANDLF.schedulers import get_scheduler
 from GANDLF.optimizers import get_optimizer
-from GANDLF.data import get_train_loader, get_validation_loader
+from GANDLF.data import get_train_loader, get_validation_loader, get_testing_loader
 from GANDLF.utils import (
     populate_header_in_parameters,
     parseTrainingCSV,
     send_model_to_device,
     get_class_imbalance_weights,
 )
+
+
+# temporary abstractions to cover lightning port needs
+@dataclass
+class AbstractSubsetDataParser(ABC):
+    """
+    Interface for subset data parsers, needed to separate the dataloader
+    creation logic from creation of other objects.
+    """
+
+    subset_csv_path: str
+    parameters_dict: dict
+
+    @abstractmethod
+    def create_subset_dataloader(self) -> DataLoader:
+        pass
+
+    def get_params_extended_with_subset_data(self) -> dict:
+        """
+        Trick to get around the fact that parameters dict need to be modified
+        during this parsing procedure. This method should be called after
+        create_subset_dataloader(), as this method will populate the parameters
+        dict with the headers from the subset data.
+        """
+        return self.parameters_dict
+
+
+class TrainingSubsetDataParser(AbstractSubsetDataParser):
+    def create_subset_dataloader(self) -> DataLoader:
+        (
+            self.parameters_dict["training_data"],
+            headers_to_populate_train,
+        ) = parseTrainingCSV(self.subset_csv_path, train=True)
+
+        self.parameters_dict = populate_header_in_parameters(
+            self.parameters_dict, headers_to_populate_train
+        )
+
+        (
+            self.parameters_dict["penalty_weights"],
+            self.parameters_dict["sampling_weights"],
+            self.parameters_dict["class_weights"],
+        ) = get_class_imbalance_weights(
+            self.parameters_dict["training_data"], self.parameters_dict
+        )
+
+        print("Penalty weights : ", self.parameters_dict["penalty_weights"])
+        print("Sampling weights: ", self.parameters_dict["sampling_weights"])
+        print("Class weights   : ", self.parameters_dict["class_weights"])
+
+        train_loader = get_train_loader(self.parameters_dict)
+        self.parameters_dict["training_samples_size"] = len(train_loader)
+        self.parameters_dict["training_data_hash"] = hash_pandas_object(
+            self.parameters_dict["training_data"]
+        ).sum()
+
+        return train_loader
+
+
+class ValidationSubsetDataParser(AbstractSubsetDataParser):
+    def create_subset_dataloader(self) -> DataLoader:
+        (self.parameters_dict["validation_data"], _) = parseTrainingCSV(
+            self.subset_csv_path, train=False
+        )
+
+        val_loader = get_validation_loader(self.parameters_dict)
+
+        return val_loader
+
+
+class TestSubsetDataParser(AbstractSubsetDataParser):
+    def create_subset_dataloader(self) -> DataLoader:
+        # hack to cope with the get_testing_loader() function
+        self.parameters_dict["testing_data"] = self.subset_csv_path
+        return get_testing_loader(self.parameters_dict)
 
 
 def create_pytorch_objects(
