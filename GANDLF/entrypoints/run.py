@@ -20,7 +20,6 @@ def _run(
     input_data: str,
     train_flag: bool,
     model_dir: str,
-    device: str,
     reset_flag: bool,
     resume_flag: bool,
     output_path: Optional[str],
@@ -68,7 +67,6 @@ def _run(
         config_file=config,
         model_dir=model_dir,
         train_mode=train_flag,
-        device=device,
         resume=resume_flag,
         reset=reset_flag,
         output_dir=output_path,
@@ -107,21 +105,6 @@ def _run(
     type=click.Path(file_okay=False, dir_okay=True),
     help="Training: Output directory to save intermediate files and model weights; "
     "inference: location of previous training session output",
-)
-@click.option(
-    "--device",
-    "-d",
-    # TODO: Not sure it's worth to restrict this list. What about other devices?
-    #  GaNDLF guarantees to work properly with these two options, but
-    #  other values may be partially working also.
-    #  * GaNDLF code convert `-1` to `cpu` (i.e. it is expected somebody may pass -1)
-    #  * `cuda:0` should work also, isn't it? Just would not be treated as `cuda`
-    #  * Would `mps` work?
-    #  * int values (like `1`) - are they supported? (legacy mode for cuda https://pytorch.org/docs/stable/tensor_attributes.html#torch-device)
-    type=click.Choice(["cuda", "cpu"]),
-    required=True,  # FIXME: either keep default value, or set required flag
-    help="Device to perform requested session on 'cpu' or 'cuda'; "
-    "for cuda, ensure CUDA_VISIBLE_DEVICES env var is set",
 )
 @click.option(
     "--reset",
