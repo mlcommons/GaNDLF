@@ -1,7 +1,9 @@
 import torch
-from GANDLF.losses import get_loss
+from torch.nn import functional as F
 from abc import ABC, abstractmethod
-from typing import List
+
+from GANDLF.losses import get_loss
+from GANDLF.utils import one_hot, reverse_one_hot, get_linear_interpolation_mode
 
 
 class AbstractLossCalculator(ABC):
@@ -50,16 +52,12 @@ class LossCalculatorDeepSupervision(AbstractLossCalculator):
     def __call__(
         self, prediction: torch.Tensor, target: torch.Tensor, *args
     ) -> torch.Tensor:
-        if len(prediction) > 1:
-            loss = torch.tensor(0.0, requires_grad=True)
-            for i in range(len(prediction)):
-                loss += (
-                    self.loss(prediction[i], target[i], self.params)
-                    * self.loss_weights[i]
-                )
-        else:
-            loss = self.loss(prediction, target, self.params)
-
+        loss_values = []
+        for i in range(len(prediction)):
+            loss_values.append(
+                self.loss(prediction[i], target[i], self.params) * self.loss_weights[i]
+            )
+        loss = torch.stack(loss_values).sum()
         return loss
 
 

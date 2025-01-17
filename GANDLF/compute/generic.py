@@ -91,6 +91,12 @@ class TestSubsetDataParser(AbstractSubsetDataParser):
         return get_testing_loader(self.parameters_dict)
 
 
+class InferenceSubsetDataParserRadiology(TestSubsetDataParser):
+    """Simple wrapper for name coherency, functionally this is the same as TestSubsetDataParser"""
+
+    pass
+
+
 def create_pytorch_objects(
     parameters: dict,
     train_csv: Optional[str] = None,

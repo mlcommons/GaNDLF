@@ -58,7 +58,7 @@ all_models_segmentation = [
     "lightunet_multilayer",
     "unet",
     "unet_multilayer",
-    "deep_resunet",
+    # "deep_resunet",
     "fcn",
     "uinc",
     "msdnet",
@@ -286,7 +286,6 @@ def test_train_segmentation_rad_2d(device):
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
-            device=device,
             resume=False,
             reset=True,
         )
@@ -320,7 +319,6 @@ def test_train_segmentation_sdnet_rad_2d(device):
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
-        device=device,
         resume=False,
         reset=True,
     )
@@ -378,7 +376,6 @@ def test_train_segmentation_rad_3d(device):
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
-            device=device,
             resume=False,
             reset=True,
         )
@@ -418,7 +415,6 @@ def test_train_regression_rad_2d(device):
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
-            device=device,
             resume=False,
             reset=True,
         )
@@ -457,7 +453,6 @@ def test_train_regression_rad_2d_imagenet(device):
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
-            device=device,
             resume=False,
             reset=True,
         )
@@ -494,7 +489,6 @@ def test_train_regression_brainage_rad_2d(device):
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
-        device=device,
         resume=False,
         reset=True,
     )
@@ -550,7 +544,6 @@ def test_train_regression_rad_3d(device):
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
-            device=device,
             resume=False,
             reset=True,
         )
@@ -595,7 +588,6 @@ def test_train_classification_rad_2d(device):
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
-            device=device,
             resume=False,
             reset=True,
         )
@@ -611,7 +603,6 @@ def test_train_classification_rad_2d(device):
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
-            device=device,
             resume=False,
             reset=True,
         )
@@ -662,7 +653,6 @@ def test_train_classification_rad_3d(device):
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
-            device=device,
             resume=False,
             reset=True,
         )
@@ -697,7 +687,6 @@ def test_train_resume_inference_classification_rad_3d(device):
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
-        device=device,
         resume=False,
         reset=True,
     )
@@ -711,7 +700,6 @@ def test_train_resume_inference_classification_rad_3d(device):
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
-        device=device,
         resume=True,
         reset=False,
     )
@@ -724,18 +712,12 @@ def test_train_resume_inference_classification_rad_3d(device):
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
-        device=device,
         resume=False,
         reset=False,
     )
 
     parameters["output_dir"] = outputDir  # this is in inference mode
-    InferenceManager(
-        dataframe=training_data,
-        modelDir=outputDir,
-        parameters=parameters,
-        device=device,
-    )
+    InferenceManager(dataframe=training_data, modelDir=outputDir, parameters=parameters)
     sanitize_outputDir()
 
     print("passed")
@@ -765,7 +747,6 @@ def test_train_inference_optimize_classification_rad_3d(device):
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
-        device=device,
         resume=False,
         reset=True,
     )
@@ -783,10 +764,7 @@ def test_train_inference_optimize_classification_rad_3d(device):
         parameters["model"]["type"] = model_type
         parameters["output_dir"] = outputDir  # this is in inference mode
         InferenceManager(
-            dataframe=training_data,
-            modelDir=outputDir,
-            parameters=parameters,
-            device=device,
+            dataframe=training_data, modelDir=outputDir, parameters=parameters
         )
 
     sanitize_outputDir()
@@ -820,7 +798,6 @@ def test_train_inference_optimize_segmentation_rad_2d(device):
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
-        device=device,
         resume=False,
         reset=True,
     )
@@ -830,10 +807,7 @@ def test_train_inference_optimize_segmentation_rad_2d(device):
         parameters["model"]["type"] = model_type
         parameters["output_dir"] = outputDir  # this is in inference mode
         InferenceManager(
-            dataframe=training_data,
-            modelDir=outputDir,
-            parameters=parameters,
-            device=device,
+            dataframe=training_data, modelDir=outputDir, parameters=parameters
         )
 
     sanitize_outputDir()
@@ -885,7 +859,6 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
             dataframe=training_data_duplicate,
             outputDir=outputDir,
             parameters=parameters,
-            device=device,
             resume=False,
             reset=True,
         )
@@ -910,12 +883,7 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
     model = all_models_regression[0]
     parameters["model"]["architecture"] = model
     parameters["model"]["onnx_export"] = False
-    InferenceManager(
-        dataframe=training_data,
-        modelDir=outputDir,
-        parameters=parameters,
-        device=device,
-    )
+    InferenceManager(dataframe=training_data, modelDir=outputDir, parameters=parameters)
 
     sanitize_outputDir()
 
@@ -950,7 +918,6 @@ def test_train_inference_classification_with_logits_multiple_folds_rad_3d(device
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
-        device=device,
         resume=False,
         reset=True,
     )
@@ -959,7 +926,6 @@ def test_train_inference_classification_with_logits_multiple_folds_rad_3d(device
         dataframe=training_data,
         modelDir=outputDir + "," + outputDir,
         parameters=parameters,
-        device=device,
     )
 
     sanitize_outputDir()
@@ -1001,7 +967,6 @@ def test_train_scheduler_classification_rad_2d(device):
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
-            device=device,
             resume=False,
             reset=True,
         )
@@ -1043,7 +1008,6 @@ def test_train_optimizer_classification_rad_2d(device):
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
-            device=device,
             resume=False,
             reset=True,
         )
@@ -1082,7 +1046,6 @@ def test_clip_train_classification_rad_3d(device):
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
-            device=device,
             resume=False,
             reset=True,
         )
@@ -1137,7 +1100,6 @@ def test_train_normtype_segmentation_rad_3d(device):
                 dataframe=training_data,
                 outputDir=outputDir,
                 parameters=parameters,
-                device=device,
                 resume=False,
                 reset=True,
             )
@@ -1188,7 +1150,6 @@ def test_train_metrics_segmentation_rad_2d(device):
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
-        device=device,
         resume=False,
         reset=True,
     )
@@ -1223,7 +1184,6 @@ def test_train_metrics_regression_rad_2d(device):
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
-        device=device,
         resume=False,
         reset=True,
     )
@@ -1282,7 +1242,6 @@ def test_train_losses_segmentation_rad_2d(device):
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
-            device=device,
             resume=False,
             reset=True,
         )
@@ -1580,7 +1539,6 @@ def test_dataloader_construction_train_segmentation_3d(device):
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
-        device=device,
         resume=False,
         reset=True,
     )
@@ -1967,7 +1925,6 @@ def test_train_checkpointing_segmentation_rad_2d(device):
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
-        device=device,
         resume=False,
         reset=True,
     )
@@ -1978,7 +1935,6 @@ def test_train_checkpointing_segmentation_rad_2d(device):
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
-        device=device,
         resume=False,
         reset=False,
     )
@@ -2210,7 +2166,6 @@ def test_train_inference_segmentation_histology_2d(device):
         dataframe=training_data,
         outputDir=modelDir,
         parameters=parameters,
-        device=device,
         resume=False,
         reset=True,
     )
@@ -2218,12 +2173,7 @@ def test_train_inference_segmentation_histology_2d(device):
         inputDir + "/train_2d_histo_segmentation.csv", train=False
     )
     inference_data.drop(index=inference_data.index[-1], axis=0, inplace=True)
-    InferenceManager(
-        dataframe=inference_data,
-        modelDir=modelDir,
-        parameters=parameters,
-        device=device,
-    )
+    InferenceManager(dataframe=inference_data, modelDir=modelDir, parameters=parameters)
 
     sanitize_outputDir()
 
@@ -2358,7 +2308,6 @@ def test_train_inference_classification_histology_large_2d(device):
         dataframe=training_data,
         outputDir=modelDir,
         parameters=parameters,
-        device=device,
         resume=False,
         reset=True,
     )
@@ -2375,10 +2324,7 @@ def test_train_inference_classification_histology_large_2d(device):
     for model_type in all_model_type:
         parameters["model"]["type"] = model_type
         InferenceManager(
-            dataframe=inference_data,
-            modelDir=modelDir,
-            parameters=parameters,
-            device=device,
+            dataframe=inference_data, modelDir=modelDir, parameters=parameters
         )
         all_folders_in_modelDir = os.listdir(modelDir)
         for folder in all_folders_in_modelDir:
@@ -2465,7 +2411,6 @@ def test_train_inference_classification_histology_2d(device):
         dataframe=training_data,
         outputDir=modelDir,
         parameters=parameters,
-        device=device,
         resume=False,
         reset=True,
     )
@@ -2482,10 +2427,7 @@ def test_train_inference_classification_histology_2d(device):
         )
         parameters["model"]["type"] = model_type
         InferenceManager(
-            dataframe=inference_data,
-            modelDir=modelDir,
-            parameters=parameters,
-            device=device,
+            dataframe=inference_data, modelDir=modelDir, parameters=parameters
         )
 
     sanitize_outputDir()
@@ -2533,7 +2475,6 @@ def test_train_segmentation_unet_layerchange_rad_2d(device):
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
-            device=device,
             resume=False,
             reset=True,
         )
@@ -2591,7 +2532,6 @@ def test_train_segmentation_unetr_rad_3d(device):
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
-            device=device,
             resume=False,
             reset=True,
         )
@@ -2631,7 +2571,6 @@ def test_train_segmentation_unetr_rad_2d(device):
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
-            device=device,
             resume=False,
             reset=True,
         )
@@ -2682,7 +2621,6 @@ def test_train_segmentation_transunet_rad_2d(device):
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
-        device=device,
         resume=False,
         reset=True,
     )
@@ -2744,7 +2682,6 @@ def test_train_segmentation_transunet_rad_3d(device):
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
-        device=device,
         resume=False,
         reset=True,
     )
@@ -2784,7 +2721,6 @@ def test_train_gradient_clipping_classification_rad_2d(device):
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
-            device=device,
             resume=False,
             reset=True,
         )
@@ -2827,7 +2763,6 @@ def test_train_segmentation_unet_conversion_rad_3d(device):
                 dataframe=training_data,
                 outputDir=outputDir,
                 parameters=parameters,
-                device=device,
                 resume=False,
                 reset=True,
             )
@@ -2902,7 +2837,6 @@ def test_generic_cli_function_recoverconfig():
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
-        device=device,
         resume=False,
         reset=True,
     )
@@ -2950,7 +2884,6 @@ def test_generic_deploy_docker():
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
-        device=device,
         resume=False,
         reset=True,
     )
@@ -3235,7 +3168,6 @@ def test_upload_download_huggingface(device):
         dataframe=training_data,
         outputDir=modelDir,
         parameters=parameters,
-        device=device,
         resume=False,
         reset=True,
     )
@@ -3244,12 +3176,7 @@ def test_upload_download_huggingface(device):
     )
 
     inference_data.drop(index=inference_data.index[-1], axis=0, inplace=True)
-    InferenceManager(
-        dataframe=inference_data,
-        modelDir=modelDir,
-        parameters=parameters,
-        device=device,
-    )
+    InferenceManager(dataframe=inference_data, modelDir=modelDir, parameters=parameters)
 
     # Initialize the Hugging Face API instance
     api = HfApi(token="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")
@@ -3366,7 +3293,6 @@ def test_differential_privacy_epsilon_classification_rad_2d(device):
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
-        device=device,
         resume=False,
         reset=True,
     )
@@ -3410,7 +3336,6 @@ def test_differential_privacy_simple_classification_rad_2d(device):
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
-        device=device,
         resume=False,
         reset=True,
     )

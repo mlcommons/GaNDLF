@@ -5,15 +5,17 @@ from typing import Optional
 import pandas as pd
 import torch
 import torch.nn.functional as F
-from GANDLF.compute import inference_loop
 from GANDLF.utils import get_unique_timestamp
+from GANDLF.compute.generic import InferenceSubsetDataParserRadiology
+import lightning.pytorch as pl
+from warnings import warn
+from GANDLF.models.lightning_module import GandlfLightningModule
 
 
 def InferenceManager(
     dataframe: pd.DataFrame,
     modelDir: str,
     parameters: dict,
-    device: str,
     outputDir: Optional[str] = None,
 ) -> None:
     """
@@ -27,7 +29,7 @@ def InferenceManager(
         outputDir (Optional[str], optional): The output directory for the inference results. Defaults to None.
     """
     if outputDir is None:
-        outputDir = os.path.join(modelDir, get_unique_timestamp())
+        outputDir = os.path.join(modelDir, get_unique_timestamp(), "output_inference")
         print(
             "Output directory not provided, creating a new directory with a unique timestamp: ",
             outputDir,
@@ -43,6 +45,36 @@ def InferenceManager(
     n_folds = parameters["nested_training"]["validation"]
     modelDir_split = modelDir.split(",") if "," in modelDir else [modelDir]
 
+    # This should be handled by config parser
+    accelerator = parameters.get("accelerator", "auto")
+    allowed_accelerators = ["cpu", "gpu", "auto"]
+    assert (
+        accelerator in allowed_accelerators
+    ), f"Invalid accelerator selected: {accelerator}. Please select from {allowed_accelerators}"
+    strategy = parameters.get("strategy", "auto")
+    allowed_strategies = ["auto", "ddp"]
+    assert (
+        strategy in allowed_strategies
+    ), f"Invalid strategy selected: {strategy}. Please select from {allowed_strategies}"
+    precision = parameters.get("precision", "32")
+    allowed_precisions = [
+        "64",
+        "64-true",
+        "32",
+        "32-true",
+        "16",
+        "16-mixed",
+        "bf16",
+        "bf16-mixed",
+    ]
+    assert (
+        precision in allowed_precisions
+    ), f"Invalid precision selected: {precision}. Please select from {allowed_precisions}"
+
+    warn(
+        f"Using {accelerator} with {strategy} for training. Trainer will use only single accelerator instance. "
+    )
+
     averaged_probs_list = []
     for current_modelDir in modelDir_split:
         fold_dirs = (
@@ -55,7 +87,6 @@ def InferenceManager(
             else [current_modelDir]
         )
 
-        probs_list = []
         is_classification = parameters["problem_type"] == "classification"
         parameters["model"].setdefault("type", "torch")
         class_list = (
@@ -63,27 +94,47 @@ def InferenceManager(
             if is_classification
             else None
         )
-
+        probs_list = None
         for fold_dir in fold_dirs:
-            parameters["current_fold_dir"] = fold_dir
-            inference_loop(
-                inferenceDataFromPickle=dataframe,
-                modelDir=fold_dir,
-                device=device,
-                parameters=parameters,
-                outputDir=outputDir,
+            module = GandlfLightningModule(parameters, output_dir=fold_dir)
+            trainer = pl.Trainer(
+                accelerator="auto",
+                strategy="auto",
+                fast_dev_run=False,
+                devices=1,  # single-device-single-node forced now
+                num_nodes=1,
+                precision=precision,
+                gradient_clip_algorithm=parameters["clip_mode"],
+                gradient_clip_val=parameters["clip_grad"],
+                max_epochs=parameters["num_epochs"],
+                sync_batchnorm=False,
+                enable_checkpointing=False,
+                logger=False,
+                num_sanity_val_steps=0,
             )
+            if parameters["modality"] == "rad":
+                inference_subset_data_parser_radiology = (
+                    InferenceSubsetDataParserRadiology(dataframe, parameters)
+                )
+                dataloader_radiology = (
+                    inference_subset_data_parser_radiology.create_subset_dataloader()
+                )
+                trainer.predict(module, dataloader_radiology)
 
+            elif parameters["modality"] in ["path", "histo"]:
+                # In case for histo we now directly iterate over dataframe
+                # this needs to be abstracted into some dataset class
+                trainer.predict(module, dataframe.iterrows())
             if is_classification:
-                logits_path = os.path.join(fold_dir, "logits.csv")
-                if os.path.isfile(logits_path):
-                    fold_logits = pd.read_csv(logits_path)[class_list].values
-                    fold_logits = torch.from_numpy(fold_logits)
-                    fold_probs = F.softmax(fold_logits, dim=1)
-                    probs_list.append(fold_probs)
+                prob_values_for_all_subjects_in_fold = list(
+                    module.subject_classification_class_probabilies.values()
+                )
+                if prob_values_for_all_subjects_in_fold:
+                    probs_list = torch.stack(
+                        prob_values_for_all_subjects_in_fold, dim=1
+                    )
 
-        if is_classification and probs_list:
-            probs_list = torch.stack(probs_list)
+        if is_classification and probs_list is not None:
             averaged_probs_list.append(torch.mean(probs_list, 0))
 
     # this logic should be changed if we want to do multi-fold inference for histo images
@@ -93,9 +144,9 @@ def InferenceManager(
         )
         averaged_probs_df["SubjectID"] = dataframe.iloc[:, 0]
 
-        averaged_probs_across_models = torch.mean(
-            torch.stack(averaged_probs_list), 0
-        ).numpy()
+        averaged_probs_across_models = (
+            torch.mean(torch.stack(averaged_probs_list), 0).cpu().numpy()
+        )
         averaged_probs_df[class_list] = averaged_probs_across_models
         averaged_probs_df["PredictedClass"] = [
             class_list[idx] for idx in averaged_probs_across_models.argmax(axis=1)

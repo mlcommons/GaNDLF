@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 from abc import ABC, abstractmethod
-from GANDLF.utils.tensor import reverse_one_hot, get_linear_interpolation_mode
+from GANDLF.utils.tensor import reverse_one_hot, get_linear_interpolation_mode, one_hot
 
 from typing import Tuple
 
@@ -31,6 +31,7 @@ class DeepSupervisionPredictionTargetProcessor(AbstractPredictionTargetProcessor
         super().__init__(params)
 
     def __call__(self, prediction: torch.Tensor, target: torch.Tensor, *args):
+        target = one_hot(target, self.params["model"]["class_list"])
         target_resampled = []
         target_prev = target.detach()
         for i, _ in enumerate(prediction):
@@ -44,8 +45,7 @@ class DeepSupervisionPredictionTargetProcessor(AbstractPredictionTargetProcessor
                     mode=get_linear_interpolation_mode(len(expected_shape)),
                     align_corners=False,
                 )
-            else:
-                target_resampled.append(target_prev)
+            target_resampled.append(target_prev)
         return prediction, target_resampled
 
 

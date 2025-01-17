@@ -19,9 +19,15 @@ class AbstractMetricCalculator(ABC):
         else:
             return metric_value.tolist()
 
+    @staticmethod
+    def _inject_kwargs_into_params(params, **kwargs):
+        for key, value in kwargs.items():
+            params[key] = value
+        return params
+
     @abstractmethod
     def __call__(
-        self, prediction: torch.Tensor, target: torch.Tensor, *args
+        self, prediction: torch.Tensor, target: torch.Tensor, **kwargs
     ) -> torch.Tensor:
         pass
 
@@ -30,8 +36,12 @@ class MetricCalculatorSDNet(AbstractMetricCalculator):
     def __init__(self, params):
         super().__init__(params)
 
-    def __call__(self, prediction: torch.Tensor, target: torch.Tensor, *args):
+    def __call__(self, prediction: torch.Tensor, target: torch.Tensor, **kwargs):
+        params = deepcopy(self.params)
+        params = self._inject_kwargs_into_params(params, **kwargs)
+
         metric_results = {}
+
         for metric_name, metric_calculator in self.metrics_calculators.items():
             metric_value = (
                 metric_calculator(prediction, target, self.params).detach().cpu()
@@ -44,7 +54,9 @@ class MetricCalculatorDeepSupervision(AbstractMetricCalculator):
     def __init__(self, params):
         super().__init__(params)
 
-    def __call__(self, prediction: torch.Tensor, target: torch.Tensor, *args):
+    def __call__(self, prediction: torch.Tensor, target: torch.Tensor, **kwargs):
+        params = deepcopy(self.params)
+        params = self._inject_kwargs_into_params(params, **kwargs)
         metric_results = {}
 
         for metric_name, metric_calculator in self.metrics_calculators.items():
@@ -63,7 +75,9 @@ class MetricCalculatorSimple(AbstractMetricCalculator):
     def __init__(self, params):
         super().__init__(params)
 
-    def __call__(self, prediction: torch.Tensor, target: torch.Tensor, *args):
+    def __call__(self, prediction: torch.Tensor, target: torch.Tensor, **kwargs):
+        params = deepcopy(self.params)
+        params = self._inject_kwargs_into_params(params, **kwargs)
         metric_results = {}
 
         for metric_name, metric_calculator in self.metrics_calculators.items():

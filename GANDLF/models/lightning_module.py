@@ -1,6 +1,5 @@
 import os
 import sys
-import cv2
 import time
 import psutil
 import torch
@@ -8,9 +7,10 @@ import torchio
 import warnings
 import openslide
 import numpy as np
-import pandas as pd
 import SimpleITK as sitk
 import lightning.pytorch as pl
+import torch.nn.functional as F
+
 
 from medcam import medcam
 from copy import deepcopy
@@ -422,7 +422,7 @@ class GandlfLightningModule(pl.LightningModule):
         images = self._prepare_images_batch_from_subject_data(subject)
         labels = self._prepare_labels_batch_from_subject_data(subject)
         # TODO this is going to block any parallelism, as the spacing is going to unpredictably change across GPUs
-        self._set_spacing_params_for_subject(subject)
+        # self._set_spacing_params_for_subject(subject)
 
         images = self._ensure_proper_images_tensor_dimensions(images)
         labels = self._process_labels(labels)
@@ -431,7 +431,11 @@ class GandlfLightningModule(pl.LightningModule):
         model_output, labels = self.pred_target_processor(model_output, labels)
 
         loss = self.loss(model_output, labels)
-        metric_results = self.metric_calculators(model_output, labels)
+        metric_results = self.metric_calculators(
+            model_output,
+            labels,
+            kwargs={"subject_spacing": subject.get("spacing", None)},
+        )
 
         if self._problem_type_is_regression or self._problem_type_is_classification:
             self.train_labels.append(labels.detach().cpu())
@@ -799,7 +803,7 @@ class GandlfLightningModule(pl.LightningModule):
             self._print_currently_processed_subject(subject)
 
         # TODO this is going to block any parallelism, as the spacing is going to unpredictably change across GPUs
-        self._set_spacing_params_for_subject(subject)
+        # self._set_spacing_params_for_subject(subject)
 
         subject_dict = self._initialize_subject_dict_nontraining_mode(subject)
         label_present = subject["label"] != ["NA"]
@@ -856,7 +860,11 @@ class GandlfLightningModule(pl.LightningModule):
             label = self._process_labels(label)
             model_output, label = self.pred_target_processor(model_output, label)
             loss = self.loss(model_output, label)
-            metric_results = self.metric_calculators(model_output, label)
+            metric_results = self.metric_calculators(
+                model_output,
+                label,
+                kwargs={"subject_spacing": subject.get("spacing", None)},
+            )
 
             self.val_losses.append(loss)
             self.validation_metric_values.append(metric_results)
@@ -1168,6 +1176,7 @@ class GandlfLightningModule(pl.LightningModule):
                 images_from_patches
             )
             model_output, attention_map = self.forward(images_from_patches)
+
             model_output = _ensure_output_shape_compatibility_with_torchio(model_output)
             if self.params["medcam_enabled"]:
                 medcam_attention_map_aggregator.add_batch(
@@ -1486,7 +1495,7 @@ class GandlfLightningModule(pl.LightningModule):
         if self.params["verbose"]:
             self._print_currently_processed_subject(subject)
 
-        self._set_spacing_params_for_subject(subject)
+        # self._set_spacing_params_for_subject(subject)
 
         subject_dict = self._initialize_subject_dict_nontraining_mode(subject)
         label_present = subject["label"] != ["NA"]
@@ -1541,7 +1550,11 @@ class GandlfLightningModule(pl.LightningModule):
             model_output, label = self.pred_target_processor(model_output, label)
 
             loss = self.loss(model_output, label)
-            metric_results = self.metric_calculators(model_output, label)
+            metric_results = self.metric_calculators(
+                model_output,
+                label,
+                kwargs={"subject_spacing": subject.get("spacing", None)},
+            )
 
             self.test_losses.append(loss)
             self.test_metric_values.append(metric_results)
@@ -1616,7 +1629,7 @@ class GandlfLightningModule(pl.LightningModule):
         self.inference_metric_values = []
         if self._problem_type_is_regression or self._problem_type_is_classification:
             self.rows_to_write = []
-            self.subject_classification_logits_mapping: Dict[str, torch.Tensor] = {}
+            self.subject_classification_class_probabilies: Dict[str, torch.Tensor] = {}
 
     @rank_zero_only
     def _print_inference_initialization_info(self):
@@ -1632,7 +1645,9 @@ class GandlfLightningModule(pl.LightningModule):
     def predict_step(self, batch, batch_idx):
         if self.params["verbose"]:
             self._print_currently_processed_subject(batch)
-        # TODO both of those below should return something - check it
+        # TODO both of those below should return values to complete the logic
+        # of calculating metrics for classification case that is currently handled
+        # by saving/reading logits.csv file
         if self.params["modality"] == "rad":
             return self._radiology_inference_step(batch)
         else:
@@ -1678,7 +1693,11 @@ class GandlfLightningModule(pl.LightningModule):
             model_output, label = self.pred_target_processor(model_output, label)
 
             loss = self.loss(model_output, label)
-            metric_results = self.metric_calculators(model_output, label)
+            metric_results = self.metric_calculators(
+                model_output,
+                label,
+                kwargs={"subject_spacing": subject.get("spacing", None)},
+            )
 
             self.inference_losses.append(loss)
             self.inference_metric_values.append(metric_results)
@@ -1699,9 +1718,9 @@ class GandlfLightningModule(pl.LightningModule):
                 self._save_predictions_for_segmentation_subject(model_output, subject)
 
         if self._problem_type_is_classification:
-            self.subject_classification_logits_mapping[
+            self.subject_classification_class_probabilies[
                 subject["subject_id"][0]
-            ] = model_output
+            ] = F.softmax(model_output, dim=1)
 
     # TODO this has to be somehow handled in different way, we
     # are mixing too much logic in this single module

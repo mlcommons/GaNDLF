@@ -3,7 +3,6 @@ import os, pickle, shutil
 from pathlib import Path
 from torch.profiler import profile, ProfilerActivity
 
-from GANDLF.compute import training_loop
 from GANDLF.utils import get_dataframe, split_data
 from GANDLF.compute.generic import (
     TrainingSubsetDataParser,
