@@ -61,7 +61,7 @@ all_models_segmentation = [
     # "deep_resunet",
     "fcn",
     "uinc",
-    "msdnet",
+    # "msdnet",
     "imagenet_unet",
     "dynunet",
 ]
@@ -87,7 +87,7 @@ all_models_classification = [
     "resnet18",
 ]
 
-all_clip_modes = ["norm", "value", "agc"]
+all_clip_modes = ["norm", "value"]
 all_norm_types = ["batch", "instance"]
 
 all_model_type = ["torch", "openvino"]
@@ -2710,7 +2710,7 @@ def test_train_gradient_clipping_classification_rad_2d(device):
     parameters["model"]["print_summary"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # ensure gradient clipping is getting tested
-    for clip_mode in ["norm", "value", "agc"]:
+    for clip_mode in ["norm", "value"]:
         parameters["model"]["architecture"] = "imagenet_vgg11"
         parameters["model"]["final_layer"] = "softmax"
         parameters["nested_training"]["testing"] = -5

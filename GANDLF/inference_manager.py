@@ -4,7 +4,6 @@ from typing import Optional
 
 import pandas as pd
 import torch
-import torch.nn.functional as F
 from GANDLF.utils import get_unique_timestamp
 from GANDLF.compute.generic import InferenceSubsetDataParserRadiology
 import lightning.pytorch as pl

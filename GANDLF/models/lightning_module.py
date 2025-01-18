@@ -430,7 +430,7 @@ class GandlfLightningModule(pl.LightningModule):
         model_output, _ = self.forward(images)
         model_output, labels = self.pred_target_processor(model_output, labels)
 
-        loss = self.loss(model_output, labels)
+        loss = self.loss(model_output, labels, images)
         metric_results = self.metric_calculators(
             model_output, labels, subject_spacing=subject.get("spacing", None)
         )
@@ -817,9 +817,10 @@ class GandlfLightningModule(pl.LightningModule):
             or self._problem_type_is_classification
             and label_present
         ):
-            model_output = self._get_predictions_on_subject_using_label_sampler(
-                subject_dict
-            )
+            (
+                model_output,
+                last_input_batch,
+            ) = self._get_predictions_on_subject_using_label_sampler(subject_dict)
 
             if self.params["save_output"]:
                 processed_logit = self._process_prediction_logit_for_row_writing(
@@ -835,9 +836,11 @@ class GandlfLightningModule(pl.LightningModule):
                 subject
             )
         else:
-            model_output = self._get_predictions_on_subject_using_grid_sampler(
-                subject_dict
-            )
+            (
+                model_output,
+                last_input_batch,
+            ) = self._get_predictions_on_subject_using_grid_sampler(subject_dict)
+
             if self.params["save_output"]:
                 self._save_predictions_for_segmentation_subject(model_output, subject)
 
@@ -857,7 +860,7 @@ class GandlfLightningModule(pl.LightningModule):
         if label is not None:
             label = self._process_labels(label)
             model_output, label = self.pred_target_processor(model_output, label)
-            loss = self.loss(model_output, label)
+            loss = self.loss(model_output, label, last_input_batch)
             metric_results = self.metric_calculators(
                 model_output, label, subject_spacing=subject.get("spacing", None)
             )
@@ -1032,7 +1035,7 @@ class GandlfLightningModule(pl.LightningModule):
     # in validation of regression and classification problems
     def _get_predictions_on_subject_using_label_sampler(
         self, subject_dict: dict
-    ) -> torch.Tensor:
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Make predictions on the subject using the label sampler. Used for regression and classification problems.
 
@@ -1042,6 +1045,9 @@ class GandlfLightningModule(pl.LightningModule):
         Returns:
             total_logits_for_all_patches (torch.Tensor): The total logits for all patches
         extracted from a subject, normalized by the number of samples per volume.
+            last_batch_of_input_images (torch.Tensor): The last batch of input images. Used
+        mostly for special cases like deep_resunet, deep_unet, etc. when it is needed for
+        loss calculation.
         """
 
         def _prepare_images_batch_from_patch_regression_or_classification_with_label_sampler(
@@ -1089,7 +1095,10 @@ class GandlfLightningModule(pl.LightningModule):
         total_logits_for_all_patches = torch.cat(model_outputs_list).sum(
             dim=0, keepdim=True
         )
-        return total_logits_for_all_patches / self.params["q_samples_per_volume"]
+        return (
+            total_logits_for_all_patches / self.params["q_samples_per_volume"],
+            images_from_patches,
+        )
 
     @rank_zero_only
     def _determine_trainer_stage_string(self):
@@ -1117,7 +1126,9 @@ class GandlfLightningModule(pl.LightningModule):
         else:
             raise RuntimeError("Output save path cannot be determined for training")
 
-    def _get_predictions_on_subject_using_grid_sampler(self, subject_dict: dict):
+    def _get_predictions_on_subject_using_grid_sampler(
+        self, subject_dict: dict
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Make predictions on the subject using the grid sampler. This is used in segmentation
         problems in validation and testing and for all problems in inference
@@ -1128,7 +1139,32 @@ class GandlfLightningModule(pl.LightningModule):
 
         Returns:
             aggregated_predictions (torch.Tensor): The predicted segmentation mask.
+            last_batch_of_input_images (torch.Tensor): The last batch of input images. Used
+        mostly for special cases like deep_resunet, deep_unet, etc. when it is needed for
+        loss calculation.
         """
+
+        def _ensure_output_is_tensor_for_special_architectures(
+            model_output: Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]
+        ):
+            """
+            Helper function to ensure that the output is a tensor for special architectures
+            that return a tuple of tensors (SDnet, DeepResunet etc)
+
+            Args:
+                model_output (Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]): The model output.
+            """
+
+            if not isinstance(model_output, torch.Tensor):
+                warnings.warn(
+                    f"Model output is not a Tensor: {type(model_output)}. Say, `deep_resunet` and `deep_unet` may return "
+                    f"list of tensors on different scales instead of just one prediction Tensor. However due to "
+                    f"GaNDLF architecture it is expected that models return only one tensor. For deep_* models "
+                    f"only the biggest scale is processed. Use these models with caution till fix is implemented."
+                )
+                model_output = model_output[0]
+
+            return model_output
 
         def _ensure_output_shape_compatibility_with_torchio(model_output: torch.Tensor):
             """
@@ -1173,6 +1209,9 @@ class GandlfLightningModule(pl.LightningModule):
             )
             model_output, attention_map = self.forward(images_from_patches)
 
+            model_output = _ensure_output_is_tensor_for_special_architectures(
+                model_output
+            )
             model_output = _ensure_output_shape_compatibility_with_torchio(model_output)
             if self.params["medcam_enabled"]:
                 medcam_attention_map_aggregator.add_batch(
@@ -1193,11 +1232,16 @@ class GandlfLightningModule(pl.LightningModule):
                 )
 
         if self._problem_type_is_regression or self._problem_type_is_classification:
-            return torch.cat(model_outputs_list).sum(dim=0, keepdim=True) / len(
-                patch_loader
+            return (
+                torch.cat(model_outputs_list).sum(dim=0, keepdim=True)
+                / len(patch_loader),
+                images_from_patches,
             )
 
-        return prediction_aggregator.get_output_tensor().unsqueeze(0).to(self.device)
+        return (
+            prediction_aggregator.get_output_tensor().unsqueeze(0).to(self.device),
+            images_from_patches,
+        )
 
     def _prepare_grid_sampler(self, subject_dict: dict):
         """
@@ -1491,8 +1535,6 @@ class GandlfLightningModule(pl.LightningModule):
         if self.params["verbose"]:
             self._print_currently_processed_subject(subject)
 
-        # self._set_spacing_params_for_subject(subject)
-
         subject_dict = self._initialize_subject_dict_nontraining_mode(subject)
         label_present = subject["label"] != ["NA"]
         value_keys_present = "value_keys" in self.params
@@ -1506,9 +1548,10 @@ class GandlfLightningModule(pl.LightningModule):
             or self._problem_type_is_classification
             and label_present
         ):
-            model_output = self._get_predictions_on_subject_using_label_sampler(
-                subject_dict
-            )
+            (
+                model_output,
+                last_input_batch,
+            ) = self._get_predictions_on_subject_using_label_sampler(subject_dict)
 
             if self.params["save_output"]:
                 processed_logit = self._process_prediction_logit_for_row_writing(
@@ -1524,9 +1567,10 @@ class GandlfLightningModule(pl.LightningModule):
                 subject
             )
         else:
-            model_output = self._get_predictions_on_subject_using_grid_sampler(
-                subject_dict
-            )
+            (
+                model_output,
+                last_input_batch,
+            ) = self._get_predictions_on_subject_using_grid_sampler(subject_dict)
             if self.params["save_output"]:
                 self._save_predictions_for_segmentation_subject(model_output, subject)
             if self._problem_type_is_segmentation and label_present:
@@ -1545,7 +1589,7 @@ class GandlfLightningModule(pl.LightningModule):
             label = self._process_labels(label)
             model_output, label = self.pred_target_processor(model_output, label)
 
-            loss = self.loss(model_output, label)
+            loss = self.loss(model_output, label, last_input_batch)
             metric_results = self.metric_calculators(
                 model_output, label, subject_spacing=subject.get("spacing", None)
             )
@@ -1659,9 +1703,10 @@ class GandlfLightningModule(pl.LightningModule):
                 or self._problem_type_is_classification
                 and label_present
             ):
-                model_output = self._get_predictions_on_subject_using_label_sampler(
-                    subject_dict
-                )
+                (
+                    model_output,
+                    last_input_batch,
+                ) = self._get_predictions_on_subject_using_label_sampler(subject_dict)
 
                 processed_logit = self._process_prediction_logit_for_row_writing(
                     model_output, self.params["scaling_factor"]
@@ -1676,9 +1721,10 @@ class GandlfLightningModule(pl.LightningModule):
                     subject
                 )
             else:
-                model_output = self._get_predictions_on_subject_using_grid_sampler(
-                    subject_dict
-                )
+                (
+                    model_output,
+                    last_input_batch,
+                ) = self._get_predictions_on_subject_using_grid_sampler(subject_dict)
                 self._save_predictions_for_segmentation_subject(model_output, subject)
                 label = self._initialize_nontraining_label_ground_truth_segmentation(
                     subject
@@ -1686,7 +1732,7 @@ class GandlfLightningModule(pl.LightningModule):
             label = self._process_labels(label)
             model_output, label = self.pred_target_processor(model_output, label)
 
-            loss = self.loss(model_output, label)
+            loss = self.loss(model_output, label, last_input_batch)
             metric_results = self.metric_calculators(
                 model_output, label, subject_spacing=subject.get("spacing", None)
             )
@@ -1694,9 +1740,10 @@ class GandlfLightningModule(pl.LightningModule):
             self.inference_losses.append(loss)
             self.inference_metric_values.append(metric_results)
         else:
-            model_output = self._get_predictions_on_subject_using_grid_sampler(
-                subject_dict
-            )
+            (
+                model_output,
+                last_input_batch,
+            ) = self._get_predictions_on_subject_using_grid_sampler(subject_dict)
             if self._problem_type_is_classification or self._problem_type_is_regression:
                 processed_logit = self._process_prediction_logit_for_row_writing(
                     model_output

@@ -95,7 +95,7 @@ num_epochs: 100
 patience: 50
 # Set the batch size
 batch_size: 1
-# gradient clip : norm, value, agc
+# gradient clip : norm, value
 clip_mode: norm
 # clip_gradient value
 clip_grad: 0.1

@@ -208,7 +208,7 @@ def test_port_metric_calculator_sdnet():
         metric_calculator, MetricCalculatorSDNet
     ), f"Expected instance of {MetricCalculatorSDNet}, got {type(metric_calculator)}"
 
-    dummy_preds = torch.randint(0, 4, (4, 4, 4, 4))
+    dummy_preds = torch.randint(0, 4, (1, 4, 4, 4, 4))
     dummy_target = torch.randint(0, 4, (4, 4, 4, 4))
     metric = metric_calculator(dummy_preds, dummy_target)
     for metric, value in metric.items():

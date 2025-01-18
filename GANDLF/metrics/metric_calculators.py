@@ -43,7 +43,11 @@ class MetricCalculatorSDNet(AbstractMetricCalculator):
         metric_results = {}
 
         for metric_name, metric_calculator in self.metrics_calculators.items():
-            metric_value = metric_calculator(prediction, target, params).detach().cpu()
+            metric_value = (
+                metric_calculator(prediction[0], target.squeeze(-1), params)
+                .detach()
+                .cpu()
+            )
             metric_results[metric_name] = self._process_metric_value(metric_value)
         return metric_results
 
