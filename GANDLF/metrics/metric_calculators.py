@@ -43,9 +43,7 @@ class MetricCalculatorSDNet(AbstractMetricCalculator):
         metric_results = {}
 
         for metric_name, metric_calculator in self.metrics_calculators.items():
-            metric_value = (
-                metric_calculator(prediction, target, self.params).detach().cpu()
-            )
+            metric_value = metric_calculator(prediction, target, params).detach().cpu()
             metric_results[metric_name] = self._process_metric_value(metric_value)
         return metric_results
 
@@ -63,9 +61,7 @@ class MetricCalculatorDeepSupervision(AbstractMetricCalculator):
             metric_results[metric_name] = 0.0
             for i, _ in enumerate(prediction):
                 metric_value = (
-                    metric_calculator(prediction[i], target[i], self.params)
-                    .detach()
-                    .cpu()
+                    metric_calculator(prediction[i], target[i], params).detach().cpu()
                 )
                 metric_results[metric_name] += self._process_metric_value(metric_value)
         return metric_results
@@ -81,9 +77,7 @@ class MetricCalculatorSimple(AbstractMetricCalculator):
         metric_results = {}
 
         for metric_name, metric_calculator in self.metrics_calculators.items():
-            metric_value = (
-                metric_calculator(prediction, target, self.params).detach().cpu()
-            )
+            metric_value = metric_calculator(prediction, target, params).detach().cpu()
             metric_results[metric_name] = self._process_metric_value(metric_value)
         return metric_results
 

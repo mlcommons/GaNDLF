@@ -432,9 +432,7 @@ class GandlfLightningModule(pl.LightningModule):
 
         loss = self.loss(model_output, labels)
         metric_results = self.metric_calculators(
-            model_output,
-            labels,
-            kwargs={"subject_spacing": subject.get("spacing", None)},
+            model_output, labels, subject_spacing=subject.get("spacing", None)
         )
 
         if self._problem_type_is_regression or self._problem_type_is_classification:
@@ -861,9 +859,7 @@ class GandlfLightningModule(pl.LightningModule):
             model_output, label = self.pred_target_processor(model_output, label)
             loss = self.loss(model_output, label)
             metric_results = self.metric_calculators(
-                model_output,
-                label,
-                kwargs={"subject_spacing": subject.get("spacing", None)},
+                model_output, label, subject_spacing=subject.get("spacing", None)
             )
 
             self.val_losses.append(loss)
@@ -1551,9 +1547,7 @@ class GandlfLightningModule(pl.LightningModule):
 
             loss = self.loss(model_output, label)
             metric_results = self.metric_calculators(
-                model_output,
-                label,
-                kwargs={"subject_spacing": subject.get("spacing", None)},
+                model_output, label, subject_spacing=subject.get("spacing", None)
             )
 
             self.test_losses.append(loss)
@@ -1694,9 +1688,7 @@ class GandlfLightningModule(pl.LightningModule):
 
             loss = self.loss(model_output, label)
             metric_results = self.metric_calculators(
-                model_output,
-                label,
-                kwargs={"subject_spacing": subject.get("spacing", None)},
+                model_output, label, subject_spacing=subject.get("spacing", None)
             )
 
             self.inference_losses.append(loss)
