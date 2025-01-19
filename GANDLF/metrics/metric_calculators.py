@@ -2,6 +2,7 @@ import torch
 from copy import deepcopy
 from GANDLF.metrics import get_metrics
 from abc import ABC, abstractmethod
+from typing import Union
 
 
 class AbstractMetricCalculator(ABC):
@@ -13,7 +14,9 @@ class AbstractMetricCalculator(ABC):
     def _initialize_metrics_dict(self):
         self.metrics_calculators = get_metrics(self.params)
 
-    def _process_metric_value(self, metric_value: torch.Tensor):
+    def _process_metric_value(self, metric_value: Union[torch.Tensor, float]):
+        if isinstance(metric_value, float):
+            return metric_value
         if metric_value.dim() == 0:
             return metric_value.item()
         else:
