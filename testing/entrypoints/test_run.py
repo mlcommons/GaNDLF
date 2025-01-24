@@ -58,8 +58,7 @@ test_cases = [
             "reset": True,
             "resume": False,
             "output_dir": None,
-            "profile_":False
-
+            "profile_": False,
         },
     ),
     CliCase(
@@ -82,8 +81,7 @@ test_cases = [
             "reset": False,
             "resume": True,
             "output_dir": None,
-            "profile_":False
-
+            "profile_": False,
         },
     ),
     CliCase(  # inference mode + --output-path
@@ -104,8 +102,7 @@ test_cases = [
             "reset": False,
             "resume": False,
             "output_dir": "output/",
-            "profile_":False
-
+            "profile_": False,
         },
     ),
     CliCase(  # check that `model_dir` can be skipped (used output instead)
@@ -127,8 +124,7 @@ test_cases = [
             "reset": False,
             "resume": False,
             "output_dir": "output/",
-            "profile_":False
-
+            "profile_": False,
         },
     ),
     CliCase(  # check that both output + model cannot be empty simultaneously
@@ -161,8 +157,7 @@ test_cases = [
             "reset": False,
             "resume": False,
             "output_dir": "output/",
-            "profile_":False
-
+            "profile_": False,
         },
     ),
     CliCase(  # reset + resume simultaneously => disabling reset in favor of resume
@@ -182,8 +177,7 @@ test_cases = [
             "reset": False,
             "resume": True,
             "output_dir": "output/",
-            "profile_":False
-
+            "profile_": False,
         },
     ),
     CliCase(  # input data may point to folder with 'data.csv'
@@ -199,8 +193,7 @@ test_cases = [
             "reset": False,
             "resume": False,
             "output_dir": None,
-            "profile_":False
-
+            "profile_": False,
         },
     ),
     CliCase(  # input data may point to comma-separated list of csvs
@@ -216,8 +209,7 @@ test_cases = [
             "reset": False,
             "resume": False,
             "output_dir": None,
-            "profile_":False
-
+            "profile_": False,
         },
     ),
     CliCase(  # output-path may point to non-existent path
@@ -237,8 +229,7 @@ test_cases = [
             "reset": False,
             "resume": False,
             "output_dir": "output_na/",
-            "profile_":False
-
+            "profile_": False,
         },
     ),
     CliCase(
