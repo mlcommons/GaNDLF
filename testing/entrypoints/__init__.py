@@ -234,6 +234,7 @@ def run_test_case(
     old_way: Callable,
     old_script_name: str,
     patched_return_value: Any = None,
+    
 ):
     """
     Given a case (list of CLI lines), check if calling all these cli commands would lead to executing main code function

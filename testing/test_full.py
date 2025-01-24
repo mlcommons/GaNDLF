@@ -3277,7 +3277,6 @@ def test_upload_download_huggingface(device):
     print("passed")
 
 
-
 def test_generic_logging(capsys):
     print("53: Starting test for logging")
     log_file = "testing/gandlf.log"
@@ -3420,8 +3419,7 @@ def test_differential_privacy_simple_classification_rad_2d(device):
     print("passed")
 
 
-
-def test_generic_cli_function_mainrun(device):
+def test_generic_profiling_function_mainrun(device):
     print("56: Starting testing profiling function main_run")
     parameters = ConfigManager(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
@@ -3444,7 +3442,14 @@ def test_generic_cli_function_mainrun(device):
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
 
     main_run(
-        file_data, file_config_temp, outputDir, True, device='cpu', resume=False, reset=True,profile_=True
+        file_data,
+        file_config_temp,
+        outputDir,
+        True,
+        device="cpu",
+        resume=False,
+        reset=True,
+        profile_=True,
     )
     sanitize_outputDir()
 
@@ -3457,10 +3462,10 @@ def test_generic_cli_function_mainrun(device):
         file_config_temp,
         outputDir,
         True,
-        device='cpu',
+        device="cpu",
         resume=False,
         reset=True,
-        profile_=True
+        profile_=True,
     )
 
     with open(file_config_temp, "w") as file:
@@ -3472,11 +3477,10 @@ def test_generic_cli_function_mainrun(device):
         file_config_temp,
         outputDir,
         True,
-        device='cpu',
+        device="cpu",
         resume=True,
         reset=False,
-        profile_=True
-
+        profile_=True,
     )
     sanitize_outputDir()
 
