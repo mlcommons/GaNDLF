@@ -24,7 +24,7 @@ def _run(
     reset_flag: bool,
     resume_flag: bool,
     output_path: Optional[str],
-    profile_: Optional[bool]=False,
+    profile_: Optional[bool] = False,
 ):
     if model_dir is None and output_path:
         model_dir = output_path
@@ -62,8 +62,6 @@ def _run(
     logging.debug(f"{resume_flag=}")
     logging.debug(f"{output_path=}")
     logging.debug(f"{profile_=}")
-
-
 
     main_run(
         data_csv=input_data,
@@ -280,8 +278,6 @@ def old_way():
         version="%(prog)s v{}".format(version) + "\n\n" + copyrightMessage,
         help="Show program's version number and exit.",
     )
-    
-
 
     # This is a dummy argument that exists to trigger MLCube mounting requirements.
     # Do not remove.
