@@ -2327,27 +2327,22 @@ def test_train_inference_classification_histology_large_2d(device):
         InferenceManager(
             dataframe=inference_data, modelDir=modelDir, parameters=parameters
         )
-        all_folders_in_modelDir = os.listdir(modelDir)
-        for folder in all_folders_in_modelDir:
-            output_subject_dir = os.path.join(modelDir, folder)
-            if os.path.isdir(output_subject_dir):
-                # check in the default outputDir that's created - this is based on a unique timestamp
-                if folder != "output_validation":
-                    # if 'predictions.csv' are not found, give error
-                    assert os.path.exists(
-                        os.path.join(
-                            output_subject_dir,
-                            str(input_df["SubjectID"][0]),
-                            "predictions.csv",
-                        )
-                    ), "predictions.csv not found"
+        assumed_output_prediction_file = os.path.join(
+            modelDir,
+            "output_inference",
+            "histopathology",
+            str(input_df["SubjectID"][0]),
+            "output_predictions.csv",
+        )
+        assert os.path.exists(assumed_output_prediction_file), "Prediction file missing"
+
     # ensure previous results are removed
-    # sanitize_outputDir()
+    sanitize_outputDir()
 
     for file in files_to_delete:
         os.remove(file)
 
-    # sanitize_outputDir()
+    sanitize_outputDir()
 
     print("passed")
 
