@@ -270,7 +270,7 @@ def TrainingManager_split(
     module = GandlfLightningModule(parameters, output_dir=outputDir)
     trainer.fit(module, train_loader, val_loader)
 
-    if dataframe_testing:
+    if dataframe_testing is not None:
         test_subset_parser = TestSubsetDataParser(dataframe_testing, parameters)
         test_loader = test_subset_parser.create_subset_dataloader()
         parameters = test_subset_parser.get_params_extended_with_subset_data()
