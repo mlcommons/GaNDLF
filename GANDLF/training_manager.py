@@ -29,6 +29,8 @@ def TrainingManager(
         resume (bool): Whether the previous run will be resumed or not.
         reset (bool): Whether the previous run will be reset or not.
     """
+    if "output_dir" not in parameters:
+        parameters["output_dir"] = outputDir
     if reset:
         shutil.rmtree(outputDir)
         Path(outputDir).mkdir(parents=True, exist_ok=True)
