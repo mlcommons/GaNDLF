@@ -250,11 +250,10 @@ def test_port_model_initialization():
     assert isinstance(
         module.pred_target_processor, AbstractPredictionTargetProcessor
     ), f"Expected instance subclassing {AbstractPredictionTargetProcessor}, got {type(module.pred_target_processor)}"
-    configured_optimizer, configured_scheduler = module.configure_optimizers()
-    # In case of both optimizer and scheduler configured, lightning returns tuple of lists (optimizers, schedulers)
-    # This is why I am checking for the first element of the iterable here
-    configured_optimizer = configured_optimizer[0]
-    configured_scheduler = configured_scheduler[0]
+    optimizer_dict = module.configure_optimizers()
+
+    configured_optimizer = optimizer_dict["optimizer"]
+    configured_scheduler = optimizer_dict["scheduler"]
     assert isinstance(
         configured_optimizer, torch.optim.Optimizer
     ), f"Expected instance subclassing  {torch.optim.Optimizer}, got {type(configured_optimizer)}"

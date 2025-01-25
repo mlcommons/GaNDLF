@@ -16,6 +16,8 @@ from medcam import medcam
 from copy import deepcopy
 from statistics import mean
 from multiprocessing import Lock
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+
 from lightning.pytorch.utilities import rank_zero_only
 
 from GANDLF.logger import Logger
@@ -2006,9 +2008,11 @@ class GandlfLightningModule(pl.LightningModule):
         if "scheduler" in self.params:
             params["optimizer_object"] = optimizer
             scheduler = get_scheduler(params)
-            return [optimizer], [scheduler]
-
-        return optimizer
+            optimizer_dict = {"optimizer": optimizer, "scheduler": scheduler}
+            if isinstance(scheduler, ReduceLROnPlateau):
+                optimizer_dict["monitor"] = "val_loss"
+            return optimizer_dict
+        return {"optimizer": optimizer}
 
     def transfer_batch_to_device(self, batch, device, dataloader_idx):
         """

@@ -935,6 +935,9 @@ def test_train_inference_classification_with_logits_multiple_folds_rad_3d(device
     print("passed")
 
 
+# WARNING - this has nondeterministic behavior - out of 5 runs on GPU, one suceeds
+# and the rest fail. Failure is due to the fact that model tries to calculate predicion
+# on empty label and pred tensor - no idea where it comes from and why it is empty
 def test_train_scheduler_classification_rad_2d(device):
     print("17: Starting 2D Rad segmentation tests for scheduler")
     # read and initialize parameters for specific data dimension
@@ -973,9 +976,9 @@ def test_train_scheduler_classification_rad_2d(device):
             reset=True,
         )
 
-    sanitize_outputDir()
+        sanitize_outputDir()
 
-    print("passed")
+        print("passed")
 
 
 def test_train_optimizer_classification_rad_2d(device):
