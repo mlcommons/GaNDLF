@@ -95,7 +95,6 @@ def InferenceManager(
         )
         probs_list = None
         for fold_dir in fold_dirs:
-            module = GandlfLightningModule(parameters, output_dir=fold_dir)
             trainer = pl.Trainer(
                 accelerator="auto",
                 strategy="auto",
@@ -115,15 +114,17 @@ def InferenceManager(
                 inference_subset_data_parser_radiology = (
                     InferenceSubsetDataParserRadiology(dataframe, parameters)
                 )
-                dataloader_radiology = (
+                dataloader_inference = (
                     inference_subset_data_parser_radiology.create_subset_dataloader()
                 )
-                trainer.predict(module, dataloader_radiology)
 
             elif parameters["modality"] in ["path", "histo"]:
                 # In case for histo we now directly iterate over dataframe
                 # this needs to be abstracted into some dataset class
-                trainer.predict(module, dataframe.iterrows())
+                dataloader_inference = dataframe.iterrows()
+
+            module = GandlfLightningModule(parameters, output_dir=fold_dir)
+            trainer.predict(module, dataloader_inference)
             if is_classification:
                 prob_values_for_all_subjects_in_fold = list(
                     module.subject_classification_class_probabilies.values()
