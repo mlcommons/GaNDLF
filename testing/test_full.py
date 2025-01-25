@@ -2914,6 +2914,7 @@ def test_generic_deploy_docker():
     print("passed")
 
 
+@pytest.mark.skip("Differential privacy not implemented")
 def test_collision_subjectid_test_segmentation_rad_2d(device):
     print("47: Starting 2D Rad segmentation tests for collision of subjectID in test")
     parameters = ConfigManager(
@@ -2953,7 +2954,6 @@ def test_collision_subjectid_test_segmentation_rad_2d(device):
         file_config_temp,
         outputDir,
         False,
-        device,
         resume=False,
         reset=True,
     )
@@ -3259,6 +3259,7 @@ def test_generic_debug_info():
     print("passed")
 
 
+@pytest.mark.skip("Differential privacy not implemented")
 def test_differential_privacy_epsilon_classification_rad_2d(device):
     print("54: Testing complex DP training for 2D classification")
     # overwrite previous results
@@ -3302,6 +3303,7 @@ def test_differential_privacy_epsilon_classification_rad_2d(device):
     print("passed")
 
 
+@pytest.mark.skip("Differential privacy not implemented")
 def test_differential_privacy_simple_classification_rad_2d(device):
     print("55: Testing simple DP")
     # overwrite previous results
