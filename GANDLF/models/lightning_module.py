@@ -745,8 +745,9 @@ class GandlfLightningModule(pl.LightningModule):
     def on_train_end(self):
         if os.path.exists(self.model_paths["best"]):
             # Why don't we handle it here with the full save_model function?
+            # TODO Onnx export seems to modify model INPLACE, so when doing cuda
             optimize_and_save_model(
-                self.model, self.params, self.model_paths["best"], onnx_export=True
+                self.model, self.params, self.model_paths["best"], onnx_export=False
             )
         self._print_total_training_time()
 

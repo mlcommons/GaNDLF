@@ -792,7 +792,7 @@ def test_train_inference_optimize_segmentation_rad_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters["metrics"] = ["dice"]
     parameters["model"]["architecture"] = "resunet"
-    parameters["model"]["onnx_export"] = True
+    parameters["model"]["onnx_export"] = torch.cuda.is_available()
     parameters["model"]["print_summary"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
@@ -2155,7 +2155,7 @@ def test_train_inference_segmentation_histology_2d(device):
     parameters["nested_training"]["testing"] = 1
     parameters["nested_training"]["validation"] = -2
     parameters["metrics"] = ["dice"]
-    parameters["model"]["onnx_export"] = True
+    parameters["model"]["onnx_export"] = torch.cuda.is_available()
     parameters["model"]["print_summary"] = True
     parameters["data_preprocessing"]["resize_image"] = [128, 128]
     modelDir = os.path.join(outputDir, "modelDir")
@@ -3157,7 +3157,7 @@ def test_upload_download_huggingface(device):
     parameters["nested_training"]["testing"] = 1
     parameters["nested_training"]["validation"] = -2
     parameters["metrics"] = ["dice"]
-    parameters["model"]["onnx_export"] = True
+    parameters["model"]["onnx_export"] = torch.cuda.is_available()
     parameters["model"]["print_summary"] = True
     parameters["data_preprocessing"]["resize_image"] = [128, 128]
     modelDir = os.path.join(outputDir, "modelDir")
