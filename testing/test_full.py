@@ -2342,12 +2342,12 @@ def test_train_inference_classification_histology_large_2d(device):
                         )
                     ), "predictions.csv not found"
     # ensure previous results are removed
-    sanitize_outputDir()
+    # sanitize_outputDir()
 
     for file in files_to_delete:
         os.remove(file)
 
-    sanitize_outputDir()
+    # sanitize_outputDir()
 
     print("passed")
 

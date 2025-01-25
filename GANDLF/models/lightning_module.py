@@ -795,7 +795,7 @@ class GandlfLightningModule(pl.LightningModule):
             self.model.enable_medcam()
             self.params["medcam_enabled"] = True
         self._current_validation_epoch_save_dir = os.path.join(
-            self.output_dir, f"output_validation", f"epoch_{self.current_epoch}"
+            self.output_dir, "output_validation", f"epoch_{self.current_epoch}"
         )
         self._ensure_path_exists(self._current_validation_epoch_save_dir)
 
@@ -1663,7 +1663,7 @@ class GandlfLightningModule(pl.LightningModule):
     @rank_zero_only
     def _initialize_inference_containers(self):
         self._current_inference_save_dir = os.path.join(
-            self.output_dir, f"output_inference"
+            self.output_dir, "output_inference"
         )  # TODO here we need some mechanism for separate outputs for nested inference
         self._ensure_path_exists(self._current_inference_save_dir)
         self.inference_losses = []
