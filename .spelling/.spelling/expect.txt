@@ -732,3 +732,5 @@ kwonly
 torchscript
 angi
 progbar
+ddp
+HPC

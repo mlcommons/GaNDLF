@@ -127,7 +127,7 @@ def InferenceManager(
             trainer.predict(module, dataloader_inference)
             if is_classification:
                 prob_values_for_all_subjects_in_fold = list(
-                    module.subject_classification_class_probabilies.values()
+                    module.subject_classification_class_probabilities.values()
                 )
                 if prob_values_for_all_subjects_in_fold:
                     probs_list = torch.stack(

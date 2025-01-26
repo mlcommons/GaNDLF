@@ -1670,7 +1670,9 @@ class GandlfLightningModule(pl.LightningModule):
         self.inference_metric_values = []
         if self._problem_type_is_regression or self._problem_type_is_classification:
             self.rows_to_write = []
-            self.subject_classification_class_probabilies: Dict[str, torch.Tensor] = {}
+            self.subject_classification_class_probabilities: Dict[
+                str, torch.Tensor
+            ] = {}
 
     @rank_zero_only
     def _print_inference_initialization_info(self):
@@ -1760,7 +1762,7 @@ class GandlfLightningModule(pl.LightningModule):
                 self._save_predictions_for_segmentation_subject(model_output, subject)
 
         if self._problem_type_is_classification:
-            self.subject_classification_class_probabilies[
+            self.subject_classification_class_probabilities[
                 subject["subject_id"][0]
             ] = F.softmax(model_output, dim=1)
 
