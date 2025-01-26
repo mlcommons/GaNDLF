@@ -270,7 +270,7 @@ class GandlfLightningModule(pl.LightningModule):
         self._try_to_save_initial_model()
         self._initialize_train_logger()
         self._initialize_training_epoch_containers()
-
+        self.params["current_epoch"] = self.current_epoch
         # TODO check out if the disabled by default medcam is indeed what we
         # meant - it was taken from original code
         if "medcam" in self.params:

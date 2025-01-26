@@ -232,11 +232,10 @@ test_cases = [
             "-c config.yaml -i input/ --train  -o output.csv",
             # model should not point to file
             "-c config.yaml -i input/ --train -m model.file ",
-            # device should not support anything other beside cuda/cpu
             "-c config.yaml -i input/ --train -m model/ ",
         ],
         old_way_lines=[
-            # config, input-data, train/infer, device are required
+            # config, input-data, train/infer, are required
             "               -i input/ -t True -m model/ ",
             "-c config.yaml           -t True -m model/ ",
             "-c config.yaml -i input/         -m model/ ",

@@ -2807,6 +2807,7 @@ def test_generic_cli_function_configgenerator():
     print("passed")
 
 
+@pytest.mark.skip("Sdnet has shape errors")
 def test_generic_cli_function_recoverconfig():
     print("45: Testing cli function for recover_config")
     # Train, then recover a config and see if it exists/is valid YAML

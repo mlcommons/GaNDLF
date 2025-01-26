@@ -56,7 +56,6 @@ def _run(
     logging.debug(f"{input_data=}")
     logging.debug(f"{train_flag=}")
     logging.debug(f"{model_dir=}")
-    logging.debug(f"{device=}")
     logging.debug(f"{reset_flag=}")
     logging.debug(f"{resume_flag=}")
     logging.debug(f"{output_path=}")
@@ -143,7 +142,6 @@ def new_way(
     input_data: str,
     train: bool,
     model_dir: str,
-    device: str,
     reset: bool,
     resume: bool,
     output_path: str,
@@ -159,7 +157,6 @@ def new_way(
         input_data=input_data,
         train_flag=train,
         model_dir=model_dir,
-        device=device,
         reset_flag=reset,
         resume_flag=resume,
         output_path=output_path,
@@ -221,15 +218,7 @@ def old_way():
         type=str,
         help="Training: Output directory to save intermediate files and model weights; inference: location of previous training session output",
     )
-    parser.add_argument(
-        "-d",
-        "--device",
-        default="cuda",  # TODO: default value doesn't work as arg is required
-        metavar="",
-        type=str,
-        required=True,
-        help="Device to perform requested session on 'cpu' or 'cuda'; for cuda, ensure CUDA_VISIBLE_DEVICES env var is set",
-    )
+
     parser.add_argument(
         "-rt",
         "--reset",
@@ -276,7 +265,6 @@ def old_way():
         input_data=args.inputdata,
         train_flag=args.train,
         model_dir=args.modeldir,
-        device=args.device,
         reset_flag=args.reset,
         resume_flag=args.resume,
         output_path=args.outputdir,

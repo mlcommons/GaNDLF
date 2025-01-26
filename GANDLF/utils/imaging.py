@@ -231,7 +231,7 @@ def write_training_patches(subject: torchio.Subject, params: dict) -> None:
     ext = get_filename_extension_sanitized(subject["path_to_metadata"][0])
     for key in params["channel_keys"]:
         img_to_write = torchio.ScalarImage(
-            tensor=subject[key][torchio.DATA][0], affine=subject[key]["affine"][0]
+            tensor=subject[key][torchio.DATA][0].cpu(), affine=subject[key]["affine"][0]
         ).as_sitk()
         sitk.WriteImage(
             img_to_write,
@@ -240,7 +240,7 @@ def write_training_patches(subject: torchio.Subject, params: dict) -> None:
 
     if params["label_keys"] is not None:
         img_to_write = torchio.ScalarImage(
-            tensor=subject[params["label_keys"][0]][torchio.DATA][0],
+            tensor=subject[params["label_keys"][0]][torchio.DATA][0].cpu(),
             affine=subject[key]["affine"][0],
         ).as_sitk()
         sitk.WriteImage(
