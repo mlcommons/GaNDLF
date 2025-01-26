@@ -304,3 +304,7 @@ q_samples_per_volume: 5
 q_num_workers: 2 # scale this according to available CPU resources
 # used for debugging
 q_verbose: False
+
+accelerator: "cpu" # options: "cpu", "gpu", "auto", "auto" selects GPU if available
+strategy: "auto" # options: "auto", "ddp", auto will automatically run ddp if multi gpus are available
+precision: 32 # options: 16, 32, 64, "64-true", "32-true", "16-mixed", "bf16", "bf16-mixed"
