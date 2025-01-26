@@ -231,7 +231,6 @@ histopath
 holocron
 hookwrapper
 HOUNSFIELD
-hpc
 hstack
 HTR
 huggingface
@@ -355,7 +354,6 @@ monai
 Mouchtaris
 moveaxis
 mpp
-mps
 mri
 msa
 mscadocs
