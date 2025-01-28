@@ -84,12 +84,12 @@ runs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Set up Python 3.9
+      - name: Set up Python 3.10
         # shell: bash
         if: ${{steps.changed-files.outputs.other_modified_files_count > 0}} # Run on any non-docs change
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: 3.10
 
       - name: Install dependencies and package
         shell: bash
