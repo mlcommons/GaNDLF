@@ -17,7 +17,7 @@ from copy import deepcopy
 from statistics import mean
 from multiprocessing import Lock
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-
+from lightning.pytorch.strategies import DDPStrategy
 from lightning.pytorch.utilities import rank_zero_only
 
 from GANDLF.logger import Logger
@@ -31,6 +31,11 @@ from GANDLF.metrics.metric_calculators import MetricCalculatorFactory
 from GANDLF.data.preprocessing import get_transforms_for_preprocessing
 from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
 from GANDLF.utils.pred_target_processors import PredictionTargetProcessorFactory
+from GANDLF.privacy.opacus.opacus_anonymization_manager import (
+    OpacusAnonymizationManager,
+)
+from GANDLF.privacy.opacus import handle_dynamic_batch_size
+
 
 from GANDLF.utils import (
     optimize_and_save_model,
@@ -273,13 +278,11 @@ class GandlfLightningModule(pl.LightningModule):
         self.params["current_epoch"] = self.current_epoch
         # TODO check out if the disabled by default medcam is indeed what we
         # meant - it was taken from original code
-        if "medcam" in self.params:
-            if self.params["medcam"]:
-                self._inject_medcam_module()
-                self.params["medcam_enabled"] = False
-        if "differential_privacy" in self.params:
-            if self.params["differential_privacy"]:
-                self._initialize_differential_privacy()
+        if self.params.get("medcam"):
+            self._inject_medcam_module()
+            self.params["medcam_enabled"] = False
+        if self.params.get("differential_privacy"):
+            self._initialize_training_differential_privacy()
 
     def _try_to_load_model_training_start(self):
         """
@@ -312,8 +315,16 @@ class GandlfLightningModule(pl.LightningModule):
                 )
                 # I am purposefully omitting the line below, as "previous_parameters" are not used anywhere
                 # params["previous_parameters"] = main_dict.get("parameters", None)
+                state_dict = checkpoint_dict["model_state_dict"]
+                if self.params.get("differential_privacy"):
+                    # this is required for torch==1.11 and for DP inference
+                    new_state_dict = {}
+                    for key, val in state_dict.items():
+                        new_key = key.replace("_module.", "")
+                        new_state_dict[new_key] = val  # remove `module.`
+                    state_dict = new_state_dict
 
-                self.model.load_state_dict(checkpoint_dict["model_state_dict"])
+                self.model.load_state_dict(state_dict)
                 if self.trainer.training:
                     self.optimizers(False).load_state_dict(
                         checkpoint_dict["optimizer_state_dict"]
@@ -423,8 +434,6 @@ class GandlfLightningModule(pl.LightningModule):
 
         images = self._prepare_images_batch_from_subject_data(subject)
         labels = self._prepare_labels_batch_from_subject_data(subject)
-        # TODO this is going to block any parallelism, as the spacing is going to unpredictably change across GPUs
-        # self._set_spacing_params_for_subject(subject)
 
         images = self._ensure_proper_images_tensor_dimensions(images)
         labels = self._process_labels(labels)
@@ -494,9 +503,6 @@ class GandlfLightningModule(pl.LightningModule):
 
         return label
 
-    def _set_spacing_params_for_subject(self, subject):
-        self.params["subject_spacing"] = subject.get("spacing", None)
-
     def _ensure_proper_images_tensor_dimensions(self, images: torch.Tensor):
         """
         Modify the input images by removing the singular depth dimension added
@@ -539,14 +545,32 @@ class GandlfLightningModule(pl.LightningModule):
         return labels
 
     def _handle_dynamic_batch_size_in_differential_privacy_mode(self, subject):
-        raise NotImplementedError(
-            "Differential privacy is not implemented yet in lightning version"
-        )
+        subject, _ = handle_dynamic_batch_size(subject, self.params)
+        return subject
 
-    def _initialize_differential_privacy(self):
-        raise NotImplementedError(
-            "Differential privacy is not implemented yet in lightning version"
+    def _initialize_training_differential_privacy(self):
+        self._check_if_opacus_is_applicable()
+        opacus_manager = OpacusAnonymizationManager(self.params)
+
+        (
+            model,
+            dp_optimizer,
+            train_dataloader,
+            privacy_engine,
+        ) = opacus_manager.apply_privacy(
+            self.model, self.optimizers().optimizer, self.trainer.train_dataloader
         )
+        self.model = model
+        self.trainer.train_dataloader = train_dataloader
+        self.trainer.optimizers = [dp_optimizer]
+        # TODO should we reinit the scheduler too?
+        self._dp_engine = privacy_engine
+
+    def _check_if_opacus_is_applicable(self):
+        if isinstance(self.trainer.strategy, DDPStrategy):
+            raise NotImplementedError(
+                "Differential privacy is not supported with DDP strategy. Please use single GPU."
+            )
 
     def on_train_epoch_start(self):
         self._set_epoch_start_time()
@@ -664,6 +688,7 @@ class GandlfLightningModule(pl.LightningModule):
         if os.path.exists(self.model_paths["latest"]):
             os.remove(self.model_paths["latest"])
         self._save_model(self.current_epoch, self.model_paths["latest"], False)
+
         print(f"Latest model saved")
 
     def _compute_metric_mean_across_values_from_batches(
@@ -802,9 +827,6 @@ class GandlfLightningModule(pl.LightningModule):
     def validation_step(self, subject, batch_idx):
         if self.params["verbose"]:
             self._print_currently_processed_subject(subject)
-
-        # TODO this is going to block any parallelism, as the spacing is going to unpredictably change across GPUs
-        # self._set_spacing_params_for_subject(subject)
 
         subject_dict = self._initialize_subject_dict_nontraining_mode(subject)
         label_present = subject["label"] != ["NA"]
@@ -1328,7 +1350,8 @@ class GandlfLightningModule(pl.LightningModule):
             self._save_predictions_csv_for_regression_or_classification(
                 self.rows_to_write, self._determine_save_path_to_use()
             )
-
+        if self.params.get("differential_privacy"):
+            self._print_differential_privacy_info()
         self._clear_validation_epoch_containers()
 
     @rank_zero_only
@@ -1345,6 +1368,14 @@ class GandlfLightningModule(pl.LightningModule):
     def _ensure_path_exists(self, path):
         if not os.path.exists(path):
             os.makedirs(path)
+
+    @rank_zero_only
+    def _print_differential_privacy_info(self):
+        delta = self.params["differential_privacy"]["delta"]
+        epsilon = self._dp_engine.get_epsilon(delta)
+        print(f"Epoch {self.current_epoch} Privacy: ε = {epsilon:.2f}, δ = {delta}")
+        self.log("epsilon", epsilon, on_epoch=True, prog_bar=True)
+        self.log("delta", delta, on_epoch=True, prog_bar=True)
 
     # TODO called at the validation step, NOT at the end of the epoch - we want to avoid
     # saving all predictions for all subjects for the end of the epoch
@@ -1646,9 +1677,8 @@ class GandlfLightningModule(pl.LightningModule):
         self._initialize_inference_containers()
         self._try_to_load_model_inference_start()
 
-        if "differential_privacy" in self.params:
-            if self.params["differential_privacy"]:
-                self._initialize_differential_privacy()
+        if self.params.get("differential_privacy"):
+            self._initialize_inference_differential_privacy()
 
     def _try_to_load_model_inference_start(self):
         if self._try_to_load_model(self.model_paths["best"]):
