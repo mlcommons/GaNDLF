@@ -235,9 +235,9 @@ You can use the following code snippet to run GaNDLF:
   # -v, --version      Show program's version number and exit.
   -c ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./experiment_0/train.csv \ # data in CSV format 
-  -m ./experiment_0/model_dir/ \ # model directory (i.e., the `model-dir`) where the output of the training will be stored, created if not present
+  -m ./experiment_0/model_dir/ \ # model directory (i.e., the `model-dir`) where the output of the training will be stored, created if not present 
   --train \ # --train/-t or --infer
-  -d cuda # ensure CUDA_VISIBLE_DEVICES env variable is set for GPU device, use 'cpu' for CPU workloads
+  # ensure CUDA_VISIBLE_DEVICES env variable is set when using GPU 
   # -rt , --reset # [optional] completely resets the previous run by deleting `model-dir`
   # -rm , --resume # [optional] resume previous training by only keeping model dict in `model-dir`
 ```
@@ -290,16 +290,20 @@ SubjectID,Target,Prediction,Mask
 ```
 
 
-## Parallelize the Training
+## GPU usage, parallelization and numerical precision
+
+### Using GPU
+By default, GaNDLF will use GPU accelerator if `CUDA_VISIBLE_DEVICES` environment variable is set [ref](https://developer.nvidia.com/blog/cuda-pro-tip-control-gpu-visibility-cuda_visible_devices/). To explicitly configure usage of GPU/CPU, you can set the `accelerator` key in the configuration file to `cuda` or `cpu`. By default, it is set to `auto`, which will use GPU if available, otherwise CPU.
 
 ### Multi-GPU training
 
-GaNDLF enables relatively straightforward multi-GPU training. Simply set the `CUDA_VISIBLE_DEVICES` environment variable to the list of GPUs you want to use, and pass `cuda` as the device to the `gandlf run` command. For example, if you want to use GPUs 0, 1, and 2, you would set `CUDA_VISIBLE_DEVICES=0,1,2` [[ref](https://developer.nvidia.com/blog/cuda-pro-tip-control-gpu-visibility-cuda_visible_devices/)] and pass `-d cuda` to the `gandlf run` command.
+GaNDLF enables relatively straightforward multi-GPU training. Simply set the `CUDA_VISIBLE_DEVICES` environment variable includes the GPU IDs you want to use (see above paragraph for reference about this variable). GaNDLF will automatically distribute the training across the GPUs using Distributed Data Parallel (DDP) strategy. To explicitly set the strategy, set the `strategy` key in the configuration file to `ddp`. By default, it is set to `auto`, which will use DDP if multiple GPUs are available, otherwise single GPU or CPU.
 
-### Distributed training
+### Multi-node training and HPC environments
+In the current release, GaNDLF does not support multi-node training. This feature will be enabled in the upcoming releases.
 
-Distributed training is a more difficult problem to address, since there are multiple ways to configure a high-performance computing cluster (SLURM, OpenHPC, Kubernetes, and so on). Owing to this discrepancy, we have ensured that GaNDLF allows multiple training jobs to be submitted in relatively straightforward manner using the command line inference of each site’s configuration. Simply populate the `parallel_compute_command` in the [configuration](#customize-the-training) with the specific command to run before the training job, and GaNDLF will use this string to submit the training job. 
-
+### Choosing numerical precision
+By default, GaNDLF uses `float32` for training and inference computations. To change the numerical precision, set the `precision` key in the configuration file to one of the values `[16, 32, 64, "64-true", "32-true", "16-mixed", "bf16", "bf16-mixed"]`. Using reduced precision usually results in faster computations and lower memory usage, altought in some cases it may lead to numerical instability - be sure to observe the training process and adjust the precision accordingly. Good rule of thumb is to start in default precision (`32`) and then experiment with lower precisions.
 
 ## Expected Output(s)
 
@@ -380,7 +384,7 @@ If `${architecture_name}` is supported, the optimized model will get generated i
 
 ## Deployment
 
-### Deploy as a Model
+### Deploy as a Model (WARNING - this feature is not fully supported in the current release!)
 
 GaNDLF provides the ability to deploy models into easy-to-share, easy-to-use formats -- users of your model do not even need to install GaNDLF. Currently, Docker images are supported (which can be converted to [Apptainer/Singularity format](https://apptainer.org/docs/user/main/docker_and_oci.html)). These images meet [the MLCube interface](https://mlcommons.org/en/mlcube/). This allows your algorithm to be used in a consistent manner with other machine learning tools.
 
