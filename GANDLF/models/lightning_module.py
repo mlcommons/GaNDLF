@@ -1311,20 +1311,19 @@ class GandlfLightningModule(pl.LightningModule):
                 metric_name
             ] = self._compute_metric_mean_across_values_from_batches(metric_values)
 
-        preds_or_labels_not_empty = not (
-            len(self.val_predictions) == 0 or len(self.val_labels) == 0
-        )
-        if (
-            self._problem_type_is_regression or self._problem_type_is_classification
-        ) and preds_or_labels_not_empty:
-            validation_epoch_average_metrics_overall = overall_stats(
-                torch.tensor(self.val_predictions),
-                torch.tensor(self.val_labels),
-                self.params,
+        if self._problem_type_is_regression or self._problem_type_is_classification:
+            preds_or_labels_not_empty = not (
+                len(self.val_predictions) == 0 or len(self.val_labels) == 0
             )
-            validation_epoch_average_metrics.update(
-                validation_epoch_average_metrics_overall
-            )
+            if preds_or_labels_not_empty:
+                validation_epoch_average_metrics_overall = overall_stats(
+                    torch.tensor(self.val_predictions),
+                    torch.tensor(self.val_labels),
+                    self.params,
+                )
+                validation_epoch_average_metrics.update(
+                    validation_epoch_average_metrics_overall
+                )
         mean_loss = self._round_value_to_precision(
             torch.mean(torch.stack(self.val_losses)).item()
         )
