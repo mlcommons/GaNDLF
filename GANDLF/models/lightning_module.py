@@ -561,7 +561,7 @@ class GandlfLightningModule(pl.LightningModule):
             self.model, self.optimizers().optimizer, self.trainer.train_dataloader
         )
         self.model = model
-        self.trainer.train_dataloader = train_dataloader
+        self.trainer.fit_loop._data_source.instance = train_dataloader
         self.trainer.optimizers = [dp_optimizer]
         # TODO should we reinit the scheduler too?
         self._dp_engine = privacy_engine
