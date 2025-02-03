@@ -1311,7 +1311,12 @@ class GandlfLightningModule(pl.LightningModule):
                 metric_name
             ] = self._compute_metric_mean_across_values_from_batches(metric_values)
 
-        if self._problem_type_is_regression or self._problem_type_is_classification:
+        preds_or_labels_not_empty = not (
+            len(self.val_predictions) == 0 or len(self.val_labels) == 0
+        )
+        if (
+            self._problem_type_is_regression or self._problem_type_is_classification
+        ) and preds_or_labels_not_empty:
             validation_epoch_average_metrics_overall = overall_stats(
                 torch.tensor(self.val_predictions),
                 torch.tensor(self.val_labels),
