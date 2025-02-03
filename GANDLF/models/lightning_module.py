@@ -1312,6 +1312,7 @@ class GandlfLightningModule(pl.LightningModule):
             ] = self._compute_metric_mean_across_values_from_batches(metric_values)
 
         if self._problem_type_is_regression or self._problem_type_is_classification:
+            # This is a workaround - sometimes the lists are empty
             preds_or_labels_not_empty = not (
                 len(self.val_predictions) == 0 or len(self.val_labels) == 0
             )
