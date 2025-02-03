@@ -303,7 +303,7 @@ GaNDLF enables relatively straightforward multi-GPU training. Simply set the `CU
 In the current release, GaNDLF does not support multi-node training. This feature will be enabled in the upcoming releases.
 
 ### Choosing numerical precision
-By default, GaNDLF uses `float32` for training and inference computations. To change the numerical precision, set the `precision` key in the configuration file to one of the values `[16, 32, 64, "64-true", "32-true", "16-mixed", "bf16", "bf16-mixed"]`. Using reduced precision usually results in faster computations and lower memory usage, altought in some cases it may lead to numerical instability - be sure to observe the training process and adjust the precision accordingly. Good rule of thumb is to start in default precision (`32`) and then experiment with lower precisions.
+By default, GaNDLF uses `float32` for training and inference computations. To change the numerical precision, set the `precision` key in the configuration file to one of the values `[16, 32, 64, "64-true", "32-true", "16-mixed", "bf16", "bf16-mixed"]`. Using reduced precision usually results in faster computations and lower memory usage, although in some cases it may lead to numerical instability - be sure to observe the training process and adjust the precision accordingly. Good rule of thumb is to start in default precision (`32`) and then experiment with lower precisions.
 
 ## Expected Output(s)
 
