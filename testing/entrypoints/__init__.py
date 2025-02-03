@@ -286,7 +286,7 @@ def run_test_case(
                     )
                 else:
                     assert result.exit_code != 0
-            except BaseException:
+            except Exception as e:
                 print(f"Test failed on the new case: {new_line}")
                 print(f"Exception: {result.exception}")
                 print(f"Exc info: {result.exc_info}")

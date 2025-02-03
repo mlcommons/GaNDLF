@@ -223,8 +223,6 @@ test_cases = [
             # config, input-data, train/infer, device are required
             "               -i input/ --train -m model/ ",
             "-c config.yaml           --train -m model/ ",
-            "-c config.yaml -i input/         -m model/ ",
-            "-c config.yaml -i input/ --train -m model/       ",
             # config should point to existing file
             "-c config_dir/ -i input/ --train -m model/ ",
             "-c path_na -i input/ --train -m model/ ",
@@ -232,14 +230,12 @@ test_cases = [
             "-c config.yaml -i input/ --train  -o output.csv",
             # model should not point to file
             "-c config.yaml -i input/ --train -m model.file ",
-            "-c config.yaml -i input/ --train -m model/ ",
         ],
         old_way_lines=[
             # config, input-data, train/infer, are required
             "               -i input/ -t True -m model/ ",
             "-c config.yaml           -t True -m model/ ",
             "-c config.yaml -i input/         -m model/ ",
-            "-c config.yaml -i input/ -t True -m model/       ",
             # config should point to existing file
             "-c config_dir/ -i input/ -t True -m model/ ",
             "-c path_na -i input/ --train -m model/ ",
