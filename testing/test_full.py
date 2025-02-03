@@ -3114,7 +3114,7 @@ def test_generic_data_split():
 
 def test_upload_download_huggingface(device):
     print("52: Starting huggingface upload download  tests")
-    # overwrite previous results
+    # overwrite previous results``
     sanitize_outputDir()
     output_dir_patches = os.path.join(outputDir, "histo_patches")
     if os.path.isdir(output_dir_patches):
@@ -3202,7 +3202,7 @@ def test_upload_download_huggingface(device):
 
 def test_generic_logging(capsys):
     print("53: Starting test for logging")
-    log_file = "testing/gandlf.log"
+    log_file = os.path.join(outputDir, "file.log")
     logger_setup(log_file)
     message = "Testing logging"
 
