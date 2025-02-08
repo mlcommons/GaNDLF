@@ -216,7 +216,7 @@ def TrainingManager_split(
     }
 
     datamodule = GandlfTrainingDatamodule(data_dict_files, parameters)
-    parameters = datamodule.updated_parameters_dict()
+    parameters = datamodule.updated_parameters_dict
 
     # This entire section should be handled in config parser
 

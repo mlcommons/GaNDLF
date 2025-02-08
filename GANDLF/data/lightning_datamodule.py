@@ -38,7 +38,7 @@ class GandlfTrainingDatamodule(pl.LightningDataModule):
 
         self.test_subset_parser = None
         testing_data = data_dict_files.get("testing", None)
-        if testing_data:
+        if testing_data is not None:
             self.test_subset_parser = TestSubsetDataParser(
                 data_dict_files["testing"], params
             )
