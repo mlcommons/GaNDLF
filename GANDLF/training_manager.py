@@ -4,11 +4,8 @@ from pathlib import Path
 from torch.profiler import profile, ProfilerActivity
 
 from GANDLF.utils import get_dataframe, split_data
-from GANDLF.compute.generic import (
-    TrainingSubsetDataParser,
-    ValidationSubsetDataParser,
-    TestSubsetDataParser,
-)
+
+from GANDLF.data.lightning_datamodule import GandlfTrainingDatamodule
 import lightning.pytorch as pl
 from lightning.pytorch.tuner import Tuner as LightningTuner
 from warnings import warn
@@ -101,18 +98,8 @@ def TrainingManager(
                     data_dict[data_type] = get_dataframe(currentDataPickle)
 
         # Dataloader initialization - should be extracted somewhere else (preferably abstracted away)
-
-        train_subset_parser = TrainingSubsetDataParser(
-            data_dict_files["training"], parameters
-        )
-        train_loader = train_subset_parser.create_subset_dataloader()
-        parameters = train_subset_parser.get_params_extended_with_subset_data()
-
-        val_subset_parser = ValidationSubsetDataParser(
-            data_dict_files["validation"], parameters
-        )
-        val_loader = val_subset_parser.create_subset_dataloader()
-        parameters = val_subset_parser.get_params_extended_with_subset_data()
+        datamodule = GandlfTrainingDatamodule(data_dict_files, parameters)
+        parameters = datamodule.updated_parameters_dict
 
         # This entire section should be handled in config parser
 
@@ -164,23 +151,19 @@ def TrainingManager(
             parameters, output_dir=currentValidationOutputFolder
         )
 
-        if parameters.get("batch_size_find", False):
-            LightningTuner(trainer).scale_batch_size(lightning_module, train_loader)
+        if parameters.get("auto_batch_size_find", False):
+            LightningTuner(trainer).scale_batch_size(
+                lightning_module, datamodule=datamodule
+            )
 
         if parameters.get("auto_lr_find", False):
-            print(f"Module : {lightning_module.learning_rate}")
-            LightningTuner(trainer).lr_find(lightning_module, train_loader)
+            LightningTuner(trainer).lr_find(lightning_module, datamodule=datamodule)
 
-        trainer.fit(lightning_module, train_loader, val_loader)
+        trainer.fit(lightning_module, datamodule=datamodule)
 
         testing_data = data_dict_files.get("testing", None)
         if testing_data:
-            test_subset_parser = TestSubsetDataParser(
-                data_dict_files["testing"], parameters
-            )
-            test_loader = test_subset_parser.create_subset_dataloader()
-            parameters = test_subset_parser.get_params_extended_with_subset_data()
-            trainer.test(lightning_module, test_loader)
+            trainer.test(lightning_module, datamodule=datamodule)
 
 
 def TrainingManager_split(
@@ -226,13 +209,14 @@ def TrainingManager_split(
         with open(currentModelConfigYaml, "w") as handle:
             yaml.dump(parameters, handle, default_flow_style=False)
 
-    train_subset_parser = TrainingSubsetDataParser(dataframe_train, parameters)
-    train_loader = train_subset_parser.create_subset_dataloader()
-    parameters = train_subset_parser.get_params_extended_with_subset_data()
+    data_dict_files = {
+        "training": dataframe_train,
+        "validation": dataframe_validation,
+        "testing": dataframe_testing,
+    }
 
-    val_subset_parser = ValidationSubsetDataParser(dataframe_validation, parameters)
-    val_loader = val_subset_parser.create_subset_dataloader()
-    parameters = val_subset_parser.get_params_extended_with_subset_data()
+    datamodule = GandlfTrainingDatamodule(data_dict_files, parameters)
+    parameters = datamodule.updated_parameters_dict()
 
     # This entire section should be handled in config parser
 
@@ -280,10 +264,16 @@ def TrainingManager_split(
         num_sanity_val_steps=0,
     )
     lightning_module = GandlfLightningModule(parameters, output_dir=outputDir)
-    trainer.fit(lightning_module, train_loader, val_loader)
+
+    if parameters.get("auto_batch_size_find", False):
+        LightningTuner(trainer).scale_batch_size(
+            lightning_module, datamodule=datamodule
+        )
+
+    if parameters.get("auto_lr_find", False):
+        LightningTuner(trainer).lr_find(lightning_module, datamodule=datamodule)
+
+    trainer.fit(lightning_module, datamodule=datamodule)
 
     if dataframe_testing is not None:
-        test_subset_parser = TestSubsetDataParser(dataframe_testing, parameters)
-        test_loader = test_subset_parser.create_subset_dataloader()
-        parameters = test_subset_parser.get_params_extended_with_subset_data()
-        trainer.test(lightning_module, test_loader)
+        trainer.test(lightning_module, datamodule=datamodule)

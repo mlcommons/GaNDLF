@@ -69,7 +69,6 @@ class GandlfLightningModule(pl.LightningModule):
         self.output_dir = output_dir
         self.params = deepcopy(params)
         self.learning_rate = self.params["learning_rate"]
-        self.batch_size = self.params["batch_size"]
         self.current_best_loss = sys.float_info.max
         self.wait_count_before_early_stopping = 0
         self._problem_type_is_regression = params["problem_type"] == "regression"
@@ -273,8 +272,6 @@ class GandlfLightningModule(pl.LightningModule):
         self._print_training_initialization_info()
         self._set_training_start_time()
         self._print_channels_info()
-        self._try_to_load_model_training_start()
-        self._try_to_save_initial_model()
         self._initialize_train_logger()
         self._initialize_training_epoch_containers()
         self.params["current_epoch"] = self.current_epoch
@@ -439,7 +436,7 @@ class GandlfLightningModule(pl.LightningModule):
 
         images = self._ensure_proper_images_tensor_dimensions(images)
         labels = self._process_labels(labels)
-
+        print(f"IMAGES SHAPE: {images.shape}")
         model_output, _ = self.forward(images)
         model_output, labels = self.pred_target_processor(model_output, labels)
 
