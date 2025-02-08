@@ -10,6 +10,7 @@ from GANDLF.compute.generic import (
     TestSubsetDataParser,
 )
 import lightning.pytorch as pl
+from lightning.pytorch.tuner import Tuner as LightningTuner
 from warnings import warn
 from GANDLF.models.lightning_module import GandlfLightningModule
 
@@ -158,10 +159,19 @@ def TrainingManager(
             logger=False,
             num_sanity_val_steps=0,
         )
-        module = GandlfLightningModule(
+
+        lightning_module = GandlfLightningModule(
             parameters, output_dir=currentValidationOutputFolder
         )
-        trainer.fit(module, train_loader, val_loader)
+
+        if parameters.get("batch_size_find", False):
+            LightningTuner(trainer).scale_batch_size(lightning_module, train_loader)
+
+        if parameters.get("auto_lr_find", False):
+            print(f"Module : {lightning_module.learning_rate}")
+            LightningTuner(trainer).lr_find(lightning_module, train_loader)
+
+        trainer.fit(lightning_module, train_loader, val_loader)
 
         testing_data = data_dict_files.get("testing", None)
         if testing_data:
@@ -170,7 +180,7 @@ def TrainingManager(
             )
             test_loader = test_subset_parser.create_subset_dataloader()
             parameters = test_subset_parser.get_params_extended_with_subset_data()
-            trainer.test(module, test_loader)
+            trainer.test(lightning_module, test_loader)
 
 
 def TrainingManager_split(
@@ -269,11 +279,11 @@ def TrainingManager_split(
         logger=False,
         num_sanity_val_steps=0,
     )
-    module = GandlfLightningModule(parameters, output_dir=outputDir)
-    trainer.fit(module, train_loader, val_loader)
+    lightning_module = GandlfLightningModule(parameters, output_dir=outputDir)
+    trainer.fit(lightning_module, train_loader, val_loader)
 
     if dataframe_testing is not None:
         test_subset_parser = TestSubsetDataParser(dataframe_testing, parameters)
         test_loader = test_subset_parser.create_subset_dataloader()
         parameters = test_subset_parser.get_params_extended_with_subset_data()
-        trainer.test(module, test_loader)
+        trainer.test(lightning_module, test_loader)

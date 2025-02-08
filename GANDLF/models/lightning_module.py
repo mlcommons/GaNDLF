@@ -68,6 +68,8 @@ class GandlfLightningModule(pl.LightningModule):
         super().__init__()
         self.output_dir = output_dir
         self.params = deepcopy(params)
+        self.learning_rate = self.params["learning_rate"]
+        self.batch_size = self.params["batch_size"]
         self.current_best_loss = sys.float_info.max
         self.wait_count_before_early_stopping = 0
         self._problem_type_is_regression = params["problem_type"] == "regression"
@@ -2041,6 +2043,7 @@ class GandlfLightningModule(pl.LightningModule):
     def configure_optimizers(self):
         params = deepcopy(self.params)
         params["model_parameters"] = self.model.parameters()
+        params["learning_rate"] = self.learning_rate
         optimizer = get_optimizer(params)
         if "scheduler" in self.params:
             params["optimizer_object"] = optimizer
