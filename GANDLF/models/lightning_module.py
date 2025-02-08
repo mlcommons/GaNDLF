@@ -369,11 +369,32 @@ class GandlfLightningModule(pl.LightningModule):
             enabled=False,
         )
 
+    def _get_metrics_names_for_loggers(self):
+        """
+        Returns the names of the overall metrics to be logged if the problem type is classification or regression.
+        """
+        metric_names = list(self.params["metrics"])
+        overall_metrics = {}
+        if self._problem_type_is_regression:
+            overall_metrics = overall_stats(
+                torch.tensor([1]), torch.tensor([1]), self.params
+            )
+        elif self._problem_type_is_classification:
+            temp_tensor = torch.randint(
+                0, self.params["model"]["num_classes"], (5,), dtype=torch.int32
+            )
+            overall_metrics = overall_stats(temp_tensor, temp_tensor, self.params)
+        for overall_metric_key in overall_metrics.keys():
+            if overall_metric_key not in metric_names:
+                metric_names.append(overall_metric_key)
+
+        return metric_names
+
     @rank_zero_only
     def _initialize_train_logger(self):
         self.train_logger = Logger(
             logger_csv_filename=os.path.join(self.output_dir, "logs_training.csv"),
-            metrics=list(self.params["metrics"]),
+            metrics=self._get_metrics_names_for_loggers(),
             mode="train",
         )
 
@@ -805,7 +826,7 @@ class GandlfLightningModule(pl.LightningModule):
     def _initialize_validation_logger(self):
         self.val_logger = Logger(
             logger_csv_filename=os.path.join(self.output_dir, "logs_validation.csv"),
-            metrics=list(self.params["metrics"]),
+            metrics=self._get_metrics_names_for_loggers(),
             mode="val",
             add_epsilon=bool(self.params.get("differential_privacy")),
         )
@@ -1551,7 +1572,7 @@ class GandlfLightningModule(pl.LightningModule):
     def _initialize_test_logger(self):
         self.test_logger = Logger(
             logger_csv_filename=os.path.join(self.output_dir, "logs_test.csv"),
-            metrics=list(self.params["metrics"]),
+            metrics=self._get_metrics_names_for_loggers(),
             mode="test",
         )
 
