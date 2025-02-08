@@ -69,8 +69,6 @@ class GandlfLightningModule(pl.LightningModule):
         self.output_dir = output_dir
         self.params = deepcopy(params)
         self.learning_rate = self.params["learning_rate"]
-        self.current_best_loss = sys.float_info.max
-        self.wait_count_before_early_stopping = 0
         self._problem_type_is_regression = params["problem_type"] == "regression"
         self._problem_type_is_classification = (
             params["problem_type"] == "classification"
@@ -274,6 +272,9 @@ class GandlfLightningModule(pl.LightningModule):
         self._print_channels_info()
         self._initialize_train_logger()
         self._initialize_training_epoch_containers()
+        self.wait_count_before_early_stopping = 0
+        self.current_best_loss = sys.float_info.max
+
         self.params["current_epoch"] = self.current_epoch
         # TODO check out if the disabled by default medcam is indeed what we
         # meant - it was taken from original code
@@ -436,7 +437,6 @@ class GandlfLightningModule(pl.LightningModule):
 
         images = self._ensure_proper_images_tensor_dimensions(images)
         labels = self._process_labels(labels)
-        print(f"IMAGES SHAPE: {images.shape}")
         model_output, _ = self.forward(images)
         model_output, labels = self.pred_target_processor(model_output, labels)
 
@@ -1135,6 +1135,7 @@ class GandlfLightningModule(pl.LightningModule):
             return "test"
         elif self.trainer.predicting:
             return "inference"
+
         return "train"
 
     def _determine_save_path_to_use(self):
@@ -1534,7 +1535,7 @@ class GandlfLightningModule(pl.LightningModule):
                 f"Validation loss did not improve. Waiting count before early stopping: {self.wait_count_before_early_stopping} / {self.params['patience']}",
                 flush=True,
             )
-            if self.wait_count_before_early_stopping >= self.params["patience"]:
+            if self.wait_count_before_early_stopping > self.params["patience"]:
                 self.trainer.should_stop = True
                 print(
                     f"Early stopping triggered at epoch {self.current_epoch}, validation loss did not improve for {self.params['patience']} epochs, with the best loss value being {self.current_best_loss}. Stopping training.",

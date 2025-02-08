@@ -262,8 +262,6 @@ def test_train_segmentation_rad_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
-    parameters["auto_lr_find"] = True
-    # parameters["batch_size_find"] = True
     parameters["data_preprocessing"]["resize_image"] = [224, 224]
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # read and initialize parameters for specific data dimension
@@ -291,6 +289,46 @@ def test_train_segmentation_rad_2d(device):
             resume=False,
             reset=True,
         )
+
+    sanitize_outputDir()
+
+    print("passed")
+
+
+def test_train_segmentation_rad_2d_find_lr_and_batch_size(device):
+    print("03: Starting 2D Rad segmentation tests")
+    # read and parse csv
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["amp"] = True
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    parameters["auto_lr_find"] = True
+    parameters["auto_batch_size_find"] = True
+    parameters["data_preprocessing"]["resize_image"] = [224, 224]
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # read and initialize parameters for specific data dimension
+    model = all_models_segmentation[0]
+    parameters["model"]["architecture"] = model
+    parameters["nested_training"]["testing"] = -5
+    parameters["nested_training"]["validation"] = -5
+    sanitize_outputDir()
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        resume=False,
+        reset=True,
+    )
 
     sanitize_outputDir()
 
