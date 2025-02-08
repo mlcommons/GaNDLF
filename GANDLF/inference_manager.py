@@ -5,10 +5,11 @@ from typing import Optional
 import pandas as pd
 import torch
 from GANDLF.utils import get_unique_timestamp
-from GANDLF.compute.generic import InferenceSubsetDataParserRadiology
 import lightning.pytorch as pl
 from warnings import warn
 from GANDLF.models.lightning_module import GandlfLightningModule
+from GANDLF.data.lightning_datamodule import GandlfInferenceDatamodule
+from lightning.pytorch.tuner import Tuner as LightningTuner
 
 
 def InferenceManager(
@@ -110,24 +111,22 @@ def InferenceManager(
                 logger=False,
                 num_sanity_val_steps=0,
             )
-            if parameters["modality"] == "rad":
-                inference_subset_data_parser_radiology = (
-                    InferenceSubsetDataParserRadiology(dataframe, parameters)
-                )
-                dataloader_inference = (
-                    inference_subset_data_parser_radiology.create_subset_dataloader()
-                )
+            datamodule = GandlfInferenceDatamodule(dataframe, parameters)
+            lightning_module = GandlfLightningModule(parameters, output_dir=fold_dir)
 
-            elif parameters["modality"] in ["path", "histo"]:
-                # In case for histo we now directly iterate over dataframe
-                # this needs to be abstracted into some dataset class
-                dataloader_inference = dataframe.iterrows()
-
-            module = GandlfLightningModule(parameters, output_dir=fold_dir)
-            trainer.predict(module, dataloader_inference)
+            if parameters.get("auto_batch_size_find", False):
+                if parameters["modality"] in ["path", "histo"]:
+                    print(
+                        "Auto batch size find is not supported for histo images. Using default batch size."
+                    )
+                else:
+                    LightningTuner(trainer).scale_batch_size(
+                        lightning_module, datamodule=datamodule, method="predict"
+                    )
+            trainer.predict(lightning_module, datamodule=datamodule)
             if is_classification:
                 prob_values_for_all_subjects_in_fold = list(
-                    module.subject_classification_class_probabilities.values()
+                    lightning_module.subject_classification_class_probabilities.values()
                 )
                 if prob_values_for_all_subjects_in_fold:
                     probs_list = torch.stack(

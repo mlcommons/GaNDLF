@@ -4,6 +4,7 @@ from GANDLF.compute.generic import (
     TrainingSubsetDataParser,
     ValidationSubsetDataParser,
     TestSubsetDataParser,
+    InferenceSubsetDataParserRadiology,
 )
 from copy import deepcopy
 
@@ -72,3 +73,29 @@ class GandlfTrainingDatamodule(pl.LightningDataModule):
         return TestSubsetDataParser(
             self.data_dict_files["testing"], params
         ).create_subset_dataloader()
+
+
+class GandlfInferenceDatamodule(pl.LightningDataModule):
+    def __init__(self, dataframe, parameters_dict):
+        super().__init__()
+        self.batch_size = parameters_dict["batch_size"]
+        self.dataframe = dataframe
+        self.parameters_dict = parameters_dict
+        inference_subset_data_parser_radiology = InferenceSubsetDataParserRadiology(
+            self.dataframe, self.parameters_dict
+        )
+        inference_subset_data_parser_radiology.create_subset_dataloader()
+
+    @property
+    def updated_parameters_dict(self):
+        return self.parameters_dict
+
+    def predict_dataloader(self):
+        if self.parameters_dict["modality"] == "rad":
+            params = self.updated_parameters_dict
+            params["batch_size"] = self.batch_size
+            return InferenceSubsetDataParserRadiology(
+                self.dataframe, params
+            ).create_subset_dataloader()
+        elif self.parameters_dict["modality"] in ["path", "histo"]:
+            return self.dataframe.iterrows()

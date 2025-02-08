@@ -759,6 +759,10 @@ def test_train_resume_inference_classification_rad_3d(device):
     )
 
     parameters["output_dir"] = outputDir  # this is in inference mode
+    parameters[
+        "auto_batch_size_find"
+    ] = True  # also test the automatic finding of batch size
+
     InferenceManager(dataframe=training_data, modelDir=outputDir, parameters=parameters)
     sanitize_outputDir()
 
