@@ -1,10 +1,9 @@
+import ast
 import traceback
 from copy import deepcopy
 from GANDLF.data.post_process import postprocessing_after_reverse_one_hot_encoding
-
 import numpy as np
 import sys
-
 from GANDLF.Configuration.Parameters.optimizer_parameters import Optimizer
 from GANDLF.Configuration.Parameters.patch_sampler import PatchSampler
 from GANDLF.Configuration.Parameters.scheduler_parameters import Scheduler
@@ -117,7 +116,7 @@ def validate_class_list(value):
             value = temp_class_list.split(",")
         else:
             try:
-                value = eval(value)
+                value = ast.literal_eval(value)
                 return value
             except Exception as e:
                 ## todo: ensure logging captures assertion errors
