@@ -2,11 +2,25 @@ from typing import Union
 from pydantic import BaseModel, model_validator, Field, AfterValidator
 from GANDLF.Configuration.Parameters.default_parameters import DefaultParameters
 from GANDLF.Configuration.Parameters.nested_training_parameters import NestedTraining
+from GANDLF.Configuration.Parameters.optimizer_parameters import Optimizer
 from GANDLF.Configuration.Parameters.patch_sampler import PatchSampler
+from GANDLF.Configuration.Parameters.scheduler_parameters import Scheduler
 from GANDLF.utils import version_check
 from importlib.metadata import version
 from typing_extensions import Self, Literal, Annotated, Any
-from GANDLF.Configuration.Parameters.validators import *
+from GANDLF.Configuration.Parameters.validators import (
+    validate_schedular,
+    validate_optimizer,
+    validate_loss_function,
+    validate_metrics,
+    validate_data_preprocessing,
+    validate_patch_size,
+    validate_parallel_compute_command,
+    validate_patch_sampler,
+    validate_data_augmentation,
+    validate_data_postprocessing_after_reverse_one_hot_encoding,
+    validate_differential_privacy,
+)
 from GANDLF.Configuration.Parameters.model_parameters import Model
 
 

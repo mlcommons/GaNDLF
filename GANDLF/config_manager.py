@@ -1,10 +1,7 @@
 # import logging
 import traceback
-from typing import Optional, Union
-from pydantic import ValidationError
+from typing import Union
 import yaml
-
-
 from GANDLF.Configuration.Parameters.parameters import Parameters
 from GANDLF.Configuration.Parameters.exclude_parameters import exclude_parameters
 
