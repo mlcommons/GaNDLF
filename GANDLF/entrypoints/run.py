@@ -24,6 +24,7 @@ def _run(
     reset_flag: bool,
     resume_flag: bool,
     output_path: Optional[str],
+    profile_: Optional[bool] = False,
 ):
     if model_dir is None and output_path:
         model_dir = output_path
@@ -60,6 +61,7 @@ def _run(
     logging.debug(f"{reset_flag=}")
     logging.debug(f"{resume_flag=}")
     logging.debug(f"{output_path=}")
+    logging.debug(f"{profile_=}")
 
     main_run(
         data_csv=input_data,
@@ -70,6 +72,7 @@ def _run(
         resume=resume_flag,
         reset=reset_flag,
         output_dir=output_path,
+        profile_=profile_,
     )
     print("Finished.")
 
@@ -145,6 +148,12 @@ def _run(
     default=None,
     help="Output file which will contain the logs.",
 )
+@click.option(
+    "--profile",
+    "-pf",
+    is_flag=True,
+    help="Track the run time and memory consumption for each layer",
+)
 @append_copyright_to_help
 def new_way(
     config: str,
@@ -156,6 +165,7 @@ def new_way(
     resume: bool,
     output_path: str,
     raw_input: str,
+    profile: bool,
     log_file: str,
 ):
     """Semantic segmentation, regression, and classification for medical images using Deep Learning."""
@@ -170,6 +180,7 @@ def new_way(
         reset_flag=reset,
         resume_flag=resume,
         output_path=output_path,
+        profile_=profile,
     )
 
 
