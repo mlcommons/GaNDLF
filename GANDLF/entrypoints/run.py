@@ -24,7 +24,7 @@ def _run(
     reset_flag: bool,
     resume_flag: bool,
     output_path: Optional[str],
-    profile_: Optional[bool] = False,
+    _profile: Optional[bool] = False,
 ):
     if model_dir is None and output_path:
         model_dir = output_path
@@ -61,7 +61,7 @@ def _run(
     logging.debug(f"{reset_flag=}")
     logging.debug(f"{resume_flag=}")
     logging.debug(f"{output_path=}")
-    logging.debug(f"{profile_=}")
+    logging.debug(f"{_profile=}")
 
     main_run(
         data_csv=input_data,
@@ -72,7 +72,7 @@ def _run(
         resume=resume_flag,
         reset=reset_flag,
         output_dir=output_path,
-        profile_=profile_,
+        _profile=_profile,
     )
     print("Finished.")
 
@@ -180,7 +180,7 @@ def new_way(
         reset_flag=reset,
         resume_flag=resume,
         output_path=output_path,
-        profile_=profile,
+        _profile=profile,
     )
 
 

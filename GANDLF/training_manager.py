@@ -146,7 +146,7 @@ def TrainingManager_split(
     device: str,
     resume: bool,
     reset: bool,
-    profile_: bool,
+    _profile: bool,
 ):
     """
     This is the training manager that ties all the training functionality together
@@ -160,7 +160,7 @@ def TrainingManager_split(
         device (str): The device to perform computations on.
         resume (bool): Whether the previous run will be resumed or not.
         reset (bool): Whether the previous run will be reset or not.
-        profile_(bool):Whether the we want the profile activity or not.
+        _profile(bool):Whether the we want the profile activity or not.
 
     """
     currentModelConfigPickle = os.path.join(outputDir, "parameters.pkl")
@@ -182,7 +182,7 @@ def TrainingManager_split(
         with open(currentModelConfigYaml, "w") as handle:
             yaml.dump(parameters, handle, default_flow_style=False)
 
-    if profile_:
+    if _profile:
         with profile(
             activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA],
             profile_memory=True,
