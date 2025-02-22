@@ -1,4 +1,3 @@
-import torch
 import lightning.pytorch as pl
 from GANDLF.compute.generic import (
     TrainingSubsetDataParser,
@@ -6,13 +5,13 @@ from GANDLF.compute.generic import (
     TestSubsetDataParser,
     InferenceSubsetDataParserRadiology,
 )
+from torch.utils.data import DataLoader as TorchDataLoader
 from copy import deepcopy
 
 
 class GandlfTrainingDatamodule(pl.LightningDataModule):
-    def __init__(self, data_dict_files, parameters_dict):
+    def __init__(self, data_dict_files: dict, parameters_dict: dict):
         super().__init__()
-        self.data_dict_files = data_dict_files
 
         # Batch size here and reinitialization of dataloader parsers is used
         # in automatic batch size tuning
@@ -24,67 +23,77 @@ class GandlfTrainingDatamodule(pl.LightningDataModule):
 
         params = deepcopy(parameters_dict)
 
-        self.train_subset_parser = TrainingSubsetDataParser(
+        train_subset_parser = TrainingSubsetDataParser(
             data_dict_files["training"], params
         )
-        self.train_subset_parser.create_subset_dataloader()
-        params = self.train_subset_parser.get_params_extended_with_subset_data()
+        self.training_dataset = train_subset_parser.create_subset_dataset()
+        params = train_subset_parser.get_params_extended_with_subset_data()
 
-        self.val_subset_parser = ValidationSubsetDataParser(
+        val_subset_parser = ValidationSubsetDataParser(
             data_dict_files["validation"], params
         )
-        self.val_subset_parser.create_subset_dataloader()
-        params = self.val_subset_parser.get_params_extended_with_subset_data()
+        self.validation_dataset = val_subset_parser.create_subset_dataset()
+        params = val_subset_parser.get_params_extended_with_subset_data()
 
-        self.test_subset_parser = None
         testing_data = data_dict_files.get("testing", None)
+        self.test_dataset = None
         if testing_data is not None:
-            self.test_subset_parser = TestSubsetDataParser(
-                data_dict_files["testing"], params
-            )
-            self.test_subset_parser.create_subset_dataloader()
-            params = self.test_subset_parser.get_params_extended_with_subset_data()
+            test_subset_parser = TestSubsetDataParser(testing_data, params)
+            self.test_dataset = test_subset_parser.create_subset_dataset()
+            params = test_subset_parser.get_params_extended_with_subset_data()
 
         self.parameters_dict = params
+
+    def _get_dataloader(self, dataset, batch_size: int, shuffle: bool):
+        return TorchDataLoader(
+            dataset,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            num_workers=self.updated_parameters_dict.get("num_workers_dataloader", 1),
+            pin_memory=self.updated_parameters_dict.get("pin_memory_dataloader", False),
+            prefetch_factor=self.updated_parameters_dict.get(
+                "prefetch_factor_dataloader", 2
+            ),
+        )
 
     @property
     def updated_parameters_dict(self):
         return self.parameters_dict
 
     def train_dataloader(self):
-        params = self.updated_parameters_dict
-        params["batch_size"] = self.batch_size
-        return TrainingSubsetDataParser(
-            self.data_dict_files["training"], params
-        ).create_subset_dataloader()
+        self.updated_parameters_dict["batch_size"] = self.batch_size
+        return self._get_dataloader(
+            self.training_dataset, self.batch_size, shuffle=True
+        )
 
     def val_dataloader(self):
-        params = self.updated_parameters_dict
-        params["batch_size"] = self.batch_size
-        return ValidationSubsetDataParser(
-            self.data_dict_files["validation"], params
-        ).create_subset_dataloader()
+        return self._get_dataloader(
+            self.validation_dataset, batch_size=1, shuffle=False
+        )
 
     def test_dataloader(self):
-        if self.test_subset_parser is None:
+        if self.test_dataset is None:
             return None
-        params = self.updated_parameters_dict
-        params["batch_size"] = self.batch_size
-        return TestSubsetDataParser(
-            self.data_dict_files["testing"], params
-        ).create_subset_dataloader()
+        return self._get_dataloader(self.test_dataset, batch_size=1, shuffle=False)
 
 
 class GandlfInferenceDatamodule(pl.LightningDataModule):
     def __init__(self, dataframe, parameters_dict):
         super().__init__()
-        self.batch_size = parameters_dict["batch_size"]
         self.dataframe = dataframe
-        self.parameters_dict = parameters_dict
-        inference_subset_data_parser_radiology = InferenceSubsetDataParserRadiology(
-            self.dataframe, self.parameters_dict
-        )
-        inference_subset_data_parser_radiology.create_subset_dataloader()
+        params = deepcopy(parameters_dict)
+        self.parameters_dict = params
+        if self.parameters_dict["modality"] == "rad":
+            inference_subset_data_parser_radiology = InferenceSubsetDataParserRadiology(
+                self.dataframe, params
+            )
+            self.inference_dataset = (
+                inference_subset_data_parser_radiology.create_subset_dataset()
+            )
+
+            self.parameters_dict = (
+                inference_subset_data_parser_radiology.get_params_extended_with_subset_data()
+            )
 
     @property
     def updated_parameters_dict(self):
@@ -92,10 +101,19 @@ class GandlfInferenceDatamodule(pl.LightningDataModule):
 
     def predict_dataloader(self):
         if self.parameters_dict["modality"] == "rad":
-            params = self.updated_parameters_dict
-            params["batch_size"] = self.batch_size
-            return InferenceSubsetDataParserRadiology(
-                self.dataframe, params
-            ).create_subset_dataloader()
+            return TorchDataLoader(
+                self.inference_dataset,
+                batch_size=1,
+                shuffle=False,
+                num_workers=self.updated_parameters_dict.get(
+                    "num_workers_dataloader", 1
+                ),
+                pin_memory=self.updated_parameters_dict.get(
+                    "pin_memory_dataloader", False
+                ),
+                prefetch_factor=self.updated_parameters_dict.get(
+                    "prefetch_factor_dataloader", 2
+                ),
+            )
         elif self.parameters_dict["modality"] in ["path", "histo"]:
             return self.dataframe.iterrows()

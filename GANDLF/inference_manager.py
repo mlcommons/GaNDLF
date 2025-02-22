@@ -9,7 +9,6 @@ import lightning.pytorch as pl
 from warnings import warn
 from GANDLF.models.lightning_module import GandlfLightningModule
 from GANDLF.data.lightning_datamodule import GandlfInferenceDatamodule
-from lightning.pytorch.tuner import Tuner as LightningTuner
 
 
 def InferenceManager(
@@ -112,17 +111,15 @@ def InferenceManager(
                 num_sanity_val_steps=0,
             )
             datamodule = GandlfInferenceDatamodule(dataframe, parameters)
+            parameters = datamodule.updated_parameters_dict
             lightning_module = GandlfLightningModule(parameters, output_dir=fold_dir)
 
             if parameters.get("auto_batch_size_find", False):
                 if parameters["modality"] in ["path", "histo"]:
                     print(
-                        "Auto batch size find is not supported for histo images. Using default batch size."
+                        "Auto batch size find is not supported in inference. Dataloader batch size is always 1."
                     )
-                else:
-                    LightningTuner(trainer).scale_batch_size(
-                        lightning_module, datamodule=datamodule, method="predict"
-                    )
+
             trainer.predict(lightning_module, datamodule=datamodule)
             if is_classification:
                 prob_values_for_all_subjects_in_fold = list(

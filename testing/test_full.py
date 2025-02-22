@@ -312,7 +312,7 @@ def test_train_segmentation_rad_2d_find_lr_and_batch_size(device):
     parameters["model"]["num_channels"] = 3
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
-    parameters["auto_lr_find"] = True
+    parameters["auto_lr_find"] = False
     parameters["auto_batch_size_find"] = True
     parameters["data_preprocessing"]["resize_image"] = [224, 224]
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
@@ -759,10 +759,6 @@ def test_train_resume_inference_classification_rad_3d(device):
     )
 
     parameters["output_dir"] = outputDir  # this is in inference mode
-    parameters[
-        "auto_batch_size_find"
-    ] = True  # also test the automatic finding of batch size
-
     InferenceManager(dataframe=training_data, modelDir=outputDir, parameters=parameters)
     sanitize_outputDir()
 

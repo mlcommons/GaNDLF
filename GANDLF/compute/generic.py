@@ -7,42 +7,49 @@ from dataclasses import dataclass
 from GANDLF.models import get_model
 from GANDLF.schedulers import get_scheduler
 from GANDLF.optimizers import get_optimizer
-from GANDLF.data import get_train_loader, get_validation_loader, get_testing_loader
+from GANDLF.data import (
+    get_train_loader,
+    get_validation_loader,
+    get_testing_loader,
+    ImagesFromDataFrame,
+)
 from GANDLF.utils import (
     populate_header_in_parameters,
+    populate_channel_keys_in_params,
     parseTrainingCSV,
     send_model_to_device,
     get_class_imbalance_weights,
 )
+from GANDLF.utils.write_parse import get_dataframe
 
 
 # temporary abstractions to cover lightning port needs
 @dataclass
 class AbstractSubsetDataParser(ABC):
     """
-    Interface for subset data parsers, needed to separate the dataloader
-    creation logic from creation of other objects.
+    Interface for subset data parsers, needed to separate the dataset creation
+    from construction of the dataloaders.
     """
 
     subset_csv_path: str
     parameters_dict: dict
 
     @abstractmethod
-    def create_subset_dataloader(self) -> DataLoader:
+    def create_subset_dataset(self):
         pass
 
     def get_params_extended_with_subset_data(self) -> dict:
         """
         Trick to get around the fact that parameters dict need to be modified
         during this parsing procedure. This method should be called after
-        create_subset_dataloader(), as this method will populate the parameters
+        create_subset_dataset(), as this method will populate the parameters
         dict with the headers from the subset data.
         """
         return self.parameters_dict
 
 
 class TrainingSubsetDataParser(AbstractSubsetDataParser):
-    def create_subset_dataloader(self) -> DataLoader:
+    def create_subset_dataset(self):
         (
             self.parameters_dict["training_data"],
             headers_to_populate_train,
@@ -64,31 +71,44 @@ class TrainingSubsetDataParser(AbstractSubsetDataParser):
         print("Sampling weights: ", self.parameters_dict["sampling_weights"])
         print("Class weights   : ", self.parameters_dict["class_weights"])
 
-        train_loader = get_train_loader(self.parameters_dict)
-        self.parameters_dict["training_samples_size"] = len(train_loader)
-        self.parameters_dict["training_data_hash"] = hash_pandas_object(
-            self.parameters_dict["training_data"]
-        ).sum()
-
-        return train_loader
+        return ImagesFromDataFrame(
+            get_dataframe(self.parameters_dict["training_data"]),
+            self.parameters_dict,
+            train=True,
+            loader_type="train",
+        )
 
 
 class ValidationSubsetDataParser(AbstractSubsetDataParser):
-    def create_subset_dataloader(self) -> DataLoader:
+    def create_subset_dataset(self):
         (self.parameters_dict["validation_data"], _) = parseTrainingCSV(
             self.subset_csv_path, train=False
         )
-
-        val_loader = get_validation_loader(self.parameters_dict)
-
-        return val_loader
+        validation_dataset = ImagesFromDataFrame(
+            get_dataframe(self.parameters_dict["validation_data"]),
+            self.parameters_dict,
+            train=False,
+            loader_type="validation",
+        )
+        self.parameters_dict = populate_channel_keys_in_params(
+            validation_dataset, self.parameters_dict
+        )
+        return validation_dataset
 
 
 class TestSubsetDataParser(AbstractSubsetDataParser):
-    def create_subset_dataloader(self) -> DataLoader:
-        # hack to cope with the get_testing_loader() function
-        self.parameters_dict["testing_data"] = self.subset_csv_path
-        return get_testing_loader(self.parameters_dict)
+    def create_subset_dataset(self):
+        testing_dataset = ImagesFromDataFrame(
+            get_dataframe(self.subset_csv_path),
+            self.parameters_dict,
+            train=False,
+            loader_type="testing",
+        )
+        if not ("channel_keys" in self.parameters_dict):
+            self.parameters_dict = populate_channel_keys_in_params(
+                testing_dataset, self.parameters_dict
+            )
+        return testing_dataset
 
 
 class InferenceSubsetDataParserRadiology(TestSubsetDataParser):
