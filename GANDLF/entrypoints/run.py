@@ -14,6 +14,8 @@ from GANDLF.cli import main_run, copyrightMessage
 from GANDLF.entrypoints import append_copyright_to_help
 from GANDLF.utils import logger_setup
 
+from warnings import warn
+
 
 def _run(
     config: str,
@@ -22,6 +24,7 @@ def _run(
     model_dir: str,
     reset_flag: bool,
     resume_flag: bool,
+    device: Optional[str],
     output_path: Optional[str],
     _profile: Optional[bool] = False,
 ):
@@ -48,7 +51,11 @@ def _run(
             "'reset' and 'resume' are mutually exclusive; 'resume' will be used."
         )
         reset_flag = False
-
+    if device is not None:
+        warn(
+            "Device parameter is deprecated and has no effect. See migration guide docs.",
+            DeprecationWarning,
+        )
     # TODO: check that output_path is not passed in training mode;
     #  maybe user misconfigured the command
 
@@ -136,6 +143,12 @@ def _run(
     is_flag=True,
     help="Track the run time and memory consumption for each layer",
 )
+@click.option(
+    "--device",
+    "-d",
+    type=str,
+    help="DEPRECATED - has no effect, see migration guide docs. Device to run the model on.",
+)
 @append_copyright_to_help
 def new_way(
     config: str,
@@ -148,6 +161,7 @@ def new_way(
     raw_input: str,
     profile: bool,
     log_file: str,
+    device: str,
 ):
     """Semantic segmentation, regression, and classification for medical images using Deep Learning."""
 
@@ -161,6 +175,7 @@ def new_way(
         resume_flag=resume,
         output_path=output_path,
         _profile=profile,
+        device=device,
     )
 
 
@@ -250,6 +265,13 @@ def old_way():
         version="%(prog)s v{}".format(version) + "\n\n" + copyrightMessage,
         help="Show program's version number and exit.",
     )
+    parser.add_argument(
+        "-d",
+        "--device",
+        metavar="",
+        type=str,
+        help="DEPRECATED - has no effect, see migration guide docs. Device to run the model on.",
+    )
 
     # This is a dummy argument that exists to trigger MLCube mounting requirements.
     # Do not remove.
@@ -268,6 +290,7 @@ def old_way():
         reset_flag=args.reset,
         resume_flag=args.resume,
         output_path=args.outputdir,
+        device=args.device,
     )
 
 
