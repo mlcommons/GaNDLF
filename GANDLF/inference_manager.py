@@ -99,8 +99,8 @@ def InferenceManager(
                 accelerator="auto",
                 strategy="auto",
                 fast_dev_run=False,
-                devices=1,  # single-device-single-node forced now
-                num_nodes=1,
+                devices=parameters["devices"],
+                num_nodes=parameters["num_nodes"],
                 precision=precision,
                 gradient_clip_algorithm=parameters["clip_mode"],
                 gradient_clip_val=parameters["clip_grad"],

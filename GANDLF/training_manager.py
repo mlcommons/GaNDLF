@@ -135,8 +135,8 @@ def TrainingManager(
             accelerator="auto",
             strategy="auto",
             fast_dev_run=False,
-            devices=1,  # single-device-single-node forced now
-            num_nodes=1,
+            devices=parameters["devices"],
+            num_nodes=parameters["num_nodes"],
             precision=precision,
             gradient_clip_algorithm=parameters["clip_mode"],
             gradient_clip_val=parameters["clip_grad"],
@@ -252,8 +252,8 @@ def TrainingManager_split(
         accelerator="auto",
         strategy="auto",
         fast_dev_run=False,
-        devices=1,  # single-device-single-node forced now
-        num_nodes=1,
+        devices=parameters.get("devices", "auto"),
+        num_nodes=parameters.get("num_nodes", 1),
         precision=precision,
         gradient_clip_algorithm=parameters["clip_mode"],
         gradient_clip_val=parameters["clip_grad"],

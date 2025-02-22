@@ -308,7 +308,8 @@ q_verbose: False
 accelerator: "cpu" # options: "cpu", "gpu", "auto", "auto" selects GPU if available
 strategy: "auto" # options: "auto", "ddp", auto will automatically run ddp if multi gpus are available
 precision: 32 # options: 16, 32, 64, "64-true", "32-true", "16-mixed", "bf16", "bf16-mixed"
-
+n_nodes: 1 # number of nodes to use for distributed training (requires using ddp strategy)
+devices: "auto" # number of devices to use for distributed training within a single node
 
 auto_lr_find: False # setting to True will run the learning rate finder before the training starts
 auto_batch_size_find: False # setting to True will run the batch size finder before the training or inference starts (this is called before the learning rate finder)
