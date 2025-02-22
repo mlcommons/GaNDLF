@@ -3417,3 +3417,71 @@ def test_differential_privacy_simple_classification_rad_2d(device):
     sanitize_outputDir()
 
     print("passed")
+
+
+def test_generic_profiling_function_mainrun(device):
+    print("56: Starting testing profiling function main_run")
+    parameters = ConfigManager(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["num_epochs"] = 1
+    parameters["nested_training"]["testing"] = 1
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["amp"] = True
+    parameters["model"]["print_summary"] = False
+    parameters["model"]["num_channels"] = 3
+    parameters["metrics"] = ["dice"]
+    parameters["model"]["architecture"] = "unet"
+
+    file_config_temp = write_temp_config_path(parameters)
+
+    file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
+
+    main_run(
+        file_data,
+        file_config_temp,
+        outputDir,
+        True,
+        device="cpu",
+        resume=False,
+        reset=True,
+        _profile=True,
+    )
+    sanitize_outputDir()
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+
+    # testing train/valid split
+    main_run(
+        file_data + "," + file_data,
+        file_config_temp,
+        outputDir,
+        True,
+        device="cpu",
+        resume=False,
+        reset=True,
+        _profile=True,
+    )
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+
+    # testing train/valid/test split with resume
+    main_run(
+        file_data + "," + file_data + "," + file_data,
+        file_config_temp,
+        outputDir,
+        True,
+        device="cpu",
+        resume=True,
+        reset=False,
+        _profile=True,
+    )
+    sanitize_outputDir()
+
+    print("passed")
