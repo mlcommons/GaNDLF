@@ -3407,10 +3407,9 @@ def test_generic_profiling_function_mainrun(device):
         file_config_temp,
         outputDir,
         True,
-        device="cpu",
         resume=False,
         reset=True,
-        _profile=True,
+        profile=True,
     )
     sanitize_outputDir()
 
@@ -3423,10 +3422,9 @@ def test_generic_profiling_function_mainrun(device):
         file_config_temp,
         outputDir,
         True,
-        device="cpu",
         resume=False,
         reset=True,
-        _profile=True,
+        profile=True,
     )
 
     with open(file_config_temp, "w") as file:
@@ -3438,10 +3436,9 @@ def test_generic_profiling_function_mainrun(device):
         file_config_temp,
         outputDir,
         True,
-        device="cpu",
         resume=True,
         reset=False,
-        _profile=True,
+        profile=True,
     )
     sanitize_outputDir()
 

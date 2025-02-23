@@ -1,21 +1,29 @@
+import os
+import yaml
+import pickle
+import shutil
 import pandas as pd
-import os, pickle, shutil
 from pathlib import Path
-from torch.profiler import profile, ProfilerActivity
+from warnings import warn
+
+import lightning.pytorch as pl
+from lightning.pytorch.profilers import PyTorchProfiler
+from lightning.pytorch.tuner import Tuner as LightningTuner
 
 from GANDLF.utils import get_dataframe, split_data
-
-from GANDLF.data.lightning_datamodule import GandlfTrainingDatamodule
-import lightning.pytorch as pl
-from lightning.pytorch.tuner import Tuner as LightningTuner
-from warnings import warn
 from GANDLF.models.lightning_module import GandlfLightningModule
+from GANDLF.data.lightning_datamodule import GandlfTrainingDatamodule
 
-import yaml
+from typing import Optional
 
 
 def TrainingManager(
-    dataframe: pd.DataFrame, outputDir: str, parameters: dict, resume: bool, reset: bool
+    dataframe: pd.DataFrame,
+    outputDir: str,
+    parameters: dict,
+    resume: bool,
+    reset: bool,
+    profile: Optional[bool] = False,
 ) -> None:
     """
     This is the training manager that ties all the training functionality together
@@ -26,7 +34,10 @@ def TrainingManager(
         parameters (dict): The parameters dictionary.
         resume (bool): Whether the previous run will be resumed or not.
         reset (bool): Whether the previous run will be reset or not.
+        profile(bool): Whether we want the profile activity or not. Defaults to False.
+
     """
+
     if "output_dir" not in parameters:
         parameters["output_dir"] = outputDir
     if reset:
@@ -132,11 +143,11 @@ def TrainingManager(
             f"Configured to use {accelerator} with {strategy} for training, but current development configuration will force single-device only training."
         )
         trainer = pl.Trainer(
-            accelerator="auto",
-            strategy="auto",
+            accelerator=accelerator,
+            strategy=strategy,
             fast_dev_run=False,
-            devices=parameters["devices"],
-            num_nodes=parameters["num_nodes"],
+            devices=parameters.get("devices", "auto"),
+            num_nodes=parameters.get("num_nodes", 1),
             precision=precision,
             gradient_clip_algorithm=parameters["clip_mode"],
             gradient_clip_val=parameters["clip_grad"],
@@ -145,6 +156,9 @@ def TrainingManager(
             enable_checkpointing=False,
             logger=False,
             num_sanity_val_steps=0,
+            profiler=PyTorchProfiler(sort_by="cpu_time_total", row_limit=10)
+            if profile
+            else None,
         )
 
         lightning_module = GandlfLightningModule(
@@ -174,7 +188,7 @@ def TrainingManager_split(
     parameters: dict,
     resume: bool,
     reset: bool,
-    _profile: bool,
+    profile: Optional[bool] = False,
 ):
     """
     This is the training manager that ties all the training functionality together
@@ -187,7 +201,7 @@ def TrainingManager_split(
         parameters (dict): The parameters dictionary.
         resume (bool): Whether the previous run will be resumed or not.
         reset (bool): Whether the previous run will be reset or not.
-        _profile(bool):Whether the we want the profile activity or not.
+        profile(bool): Whether the we want the profile activity or not. Defaults to False.
 
     """
     currentModelConfigPickle = os.path.join(outputDir, "parameters.pkl")
@@ -249,8 +263,8 @@ def TrainingManager_split(
         f"Using {accelerator} with {strategy} for training. Trainer will use only single accelerator instance. "
     )
     trainer = pl.Trainer(
-        accelerator="auto",
-        strategy="auto",
+        accelerator=accelerator,
+        strategy=strategy,
         fast_dev_run=False,
         devices=parameters.get("devices", "auto"),
         num_nodes=parameters.get("num_nodes", 1),
@@ -262,6 +276,9 @@ def TrainingManager_split(
         enable_checkpointing=False,
         logger=False,
         num_sanity_val_steps=0,
+        profiler=PyTorchProfiler(sort_by="cpu_time_total", row_limit=10)
+        if profile
+        else None,
     )
     lightning_module = GandlfLightningModule(parameters, output_dir=outputDir)
 

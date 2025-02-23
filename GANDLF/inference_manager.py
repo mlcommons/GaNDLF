@@ -96,11 +96,11 @@ def InferenceManager(
         probs_list = None
         for fold_dir in fold_dirs:
             trainer = pl.Trainer(
-                accelerator="auto",
-                strategy="auto",
+                accelerator=accelerator,
+                strategy=strategy,
                 fast_dev_run=False,
-                devices=parameters["devices"],
-                num_nodes=parameters["num_nodes"],
+                devices=parameters.get("devices", "auto"),
+                num_nodes=parameters.get("num_nodes", 1),
                 precision=precision,
                 gradient_clip_algorithm=parameters["clip_mode"],
                 gradient_clip_val=parameters["clip_grad"],
@@ -115,10 +115,9 @@ def InferenceManager(
             lightning_module = GandlfLightningModule(parameters, output_dir=fold_dir)
 
             if parameters.get("auto_batch_size_find", False):
-                if parameters["modality"] in ["path", "histo"]:
-                    print(
-                        "Auto batch size find is not supported in inference. Dataloader batch size is always 1."
-                    )
+                print(
+                    "Auto batch size find is not supported in inference. Dataloader batch size is always 1."
+                )
 
             trainer.predict(lightning_module, datamodule=datamodule)
             if is_classification:

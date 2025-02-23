@@ -18,7 +18,7 @@ def main_run(
     train_mode: bool,
     resume: bool,
     reset: bool,
-    _profile: Optional[bool] = False,
+    profile: Optional[bool] = False,
     output_dir: Optional[str] = None,
 ) -> None:
     """
@@ -31,6 +31,7 @@ def main_run(
         train_mode (bool): Whether to train or infer.
         resume (bool): Whether the previous run will be resumed or not.
         reset (bool): Whether the previous run will be reset or not.
+        profile (bool): Whether to profile the training or not. Defaults to False.
         output_dir (str): The output directory for the inference session. Defaults to None.
 
     Returns:
@@ -91,7 +92,7 @@ def main_run(
                 parameters=parameters,
                 resume=resume,
                 reset=reset,
-                _profile=_profile,
+                profile=profile,
             )
     else:
         data_full, headers = parseTrainingCSV(file_data_full, train=train_mode)
@@ -103,6 +104,7 @@ def main_run(
                 parameters=parameters,
                 resume=resume,
                 reset=reset,
+                profile=profile,
             )
         else:
             _, data_full, headers = parseTestingCSV(

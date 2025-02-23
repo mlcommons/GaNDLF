@@ -735,3 +735,8 @@ HPC
 Backpropagation
 reinitialization
 datamodule
+dataloaders
+ntasks
+SBATCH
+srun
+tpu
