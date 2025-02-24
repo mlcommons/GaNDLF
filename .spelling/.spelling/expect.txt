@@ -732,7 +732,6 @@ angi
 progbar
 ddp
 HPC
-Backpropagation
 reinitialization
 datamodule
 dataloaders
