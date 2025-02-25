@@ -9,7 +9,12 @@ from GANDLF.models import global_models_dict
 
 # Define model architecture options
 ARCHITECTURE_OPTIONS = Literal[tuple(global_models_dict.keys())]
+# Define model norm_type options
 NORM_TYPE_OPTIONS = Literal["batch", "instance", "none"]
+# Define model final_layer options
+FINAL_LAYER_OPTIONS = Literal[
+    "sigmoid", "softmax", "logsoftmax", "tanh", "identity", "logits", "regression"
+]
 
 
 # You can define new parameters for model here. Please read the pydantic documentation.
@@ -20,7 +25,7 @@ class Model(BaseModel):
     )  #  it allows extra fields in the model dict
     dimension: Optional[int] = Field(description="Dimension.")
     architecture: Union[ARCHITECTURE_OPTIONS, dict] = Field(description="Architecture.")
-    final_layer: str = Field(description="Final layer.")
+    final_layer: FINAL_LAYER_OPTIONS = Field(description="Final layer.")
     norm_type: Optional[NORM_TYPE_OPTIONS] = Field(
         description="Normalization type.", default="batch"
     )  # TODO: check it again
