@@ -13,7 +13,7 @@ ARCHITECTURE_OPTIONS = Literal[tuple(global_models_dict.keys())]
 NORM_TYPE_OPTIONS = Literal["batch", "instance", "none"]
 # Define model final_layer options
 FINAL_LAYER_OPTIONS = Literal[
-    "sigmoid", "softmax", "logsoftmax", "tanh", "identity", "logits", "regression"
+    "sigmoid", "softmax", "logsoftmax", "tanh", "identity", "logits", "regression", "None", "none"
 ]
 
 
