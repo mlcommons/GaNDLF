@@ -43,7 +43,7 @@ class Model(BaseModel):
     type: Optional[str] = Field(description="Type of model.", default="torch")
     data_type: str = Field(description="Data type.", default="FP32")
     save_at_every_epoch: bool = Field(default=False, description="Save at every epoch.")
-    amp: bool = Field(default=False, description="Amplifier.")
+    amp: bool = Field(default=False, description="Automatic mixed precision")
     ignore_label_validation: Union[int, None] = Field(
         default=None, description="Ignore label validation."
     )  # TODO:  To check it
