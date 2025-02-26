@@ -7,7 +7,7 @@ from GANDLF.Configuration.Parameters.patch_sampler import PatchSampler
 from GANDLF.Configuration.Parameters.scheduler_parameters import Scheduler
 from GANDLF.utils import version_check
 from importlib.metadata import version
-from typing_extensions import Self, Literal, Annotated, Any
+from typing_extensions import Self, Literal, Annotated
 from GANDLF.Configuration.Parameters.validators import (
     validate_schedular,
     validate_optimizer,
