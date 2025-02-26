@@ -42,7 +42,7 @@ class InferenceMechanism(BaseModel):
 class UserDefinedParameters(DefaultParameters):
     version: Version = Field(
         default=Version(minimum=version("GANDLF"), maximum=version("GANDLF")),
-        description="Whether weighted loss is to be used or not.",
+        description="GANDLF version",
     )
     patch_size: Union[list[Union[int, float]], int, float] = Field(
         description="Patch size."
