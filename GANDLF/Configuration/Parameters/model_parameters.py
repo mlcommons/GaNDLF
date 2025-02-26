@@ -23,6 +23,7 @@ FINAL_LAYER_OPTIONS = Literal[
     "None",
     "none",
 ]
+TYPE_OPTIONS = Literal["torch", "openvino"]
 
 
 # You can define new parameters for model here. Please read the pydantic documentation.
@@ -48,7 +49,7 @@ class Model(BaseModel):
         ),
         default=3,
     )  # TODO: check it
-    type: Optional[str] = Field(description="Type of model.", default="torch")
+    type: TYPE_OPTIONS = Field(description="Type of model.", default="torch")
     data_type: str = Field(description="Data type.", default="FP32")
     save_at_every_epoch: bool = Field(default=False, description="Save at every epoch.")
     amp: bool = Field(default=False, description="Automatic mixed precision")
