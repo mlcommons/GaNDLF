@@ -78,7 +78,7 @@ class UserDefinedParameters(DefaultParameters):
     data_postprocessing_after_reverse_one_hot_encoding: dict = Field(
         description="data_postprocessing_after_reverse_one_hot_encoding.", default={}
     )
-    differential_privacy: Any = Field(description="Differential privacy.", default=None)
+    differential_privacy: Union[bool,dict] = Field(description="Differential privacy.", default=None)
     # TODO: It should be defined with a better way (using a BaseModel class)
     data_preprocessing: Annotated[
         dict,
