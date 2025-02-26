@@ -1,4 +1,7 @@
 from pydantic import BaseModel, Field
+from typing_extensions import Literal
+
+TYPE_OPTIONS = Literal["uniform", "label "]
 
 
 class PatchSampler(BaseModel):
