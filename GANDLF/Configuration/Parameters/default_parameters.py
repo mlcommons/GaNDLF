@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
-from typing import Optional, Dict
-from typing_extensions import Union
+from typing import Dict
+from typing_extensions import Union, Literal, Optional
+
+GRID_AGGREGATOR_OVERLAP_OPTIONS = Literal["crop", "average", "hann"]
 
 
 class DefaultParameters(BaseModel):
@@ -54,7 +56,7 @@ class DefaultParameters(BaseModel):
     data_postprocessing: Union[dict, set] = Field(
         default={}, description="Default data postprocessing configuration."
     )
-    grid_aggregator_overlap: str = Field(
+    grid_aggregator_overlap: GRID_AGGREGATOR_OVERLAP_OPTIONS = Field(
         default="crop", description="Default grid aggregator overlap strategy."
     )
     determinism: bool = Field(
