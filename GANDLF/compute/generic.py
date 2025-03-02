@@ -7,12 +7,7 @@ from dataclasses import dataclass
 from GANDLF.models import get_model
 from GANDLF.schedulers import get_scheduler
 from GANDLF.optimizers import get_optimizer
-from GANDLF.data import (
-    get_train_loader,
-    get_validation_loader,
-    get_testing_loader,
-    ImagesFromDataFrame,
-)
+from GANDLF.data import get_train_loader, get_validation_loader, ImagesFromDataFrame
 from GANDLF.utils import (
     populate_header_in_parameters,
     populate_channel_keys_in_params,
@@ -21,9 +16,10 @@ from GANDLF.utils import (
     get_class_imbalance_weights,
 )
 from GANDLF.utils.write_parse import get_dataframe
+from torchio import SubjectsDataset, Queue
+from typing import Union
 
 
-# temporary abstractions to cover lightning port needs
 @dataclass
 class AbstractSubsetDataParser(ABC):
     """
@@ -35,7 +31,14 @@ class AbstractSubsetDataParser(ABC):
     parameters_dict: dict
 
     @abstractmethod
-    def create_subset_dataset(self):
+    def create_subset_dataset(self) -> Union[SubjectsDataset, Queue]:
+        """
+        Method to create the subset dataset based on the subset CSV file
+        and the parameters dict.
+
+        Returns:
+            Union[SubjectsDataset, Queue]: The subset dataset.
+        """
         pass
 
     def get_params_extended_with_subset_data(self) -> dict:
@@ -49,7 +52,7 @@ class AbstractSubsetDataParser(ABC):
 
 
 class TrainingSubsetDataParser(AbstractSubsetDataParser):
-    def create_subset_dataset(self):
+    def create_subset_dataset(self) -> Union[SubjectsDataset, Queue]:
         (
             self.parameters_dict["training_data"],
             headers_to_populate_train,
@@ -80,7 +83,7 @@ class TrainingSubsetDataParser(AbstractSubsetDataParser):
 
 
 class ValidationSubsetDataParser(AbstractSubsetDataParser):
-    def create_subset_dataset(self):
+    def create_subset_dataset(self) -> Union[SubjectsDataset, Queue]:
         (self.parameters_dict["validation_data"], _) = parseTrainingCSV(
             self.subset_csv_path, train=False
         )
@@ -97,7 +100,7 @@ class ValidationSubsetDataParser(AbstractSubsetDataParser):
 
 
 class TestSubsetDataParser(AbstractSubsetDataParser):
-    def create_subset_dataset(self):
+    def create_subset_dataset(self) -> Union[SubjectsDataset, Queue]:
         testing_dataset = ImagesFromDataFrame(
             get_dataframe(self.subset_csv_path),
             self.parameters_dict,
