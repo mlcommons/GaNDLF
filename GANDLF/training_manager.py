@@ -259,9 +259,6 @@ def TrainingManager_split(
         precision in allowed_precisions
     ), f"Invalid precision selected: {precision}. Please select from {allowed_precisions}"
 
-    warn(
-        f"Using {accelerator} with {strategy} for training. Trainer will use only single accelerator instance. "
-    )
     trainer = pl.Trainer(
         accelerator=accelerator,
         strategy=strategy,
