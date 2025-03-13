@@ -24,7 +24,7 @@ FINAL_LAYER_OPTIONS = Literal[
     "none",
 ]
 TYPE_OPTIONS = Literal["torch", "openvino"]
-
+DIMENSIONS_OPTIONS = Literal[2, 3]
 
 # You can define new parameters for model here. Please read the pydantic documentation.
 # It allows extra fields in model dict.
@@ -32,7 +32,7 @@ class Model(BaseModel):
     model_config = ConfigDict(
         extra="allow"
     )  #  it allows extra fields in the model dict
-    dimension: Optional[int] = Field(description="Dimension.")
+    dimension: Optional[DIMENSIONS_OPTIONS] = Field(description="model input dimension (2D or 3D).")
     architecture: Union[ARCHITECTURE_OPTIONS, dict] = Field(description="Architecture.")
     final_layer: FINAL_LAYER_OPTIONS = Field(description="Final layer.")
     norm_type: Optional[NORM_TYPE_OPTIONS] = Field(
