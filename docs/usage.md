@@ -420,7 +420,7 @@ For more information about using a custom entrypoint script, see the examples [h
 
 ## Federating your model using OpenFL
 
-Once you have a model definition, it is easy to perform federated learning using the [Open Federated Learning (OpenFL) library](https://github.com/securefederatedai/openfl). Follow the tutorial in [this page](https://openfl.readthedocs.io/en/latest/running_the_federation_with_gandlf.html) to get started.
+Once you have a model definition, it is easy to perform federated learning using the [Open Federated Learning (OpenFL) library](https://github.com/securefederatedai/openfl). Follow the tutorial in [this page](https://openfl.readthedocs.io/en/latest/developer_guide/running_the_federation_with_gandlf.html) to get started.
 
 
 ## Federating your model evaluation using MedPerf
