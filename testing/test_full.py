@@ -3492,21 +3492,20 @@ def test_generic_profiling_function_mainrun(device):
 
 
 def test_model_successful_generic_config(device):
-
     model = Model(
-        dimension = 3,
-        architecture = "vgg16",
-        final_layer= "sigmoid",
-        norm_type= "batch",
-        base_filters= None,
-        class_list= [],
-        num_channels= 3,
-        type= "torch",
-        data_type= "FP32",
-        save_at_every_epoch= False,
-        amp= False,
-        ignore_label_validation= None,
-        print_summary= True
+        dimension=3,
+        architecture="vgg16",
+        final_layer="sigmoid",
+        norm_type="batch",
+        base_filters=None,
+        class_list=[],
+        num_channels=3,
+        type="torch",
+        data_type="FP32",
+        save_at_every_epoch=False,
+        amp=False,
+        ignore_label_validation=None,
+        print_summary=True,
     )
 
     assert model.dimension == 3, "Dimension should be 3"
@@ -3520,16 +3519,9 @@ def test_model_successful_generic_config(device):
     assert model.data_type == "FP32", "Data_type should be 'FP32'"
     assert model.save_at_every_epoch is False, "Save_at_every_epoch should be False"
     assert model.amp is False, "amp should be False"
-    assert model.ignore_label_validation is None, "Ignore_label_validation should be None"
+    assert (
+        model.ignore_label_validation is None
+    ), "Ignore_label_validation should be None"
     assert model.print_summary is True, "Print_summary should be True"
 
     print("passed")
-
-
-
-
-
-
-
-
-
