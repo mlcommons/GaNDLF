@@ -100,7 +100,7 @@ def parseTrainingCSV(
 
     for col in data_full.columns:
         # add appropriate headers to read here, as needed
-        col_lower = col.lower()
+        col_lower = str(col).lower()
         currentHeaderLoc = data_full.columns.get_loc(col)
         if (
             ("channel" in col_lower)

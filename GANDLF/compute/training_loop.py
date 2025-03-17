@@ -13,9 +13,9 @@ from GANDLF.grad_clipping.grad_scaler import GradScaler, model_parameters_exclud
 from GANDLF.grad_clipping.clip_gradients import dispatch_clip_grad_
 from GANDLF.utils import (
     get_date_time,
-    best_model_path_end,
-    latest_model_path_end,
-    initial_model_path_end,
+    BEST_MODEL_PATH_END,
+    LATEST_MODEL_PATH_END,
+    INITIAL_MODEL_PATH_END,
     save_model,
     optimize_and_save_model,
     load_model,
@@ -281,13 +281,13 @@ def training_loop(
     first_model_saved = False
     model_paths = {
         "best": os.path.join(
-            output_dir, params["model"]["architecture"] + best_model_path_end
+            output_dir, params["model"]["architecture"] + BEST_MODEL_PATH_END
         ),
         "initial": os.path.join(
-            output_dir, params["model"]["architecture"] + initial_model_path_end
+            output_dir, params["model"]["architecture"] + INITIAL_MODEL_PATH_END
         ),
         "latest": os.path.join(
-            output_dir, params["model"]["architecture"] + latest_model_path_end
+            output_dir, params["model"]["architecture"] + LATEST_MODEL_PATH_END
         ),
     }
 
@@ -481,14 +481,14 @@ def training_loop(
                 + str(mem[3])
             )
             if params["device"] == "cuda":
-                mem_cuda = torch.cuda.memory_stats()
+                cuda_memory_stats = torch.cuda.memory_stats()
                 outputToWrite_mem += (
                     ","
-                    + str(mem_cuda["active.all.peak"])
+                    + str(cuda_memory_stats["active.all.peak"])
                     + ","
-                    + str(mem_cuda["active.all.current"])
+                    + str(cuda_memory_stats["active.all.current"])
                     + ","
-                    + str(mem_cuda["active.all.allocated"])
+                    + str(cuda_memory_stats["active.all.allocated"])
                 )
             outputToWrite_mem += ",\n"
             file_mem.write(outputToWrite_mem)

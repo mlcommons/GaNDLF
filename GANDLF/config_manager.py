@@ -11,6 +11,7 @@ from GANDLF.privacy.opacus import parse_opacus_params
 
 from GANDLF.metrics import surface_distance_ids
 from importlib.metadata import version
+from warnings import warn
 
 ## dictionary to define defaults for appropriate options, which are evaluated
 parameter_defaults = {
@@ -645,11 +646,9 @@ def _parseConfig(
 
     parallel_compute_command = ""
     if "parallel_compute_command" in params:
-        parallel_compute_command = params["parallel_compute_command"]
-        parallel_compute_command = parallel_compute_command.replace("'", "")
-        parallel_compute_command = parallel_compute_command.replace('"', "")
-    params["parallel_compute_command"] = parallel_compute_command
-
+        warn(
+            "parallel_compute_command is deprecated, please refer to migration guide to get information about configuring distributed training"
+        )
     if "opt" in params:
         print("DeprecationWarning: 'opt' has been superseded by 'optimizer'")
         params["optimizer"] = params["opt"]

@@ -18,8 +18,8 @@ from torch.cuda.amp import autocast
 import openslide
 from GANDLF.data import get_testing_loader
 from GANDLF.utils import (
-    best_model_path_end,
-    latest_model_path_end,
+    BEST_MODEL_PATH_END,
+    LATEST_MODEL_PATH_END,
     load_ov_model,
     print_model_summary,
     applyCustomColorMap,
@@ -72,11 +72,11 @@ def inference_loop(
             files_to_check = [
                 os.path.join(
                     modelDir,
-                    str(parameters["model"]["architecture"]) + best_model_path_end,
+                    str(parameters["model"]["architecture"]) + BEST_MODEL_PATH_END,
                 ),
                 os.path.join(
                     modelDir,
-                    str(parameters["model"]["architecture"]) + latest_model_path_end,
+                    str(parameters["model"]["architecture"]) + LATEST_MODEL_PATH_END,
                 ),
             ]
 
