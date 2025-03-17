@@ -69,9 +69,10 @@ def initialize_key(
     return parameters
 
 
-# Define custom errors
+# Define custom error messages. The key must be a pydantic type error.
 CUSTOM_MESSAGES = {
-    "literal_error": "The input must be a valid option, please read the documentation"
+    "literal_error": "The input must be a valid option, please read the documentation",
+    "missing": "This parameter is required. Please define it",
 }
 
 
@@ -79,7 +80,6 @@ def convert_errors(e: ValidationError, custom_messages=None) -> list[ErrorDetail
     if custom_messages is None:
         custom_messages = CUSTOM_MESSAGES
     new_errors: list[ErrorDetails] = []
-
     for error in e.errors():
         custom_message = custom_messages.get(error["type"])
         if custom_message:
@@ -93,9 +93,12 @@ def extract_messages(errors: list[ErrorDetails]) -> list[str]:
     error_messages: list[str] = []
     for error in errors:
         location = error.get("loc")
-        parameter_name = location[0]
-        parameter_second = location[1] if location[1] else None
-        message = f"Configuration Error: Parameter: {parameter_name,parameter_second} - {error['msg']}"
+        if len(location) == 2:
+            message = f"Configuration Error: Parameter: ({location[0]}, {location[1]}) - {error['msg']}"
+        else:
+            message = (
+                f"Configuration Error: Parameter: ({location[0]}) - {error['msg']}"
+            )
         error_messages.append(message)
     return error_messages
 
