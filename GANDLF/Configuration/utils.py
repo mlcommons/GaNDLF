@@ -1,8 +1,10 @@
+import logging
 from typing import Optional, Union
 
 
 from typing import Type
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
+from pydantic_core import ErrorDetails
 
 
 def generate_and_save_markdown(model: Type[BaseModel], file_path: str) -> None:
@@ -65,3 +67,41 @@ def initialize_key(
         parameters[key] = value  # if key is absent
 
     return parameters
+
+#Define custom errors
+CUSTOM_MESSAGES = {
+    'literal_error': 'The input must be a valid option, please read the documentation',
+}
+
+def convert_errors(
+    e: ValidationError, custom_messages=None
+) -> list[ErrorDetails]:
+    if custom_messages is None:
+        custom_messages = CUSTOM_MESSAGES
+    new_errors: list[ErrorDetails] = []
+
+    for error in e.errors():
+        custom_message = custom_messages.get(error['type'])
+        if custom_message:
+            ctx = error.get('ctx')
+            error['msg'] = (
+                custom_message.format(**ctx) if ctx else custom_message
+            )
+        new_errors.append(error)
+    return new_errors
+
+def extract_messages(errors: list[ErrorDetails]) -> list[str]:
+    error_messages:list[str] = []
+    for error in errors:
+        location = error.get('loc')
+        parameter_name = location[0]
+        parameter_second =  location[1] if location[1] else None
+        message = f"Configuration Error: Parameter: {parameter_name,parameter_second} - {error['msg']}"
+        error_messages.append(message)
+    return error_messages
+
+
+def handle_configuration_errors(e: ValidationError):
+    messages = extract_messages(convert_errors(e))
+    for message in messages:
+        logging.error(message)

@@ -1,9 +1,12 @@
-# import logging
+import logging
 import traceback
 from typing import Union
 import yaml
+from pydantic import ValidationError
+
 from GANDLF.Configuration.Parameters.parameters import Parameters
 from GANDLF.Configuration.Parameters.exclude_parameters import exclude_parameters
+from GANDLF.Configuration.utils import convert_errors, handle_configuration_errors
 
 
 def _parseConfig(
@@ -51,6 +54,9 @@ def ConfigManager(
             }
         )
         return parameters
+    except ValidationError as e:
+         handle_configuration_errors(e)
+
     except Exception as e:
         ## todo: ensure logging captures assertion errors
         assert (
