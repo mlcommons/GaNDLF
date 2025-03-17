@@ -3526,6 +3526,7 @@ def test_model_successful_generic_config(device):
 
     print("passed")
 
+
 def test_model_fail_generic_config(device):
     model = Model(
         dimension=3,
@@ -3560,4 +3561,3 @@ def test_model_fail_generic_config(device):
     assert model.print_summary is True, "Print_summary should be True"
 
     print("passed")
-

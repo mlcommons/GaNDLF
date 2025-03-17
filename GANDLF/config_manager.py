@@ -55,7 +55,7 @@ def ConfigManager(
         )
         return parameters
     except ValidationError as e:
-         handle_configuration_errors(e)
+        handle_configuration_errors(e)
 
     except Exception as e:
         ## todo: ensure logging captures assertion errors

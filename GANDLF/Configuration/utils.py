@@ -68,34 +68,33 @@ def initialize_key(
 
     return parameters
 
-#Define custom errors
+
+# Define custom errors
 CUSTOM_MESSAGES = {
-    'literal_error': 'The input must be a valid option, please read the documentation',
+    "literal_error": "The input must be a valid option, please read the documentation"
 }
 
-def convert_errors(
-    e: ValidationError, custom_messages=None
-) -> list[ErrorDetails]:
+
+def convert_errors(e: ValidationError, custom_messages=None) -> list[ErrorDetails]:
     if custom_messages is None:
         custom_messages = CUSTOM_MESSAGES
     new_errors: list[ErrorDetails] = []
 
     for error in e.errors():
-        custom_message = custom_messages.get(error['type'])
+        custom_message = custom_messages.get(error["type"])
         if custom_message:
-            ctx = error.get('ctx')
-            error['msg'] = (
-                custom_message.format(**ctx) if ctx else custom_message
-            )
+            ctx = error.get("ctx")
+            error["msg"] = custom_message.format(**ctx) if ctx else custom_message
         new_errors.append(error)
     return new_errors
 
+
 def extract_messages(errors: list[ErrorDetails]) -> list[str]:
-    error_messages:list[str] = []
+    error_messages: list[str] = []
     for error in errors:
-        location = error.get('loc')
+        location = error.get("loc")
         parameter_name = location[0]
-        parameter_second =  location[1] if location[1] else None
+        parameter_second = location[1] if location[1] else None
         message = f"Configuration Error: Parameter: {parameter_name,parameter_second} - {error['msg']}"
         error_messages.append(message)
     return error_messages
