@@ -3535,7 +3535,7 @@ def test_model_fail_generic_config(device):
     ):
         model = Model(
             dimension=3,
-            architecture="fsdfsd",
+            architecture="fsdfsld",
             final_layer="sigmoid",
             norm_type="batch",
             base_filters=32,
