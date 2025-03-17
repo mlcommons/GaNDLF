@@ -3529,13 +3529,10 @@ def test_model_successful_generic_config(device):
 
 
 def test_model_fail_generic_config(device):
-    with pytest.raises(
-        ValidationError,
-        match="The input must be a valid option, please read the documentation",
-    ):
+    with pytest.raises(ValidationError, match = "The input must be a valid option, please read the documentation") :
         model = Model(
             dimension=3,
-            architecture="fsdfsld",
+            architecture="fsdfsd",
             final_layer="sigmoid",
             norm_type="batch",
             base_filters=32,
@@ -3548,5 +3545,8 @@ def test_model_fail_generic_config(device):
             ignore_label_validation=None,
             print_summary=True,
         )
+
+
+
 
     print("passed")
