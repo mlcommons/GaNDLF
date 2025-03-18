@@ -3529,7 +3529,8 @@ def test_model_successful_generic_config(device):
 
 
 def test_model_fail_generic_config(device):
-    with pytest.raises(ValidationError):
+
+    with pytest.raises(ValidationError) as exc_info:
         model = Model(
             dimension=3,
             architecture="fsdfsd",
