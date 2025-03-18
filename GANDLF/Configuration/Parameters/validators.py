@@ -4,9 +4,9 @@ from copy import deepcopy
 from GANDLF.data.post_process import postprocessing_after_reverse_one_hot_encoding
 import numpy as np
 import sys
-from GANDLF.Configuration.Parameters.optimizer_parameters import Optimizer
-from GANDLF.Configuration.Parameters.patch_sampler import PatchSampler
-from GANDLF.Configuration.Parameters.scheduler_parameters import Scheduler
+from GANDLF.Configuration.Parameters.optimizer_parameters import OptimizerConfig
+from GANDLF.Configuration.Parameters.patch_sampler import PatchSamplerConfig
+from GANDLF.Configuration.Parameters.scheduler_parameters import SchedulerConfig
 from GANDLF.Configuration.utils import initialize_key
 from GANDLF.metrics import surface_distance_ids
 
@@ -169,7 +169,7 @@ def validate_parallel_compute_command(value):
 
 def validate_schedular(value, learning_rate):
     if isinstance(value, str):
-        value = Scheduler(type=value)
+        value = SchedulerConfig(type=value)
     if value.step_size is None:
         value.step_size = learning_rate / 5.0
     return value
@@ -177,7 +177,7 @@ def validate_schedular(value, learning_rate):
 
 def validate_optimizer(value):
     if isinstance(value, str):
-        value = Optimizer(type=value)
+        value = OptimizerConfig(type=value)
     return value
 
 
@@ -268,7 +268,7 @@ def validate_data_postprocessing_after_reverse_one_hot_encoding(
 
 def validate_patch_sampler(value):
     if isinstance(value, str):
-        value = PatchSampler(type=value.lower())
+        value = PatchSamplerConfig(type=value.lower())
     return value
 
 

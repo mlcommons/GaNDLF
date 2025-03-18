@@ -7,7 +7,7 @@ TYPE_OPTIONS = Literal[tuple(global_schedulers_dict.keys())]
 
 
 # It allows extra parameters
-class Scheduler(BaseModel):
+class SchedulerConfig(BaseModel):
     model_config = ConfigDict(extra="allow")
     type: TYPE_OPTIONS = Field(
         description="triangle/triangle_modified use LambdaLR but triangular/triangular2/exp_range uses CyclicLR"

@@ -2,9 +2,9 @@ from typing import Union
 from pydantic import BaseModel, model_validator, Field, AfterValidator
 from GANDLF.Configuration.Parameters.default_parameters import DefaultParameters
 from GANDLF.Configuration.Parameters.nested_training_parameters import NestedTraining
-from GANDLF.Configuration.Parameters.optimizer_parameters import Optimizer
-from GANDLF.Configuration.Parameters.patch_sampler import PatchSampler
-from GANDLF.Configuration.Parameters.scheduler_parameters import Scheduler
+from GANDLF.Configuration.Parameters.optimizer_parameters import  OptimizerConfig
+from GANDLF.Configuration.Parameters.patch_sampler import  PatchSamplerConfig
+from GANDLF.Configuration.Parameters.scheduler_parameters import SchedulerConfig
 from GANDLF.utils import version_check
 from importlib.metadata import version
 from typing_extensions import Self, Literal, Annotated
@@ -21,7 +21,7 @@ from GANDLF.Configuration.Parameters.validators import (
     validate_data_postprocessing_after_reverse_one_hot_encoding,
     validate_differential_privacy,
 )
-from GANDLF.Configuration.Parameters.model_parameters import Model
+from GANDLF.Configuration.Parameters.model_parameters import ModelConfig
 
 
 class Version(BaseModel):  # TODO: Maybe should be to another folder
@@ -34,7 +34,7 @@ class Version(BaseModel):  # TODO: Maybe should be to another folder
             return self
 
 
-class InferenceMechanism(BaseModel):
+class InferenceMechanismConfig(BaseModel):
     grid_aggregator_overlap: Literal["crop", "average"] = Field(default="crop")
     patch_overlap: int = Field(default=0)
 
@@ -47,7 +47,7 @@ class UserDefinedParameters(DefaultParameters):
     patch_size: Union[list[Union[int, float]], int, float] = Field(
         description="Patch size."
     )
-    model: Model = Field(..., description="The model to use. ")
+    model: ModelConfig = Field(..., description="The model to use. ")
     modality: Literal["rad", "histo", "path"] = Field(description="Modality.")
     loss_function: Annotated[
         Union[dict, str],
@@ -63,17 +63,17 @@ class UserDefinedParameters(DefaultParameters):
     parallel_compute_command: str = Field(
         default="", description="Parallel compute command."
     )
-    scheduler: Union[str, Scheduler] = Field(
-        description="Scheduler.", default=Scheduler(type="triangle_modified")
+    scheduler: Union[str, SchedulerConfig] = Field(
+        description="Scheduler.", default=SchedulerConfig(type="triangle_modified")
     )
-    optimizer: Union[str, Optimizer] = Field(
-        description="Optimizer.", default=Optimizer(type="adam")
+    optimizer: Union[str, OptimizerConfig] = Field(
+        description="Optimizer.", default=OptimizerConfig(type="adam")
     )  # TODO: Check it again for (opt)
-    patch_sampler: Union[str, PatchSampler] = Field(
-        description="Patch sampler.", default=PatchSampler()
+    patch_sampler: Union[str, PatchSamplerConfig] = Field(
+        description="Patch sampler.", default=PatchSamplerConfig()
     )
-    inference_mechanism: InferenceMechanism = Field(
-        description="Inference mechanism.", default=InferenceMechanism()
+    inference_mechanism: InferenceMechanismConfig = Field(
+        description="Inference mechanism.", default=InferenceMechanismConfig()
     )
     data_postprocessing_after_reverse_one_hot_encoding: dict = Field(
         description="data_postprocessing_after_reverse_one_hot_encoding.", default={}

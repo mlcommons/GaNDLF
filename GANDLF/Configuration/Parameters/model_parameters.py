@@ -29,7 +29,7 @@ DIMENSIONS_OPTIONS = Literal[2, 3]
 
 # You can define new parameters for model here. Please read the pydantic documentation.
 # It allows extra fields in model dict.
-class Model(BaseModel):
+class ModelConfig(BaseModel):
     model_config = ConfigDict(
         extra="allow"
     )  #  it allows extra fields in the model dict

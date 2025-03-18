@@ -6,5 +6,5 @@ from GANDLF.optimizers import global_optimizer_dict
 OPTIMIZER_OPTIONS = Literal[tuple(global_optimizer_dict.keys())]
 
 
-class Optimizer(BaseModel):
+class OptimizerConfig(BaseModel):
     type: OPTIMIZER_OPTIONS = Field(description="Type of optimizer to use")
