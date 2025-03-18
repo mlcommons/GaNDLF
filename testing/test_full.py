@@ -3546,5 +3546,8 @@ def test_model_fail_generic_config(device):
             ignore_label_validation=None,
             print_summary=True,
         )
+    error = exc_info.value
+    assert error.errors()[0]["type"] == "literal_error"
+    assert error.errors()[0]["type"] == "dict_type"
 
     print("passed")
