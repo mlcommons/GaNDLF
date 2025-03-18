@@ -10,7 +10,7 @@ from pydantic import ValidationError
 from pydicom.data import get_testdata_file
 import cv2
 
-from GANDLF.Configuration.Parameters.model_parameters import Model
+from GANDLF.Configuration.Parameters.model_parameters import ModelConfig
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
 from GANDLF.utils import parseTestingCSV, get_tensor_from_image
@@ -3493,7 +3493,7 @@ def test_generic_profiling_function_mainrun(device):
 
 
 def test_model_successful_generic_config(device):
-    model = Model(
+    model = ModelConfig(
         dimension=3,
         architecture="vgg16",
         final_layer="sigmoid",
@@ -3530,7 +3530,7 @@ def test_model_successful_generic_config(device):
 
 def test_model_fail_generic_config(device):
     with pytest.raises(ValidationError) as exc_info:
-        model = Model(
+         ModelConfig(
             dimension=3,
             architecture="architecture",  # invalid value
             final_layer="sigmoid",
