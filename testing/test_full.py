@@ -3492,61 +3492,23 @@ def test_generic_profiling_function_mainrun(device):
     print("passed")
 
 
-def test_model_successful_generic_config(device):
-    model = ModelConfig(
-        dimension=3,
-        architecture="vgg16",
-        final_layer="sigmoid",
-        norm_type="batch",
-        base_filters=None,
-        class_list=[],
-        num_channels=3,
-        type="torch",
-        data_type="FP32",
-        save_at_every_epoch=False,
-        amp=False,
-        ignore_label_validation=None,
-        print_summary=True,
-    )
+def test_parameters_failure_generic_config(caplog):
+    # Read the parameters_configuration file. This file contains all the parameters for testing
+    with caplog.at_level(logging.ERROR):
+        with pytest.raises(ValueError):
+            params = yaml.safe_load(
+                open(testingDir + "/parameters_configuration.yaml", "r")
+            )
 
-    assert model.dimension == 3, "Dimension should be 3"
-    assert model.architecture == "vgg16", "Architecture should be 'vgg16'"
-    assert model.final_layer == "sigmoid", "Final_layer should be 'sigmoid'"
-    assert model.norm_type == "batch", "Norm_type should be 'batch'"
-    assert model.base_filters is None, "Base_filters should be None"
-    assert model.class_list == [], "Class_list should be an empty list"
-    assert model.num_channels == 3, "Num channels should be 3"
-    assert model.type == "torch", "Type should be 'torch'"
-    assert model.data_type == "FP32", "Data_type should be 'FP32'"
-    assert model.save_at_every_epoch is False, "Save_at_every_epoch should be False"
-    assert model.amp is False, "amp should be False"
+            parseConfig(params, version_check_flag=False)
+
+    assert "(patch_size) - This parameter is required. Please define it" in caplog.text
+    assert "(model) - This parameter is required. Please define it" in caplog.text
+    assert "(modality) - This parameter is required. Please define it" in caplog.text
     assert (
-        model.ignore_label_validation is None
-    ), "Ignore_label_validation should be None"
-    assert model.print_summary is True, "Print_summary should be True"
-
-    print("passed")
-
-
-def test_model_fail_generic_config(device):
-    with pytest.raises(ValidationError) as exc_info:
-        ModelConfig(
-            dimension=3,
-            architecture="architecture",  # invalid value
-            final_layer="sigmoid",
-            norm_type="batch",
-            base_filters=32,
-            class_list=[],
-            num_channels=3,
-            type="torch",
-            data_type="FP32",
-            save_at_every_epoch=False,
-            amp=False,
-            ignore_label_validation=None,
-            print_summary=True,
-        )
-    error = exc_info.value
-    assert error.errors()[0]["type"] == "literal_error"
-    assert error.errors()[1]["type"] == "dict_type"
-
-    print("passed")
+        "(loss_function) - This parameter is required. Please define it" in caplog.text
+    )
+    assert (
+        "(nested_training) - This parameter is required. Please define it"
+        in caplog.text
+    )
