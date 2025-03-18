@@ -3548,6 +3548,6 @@ def test_model_fail_generic_config(device):
         )
     error = exc_info.value
     assert error.errors()[0]["type"] == "literal_error"
-    assert error.errors()[0]["type"] == "dict_type"
+    assert error.errors()[1]["type"] == "dict_type"
 
     print("passed")
