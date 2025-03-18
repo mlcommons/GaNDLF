@@ -3529,11 +3529,10 @@ def test_model_successful_generic_config(device):
 
 
 def test_model_fail_generic_config(device):
-
     with pytest.raises(ValidationError) as exc_info:
         model = Model(
             dimension=3,
-            architecture="architecture", #invalid value
+            architecture="architecture",  # invalid value
             final_layer="sigmoid",
             norm_type="batch",
             base_filters=32,
