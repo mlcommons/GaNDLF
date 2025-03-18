@@ -5,7 +5,7 @@ from pydantic import ValidationError
 
 from GANDLF.Configuration.Parameters.parameters import Parameters
 from GANDLF.Configuration.Parameters.exclude_parameters import exclude_parameters
-from GANDLF.Configuration.utils import convert_errors, handle_configuration_errors
+from GANDLF.Configuration.utils import handle_configuration_errors
 
 
 def _parseConfig(
