@@ -12,7 +12,8 @@ We use the Pydantic library for parameter configuration. Parameters are organize
 - **PatchSampleConfig**: Contains parameters for the patch sampler.
 
 #### How to Define New Parameters
-To define new parameters, create a new BaseModel class and add the parameter to one of the basic classes (UserDefinedParameters or DefaultParameters).
+To define new parameters, add new parameters directly in the classes. 
+Also, create a new BaseModel class and add it to one of the basic classes (UserDefinedParameters or DefaultParameters).
 
 If validation is required, you can define it in the validators file.
 For more details, refer to the [Pydantic documentation](https://docs.pydantic.dev/latest/).
