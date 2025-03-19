@@ -1,18 +1,19 @@
-### Pydantic configuration
-We use the pydantic library for parameters configuration.
-We separate the parameters via their contex in the above base model classes.
+### Parameters Configuration
+We use the Pydantic library for parameter configuration. Parameters are organized by context within the base model classes described below.
 
-The basic classes are:
-- The **default_parameters** contains the parameters that are initialized from the application directly.
-- The **UserDefinedParameters** contains the parameters that the user should define.
+#### Basic Classes
+- **DefaultParameters**: Contains parameters initialized directly from the application.
+- **UserDefinedParameters**: Contains parameters that the user must define.
+##### Other Subclasses
+- **ModelConfig**: Contains parameters specific to the model.
+- **OptimizerConfig**: Contains parameters for the optimizer.
+- **SchedulerConfig**: Contains parameters for the scheduler.
+- **NestedTrainingConfig**: Contains parameters for nested training.
+- **PatchSampleConfig**: Contains parameters for the patch sampler.
 
-The other subclasses are:
-- The ModelConfig contains the parameters for Model.
-- The OptimizerConfig contains the parameters for the Optimizer.
-- The SchedulerConfig contains the parameters for the Scheduler.
-- The NestedTrainingConfig contains the parameters for the Nesting Training
-- The PatchSampleConfig contains the parameters for the PatchSampler
+#### How to Define New Parameters
+To define new parameters, create a new BaseModel class and add the parameter to one of the basic classes (UserDefinedParameters or DefaultParameters).
 
-### How to define new parameters.
-You can define a new BaseModel class and add the parameter in one of the basic classes (UserDefineParameters,DefaultParameters). 
-Also, in the validators file can be defined your validation if is needed. Please read the Pydantic documentation for more details.
+If validation is required, you can define it in the validators file.
+For more details, refer to the [Pydantic documentation](https://docs.pydantic.dev/latest/).
+ 
