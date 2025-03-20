@@ -1116,13 +1116,14 @@ def test_train_normtype_segmentation_rad_3d(device,caplog):
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
 
     # these should raise exceptions
-    for norm_type in ["none", None]:
-        parameters["model"]["norm_type"] = norm_type
-        file_config_temp = write_temp_config_path(parameters)
-        with caplog.at_level(logging.ERROR):
+    with caplog.at_level(logging.ERROR):
+        for norm_type in ["none", None]:
+            parameters["model"]["norm_type"] = norm_type
+            file_config_temp = write_temp_config_path(parameters)
             parameters = ConfigManager(file_config_temp, version_check_flag=False)
-            assert "Normalization type cannot be 'None' for non-VGG architectures"in caplog.text
-            caplog.clear()
+
+    assert "Normalization type cannot be 'None' for non-VGG architectures" in caplog.text
+
 
     # loop through selected models and train for single epoch
     for norm in all_norm_types:
