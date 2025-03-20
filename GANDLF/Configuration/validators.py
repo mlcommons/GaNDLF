@@ -1,6 +1,8 @@
 import ast
 import traceback
 from copy import deepcopy
+
+from GANDLF.Configuration.differential_privacy_config import DifferentialPrivacyConfig
 from GANDLF.data.post_process import postprocessing_after_reverse_one_hot_encoding
 import numpy as np
 import sys
@@ -412,15 +414,8 @@ def validate_differential_privacy(value, batch_size):
         print(
             "WARNING: Non dictionary value for the key: 'differential_privacy' was used, replacing with default valued dictionary."
         )
-        value = {}
+        value = DifferentialPrivacyConfig(physical_batch_size= batch_size).model_dump()
     # these are some defaults
-    value = initialize_key(value, "noise_multiplier", 10.0)
-    value = initialize_key(value, "max_grad_norm", 1.0)
-    value = initialize_key(value, "accountant", "rdp")
-    value = initialize_key(value, "secure_mode", False)
-    value = initialize_key(value, "allow_opacus_model_fix", True)
-    value = initialize_key(value, "delta", 1e-5)
-    value = initialize_key(value, "physical_batch_size", batch_size)
 
     if value["physical_batch_size"] > batch_size:
         print(
@@ -433,4 +428,5 @@ def validate_differential_privacy(value, batch_size):
     for key in ["noise_multiplier", "max_grad_norm", "delta", "epsilon"]:
         if key in value:
             value[key] = float(value[key])
-    return value
+
+    return DifferentialPrivacyConfig(**value)

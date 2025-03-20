@@ -1,6 +1,7 @@
 from typing import Union
 from pydantic import BaseModel, model_validator, Field, AfterValidator
 from GANDLF.Configuration.default_config import DefaultParameters
+from GANDLF.Configuration.differential_privacy_config import DifferentialPrivacyConfig
 from GANDLF.Configuration.nested_training_config import NestedTraining
 from GANDLF.Configuration.optimizer_config import OptimizerConfig
 from GANDLF.Configuration.patch_sampler_config import PatchSamplerConfig
@@ -78,8 +79,8 @@ class UserDefinedParameters(DefaultParameters):
     data_postprocessing_after_reverse_one_hot_encoding: dict = Field(
         description="data_postprocessing_after_reverse_one_hot_encoding.", default={}
     )
-    differential_privacy: Union[bool, dict] = Field(
-        description="Differential privacy.", default=None
+    differential_privacy: Union[bool, DifferentialPrivacyConfig] = Field(
+        description="Differential privacy.", default=DifferentialPrivacyConfig()
     )
     # TODO: It should be defined with a better way (using a BaseModel class)
     data_preprocessing: Annotated[
