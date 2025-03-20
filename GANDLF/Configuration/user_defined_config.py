@@ -80,7 +80,7 @@ class UserDefinedParameters(DefaultParameters):
         description="data_postprocessing_after_reverse_one_hot_encoding.", default={}
     )
     differential_privacy: Union[bool, DifferentialPrivacyConfig] = Field(
-        description="Differential privacy.", default=DifferentialPrivacyConfig()
+        description="Differential privacy."
     )
     # TODO: It should be defined with a better way (using a BaseModel class)
     data_preprocessing: Annotated[

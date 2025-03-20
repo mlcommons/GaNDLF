@@ -414,7 +414,7 @@ def validate_differential_privacy(value, batch_size):
         print(
             "WARNING: Non dictionary value for the key: 'differential_privacy' was used, replacing with default valued dictionary."
         )
-        value = DifferentialPrivacyConfig(physical_batch_size= batch_size).model_dump()
+        value = DifferentialPrivacyConfig(physical_batch_size=batch_size).model_dump()
     # these are some defaults
 
     if value["physical_batch_size"] > batch_size:
