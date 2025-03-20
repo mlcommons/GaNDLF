@@ -61,8 +61,8 @@ def ConfigManager(
         ## todo: ensure logging captures assertion errors
         else:
             assert (
-            False
-        ), f"Config parsing failed: {config_file_path=}, {version_check_flag=}, Exception: {str(e)}, {traceback.format_exc()}"
+                False
+            ), f"Config parsing failed: {config_file_path=}, {version_check_flag=}, Exception: {str(e)}, {traceback.format_exc()}"
         # logging.error(
         #     f"gandlf config parsing failed: {config_file_path=}, {version_check_flag=}, Exception: {str(e)}, {traceback.format_exc()}"
         # )
