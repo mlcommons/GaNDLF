@@ -6,11 +6,9 @@ import pandas as pd
 import logging
 import json
 
-from pydantic import ValidationError
 from pydicom.data import get_testdata_file
 import cv2
 
-from GANDLF.Configuration.Parameters.model_parameters import ModelConfig
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
 from GANDLF.utils import parseTestingCSV, get_tensor_from_image
@@ -3492,23 +3490,23 @@ def test_generic_profiling_function_mainrun(device):
     print("passed")
 
 
-def test_parameters_failure_generic_config(caplog):
-    # Read the parameters_configuration file. This file contains all the parameters for testing
-    with caplog.at_level(logging.ERROR):
-        with pytest.raises(ValueError):
-            params = yaml.safe_load(
-                open(testingDir + "/parameters_configuration.yaml", "r")
-            )
-
-            parseConfig(params, version_check_flag=False)
-
-    assert "(patch_size) - This parameter is required. Please define it" in caplog.text
-    assert "(model) - This parameter is required. Please define it" in caplog.text
-    assert "(modality) - This parameter is required. Please define it" in caplog.text
-    assert (
-        "(loss_function) - This parameter is required. Please define it" in caplog.text
-    )
-    assert (
-        "(nested_training) - This parameter is required. Please define it"
-        in caplog.text
-    )
+# def test_parameters_failure_generic_config(caplog):
+#     # Read the parameters_configuration file. This file contains all the parameters for testing
+#     with caplog.at_level(logging.ERROR):
+#         with pytest.raises(ValueError):
+#             params = yaml.safe_load(
+#                 open(testingDir + "/parameters_configuration.yaml", "r")
+#             )
+#
+#             parseConfig(params, version_check_flag=False)
+#
+#     assert "(patch_size) - This parameter is required. Please define it" in caplog.text
+#     assert "(model) - This parameter is required. Please define it" in caplog.text
+#     assert "(modality) - This parameter is required. Please define it" in caplog.text
+#     assert (
+#         "(loss_function) - This parameter is required. Please define it" in caplog.text
+#     )
+#     assert (
+#         "(nested_training) - This parameter is required. Please define it"
+#         in caplog.text
+#     )

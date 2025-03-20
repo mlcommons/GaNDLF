@@ -4,9 +4,9 @@ from copy import deepcopy
 from GANDLF.data.post_process import postprocessing_after_reverse_one_hot_encoding
 import numpy as np
 import sys
-from GANDLF.Configuration.Parameters.optimizer_parameters import OptimizerConfig
-from GANDLF.Configuration.Parameters.patch_sampler import PatchSamplerConfig
-from GANDLF.Configuration.Parameters.scheduler_parameters import SchedulerConfig
+from GANDLF.Configuration.optimizer_config import OptimizerConfig
+from GANDLF.Configuration.patch_sampler_config import PatchSamplerConfig
+from GANDLF.Configuration.scheduler_config import SchedulerConfig
 from GANDLF.Configuration.utils import initialize_key
 from GANDLF.metrics import surface_distance_ids
 

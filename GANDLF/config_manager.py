@@ -3,8 +3,8 @@ from typing import Union
 import yaml
 from pydantic import ValidationError
 
-from GANDLF.Configuration.Parameters.parameters import Parameters
-from GANDLF.Configuration.Parameters.exclude_parameters import exclude_parameters
+from GANDLF.Configuration.parameters_config import Parameters
+from GANDLF.Configuration.exclude_parameters import exclude_parameters
 from GANDLF.Configuration.utils import handle_configuration_errors
 
 
