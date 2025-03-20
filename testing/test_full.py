@@ -1092,7 +1092,7 @@ def test_clip_train_classification_rad_3d(device):
     print("passed")
 
 
-def test_train_normtype_segmentation_rad_3d(device,caplog):
+def test_train_normtype_segmentation_rad_3d(device):
     print("20: Starting 3D Rad segmentation tests for normtype")
     # read and initialize parameters for specific data dimension
     # read and parse csv
@@ -1116,14 +1116,13 @@ def test_train_normtype_segmentation_rad_3d(device,caplog):
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
 
     # these should raise exceptions
-    with caplog.at_level(logging.ERROR):
-        for norm_type in ["none", None]:
-            parameters["model"]["norm_type"] = norm_type
-            file_config_temp = write_temp_config_path(parameters)
+    for norm_type in ["none", None]:
+        parameters["model"]["norm_type"] = norm_type
+        file_config_temp = write_temp_config_path(parameters)
+        with pytest.raises(Exception) as exc_info:
             parameters = ConfigManager(file_config_temp, version_check_flag=False)
 
-    assert "Normalization type cannot be 'None' for non-VGG architectures" in caplog.text
-
+        print("Exception raised:", exc_info.value)
 
     # loop through selected models and train for single epoch
     for norm in all_norm_types:

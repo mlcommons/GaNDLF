@@ -53,12 +53,14 @@ def ConfigManager(
             }
         )
         return parameters
-    except ValidationError as e:
-        handle_configuration_errors(e)
 
     except Exception as e:
+        if isinstance(e, ValidationError):
+            handle_configuration_errors(e)
+            raise
         ## todo: ensure logging captures assertion errors
-        assert (
+        else:
+            assert (
             False
         ), f"Config parsing failed: {config_file_path=}, {version_check_flag=}, Exception: {str(e)}, {traceback.format_exc()}"
         # logging.error(
