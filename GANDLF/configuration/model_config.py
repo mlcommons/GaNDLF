@@ -1,7 +1,7 @@
 from pydantic import BaseModel, model_validator, Field, AliasChoices, ConfigDict
 from typing_extensions import Self, Literal, Optional
 from typing import Union
-from GANDLF.Configuration.validators import validate_class_list, validate_norm_type
+from GANDLF.configuration.validators import validate_class_list, validate_norm_type
 from GANDLF.models import global_models_dict
 
 # Define model architecture options

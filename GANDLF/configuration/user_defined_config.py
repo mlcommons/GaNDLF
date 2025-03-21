@@ -1,15 +1,15 @@
 from typing import Union
 from pydantic import BaseModel, model_validator, Field, AfterValidator
-from GANDLF.Configuration.default_config import DefaultParameters
-from GANDLF.Configuration.differential_privacy_config import DifferentialPrivacyConfig
-from GANDLF.Configuration.nested_training_config import NestedTraining
-from GANDLF.Configuration.optimizer_config import OptimizerConfig
-from GANDLF.Configuration.patch_sampler_config import PatchSamplerConfig
-from GANDLF.Configuration.scheduler_config import SchedulerConfig
+from GANDLF.configuration.default_config import DefaultParameters
+from GANDLF.configuration.differential_privacy_config import DifferentialPrivacyConfig
+from GANDLF.configuration.nested_training_config import NestedTraining
+from GANDLF.configuration.optimizer_config import OptimizerConfig
+from GANDLF.configuration.patch_sampler_config import PatchSamplerConfig
+from GANDLF.configuration.scheduler_config import SchedulerConfig
 from GANDLF.utils import version_check
 from importlib.metadata import version
 from typing_extensions import Self, Literal, Annotated
-from GANDLF.Configuration.validators import (
+from GANDLF.configuration.validators import (
     validate_schedular,
     validate_optimizer,
     validate_loss_function,
@@ -22,7 +22,7 @@ from GANDLF.Configuration.validators import (
     validate_data_postprocessing_after_reverse_one_hot_encoding,
     validate_differential_privacy,
 )
-from GANDLF.Configuration.model_config import ModelConfig
+from GANDLF.configuration.model_config import ModelConfig
 
 
 class Version(BaseModel):  # TODO: Maybe should be to another folder

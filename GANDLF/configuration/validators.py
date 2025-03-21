@@ -2,14 +2,14 @@ import ast
 import traceback
 from copy import deepcopy
 
-from GANDLF.Configuration.differential_privacy_config import DifferentialPrivacyConfig
+from GANDLF.configuration.differential_privacy_config import DifferentialPrivacyConfig
 from GANDLF.data.post_process import postprocessing_after_reverse_one_hot_encoding
 import numpy as np
 import sys
-from GANDLF.Configuration.optimizer_config import OptimizerConfig
-from GANDLF.Configuration.patch_sampler_config import PatchSamplerConfig
-from GANDLF.Configuration.scheduler_config import SchedulerConfig
-from GANDLF.Configuration.utils import initialize_key
+from GANDLF.configuration.optimizer_config import OptimizerConfig
+from GANDLF.configuration.patch_sampler_config import PatchSamplerConfig
+from GANDLF.configuration.scheduler_config import SchedulerConfig
+from GANDLF.configuration.utils import initialize_key
 from GANDLF.metrics import surface_distance_ids
 
 
