@@ -27,7 +27,7 @@ class adam_config(BaseModel):
     betas: Tuple[float, float] = Field(default=(0.9, 0.999))
     weight_decay: float = Field(default=0.00005)
     eps: float = Field(default=1e-8)
-    amsgrad: float = Field(default=False)
+    amsgrad: bool = Field(default=False)
 
 
 class adamax_config(BaseModel):
