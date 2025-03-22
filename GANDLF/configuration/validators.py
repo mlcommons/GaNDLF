@@ -184,12 +184,16 @@ def validate_scheduler(value, learning_rate, num_epochs):
     value = SchedulerConfig(**combineScheduler.model_dump())
 
     if value.type == "triangular":
-        if value.min_lr is None:
-            value.min_lr = learning_rate * 0.001
         if value.max_lr is None:
             value.max_lr = learning_rate
+
+    if value.type in ["reduce_on_plateau", "reduce-on-plateau", "plateau","exp_range", "triangular"]:
+        if value.min_lr is None:
+            value.min_lr = learning_rate * 0.001
+
     if value.type in ["warmupcosineschedule", "wcs"]:
         value.warmup_steps = num_epochs * 0.1
+
     if hasattr(value, "step_size") and value.step_size is None:
         value.step_size = learning_rate / 5.0
 
