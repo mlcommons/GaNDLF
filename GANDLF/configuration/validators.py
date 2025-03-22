@@ -173,7 +173,7 @@ def validate_parallel_compute_command(value):
     return value
 
 
-def validate_schedular(value, learning_rate, num_epochs):
+def validate_scheduler(value, learning_rate, num_epochs):
     if isinstance(value, str):
         value = SchedulerConfig(type=value)
     # Find the scheduler_config class based on the type

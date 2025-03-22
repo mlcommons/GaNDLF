@@ -10,7 +10,7 @@ from GANDLF.utils import version_check
 from importlib.metadata import version
 from typing_extensions import Self, Literal, Annotated
 from GANDLF.configuration.validators import (
-    validate_schedular,
+    validate_scheduler,
     validate_optimizer,
     validate_loss_function,
     validate_metrics,
@@ -103,7 +103,7 @@ class UserDefinedParameters(DefaultParameters):
             self.parallel_compute_command
         )
         # validate scheduler
-        self.scheduler = validate_schedular(
+        self.scheduler = validate_scheduler(
             self.scheduler, self.learning_rate, self.num_epochs
         )
         # validate optimizer
