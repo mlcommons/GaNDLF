@@ -103,7 +103,9 @@ class UserDefinedParameters(DefaultParameters):
             self.parallel_compute_command
         )
         # validate scheduler
-        self.scheduler = validate_schedular(self.scheduler, self.learning_rate)
+        self.scheduler = validate_schedular(
+            self.scheduler, self.learning_rate, self.num_epochs
+        )
         # validate optimizer
         self.optimizer = validate_optimizer(self.optimizer)
         # validate patch_sampler
