@@ -3488,25 +3488,3 @@ def test_generic_profiling_function_mainrun(device):
     sanitize_outputDir()
 
     print("passed")
-
-
-# def test_parameters_failure_generic_config(caplog):
-#     # Read the parameters_configuration file. This file contains all the parameters for testing
-#     with caplog.at_level(logging.ERROR):
-#         with pytest.raises(ValueError):
-#             params = yaml.safe_load(
-#                 open(testingDir + "/parameters_configuration.yaml", "r")
-#             )
-#
-#             parseConfig(params, version_check_flag=False)
-#
-#     assert "(patch_size) - This parameter is required. Please define it" in caplog.text
-#     assert "(model) - This parameter is required. Please define it" in caplog.text
-#     assert "(modality) - This parameter is required. Please define it" in caplog.text
-#     assert (
-#         "(loss_function) - This parameter is required. Please define it" in caplog.text
-#     )
-#     assert (
-#         "(nested_training) - This parameter is required. Please define it"
-#         in caplog.text
-#     )
