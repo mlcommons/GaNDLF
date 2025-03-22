@@ -186,7 +186,13 @@ def validate_scheduler(value, learning_rate, num_epochs):
         if value.max_lr is None:
             value.max_lr = learning_rate
 
-    if value.type in ["reduce_on_plateau", "reduce-on-plateau", "plateau","exp_range", "triangular"]:
+    if value.type in [
+        "reduce_on_plateau",
+        "reduce-on-plateau",
+        "plateau",
+        "exp_range",
+        "triangular",
+    ]:
         if value.min_lr is None:
             value.min_lr = learning_rate * 0.001
 

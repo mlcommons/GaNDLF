@@ -1,6 +1,5 @@
 from pydantic import BaseModel, ConfigDict, Field
-from typing_extensions import Literal
-from typing import Union
+from typing_extensions import Literal, Union
 from GANDLF.schedulers import global_schedulers_dict
 
 TYPE_OPTIONS = Literal[tuple(global_schedulers_dict.keys())]
