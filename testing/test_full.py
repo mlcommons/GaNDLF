@@ -4,6 +4,7 @@ import SimpleITK as sitk
 import numpy as np
 import pandas as pd
 import logging
+import json
 
 from pydicom.data import get_testdata_file
 import cv2
@@ -988,8 +989,8 @@ def test_train_scheduler_classification_rad_2d(device):
         parameters = populate_header_in_parameters(parameters, parameters["headers"])
         parameters["model"]["onnx_export"] = False
         parameters["model"]["print_summary"] = False
-        parameters["scheduler"] = {}
-        parameters["scheduler"]["type"] = scheduler
+        parameters["scheduler"] = scheduler
+        # parameters["scheduler"]["type"] = scheduler
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
         sanitize_outputDir()
@@ -3362,6 +3363,8 @@ def test_differential_privacy_epsilon_classification_rad_2d(device):
         yaml.dump(parameters, file)
     parameters = parseConfig(file_config_temp, version_check_flag=True)
 
+    print(json.dumps(parameters))
+
     TrainingManager(
         dataframe=training_data,
         outputDir=outputDir,
@@ -3485,3 +3488,25 @@ def test_generic_profiling_function_mainrun(device):
     sanitize_outputDir()
 
     print("passed")
+
+
+# def test_parameters_failure_generic_config(caplog):
+#     # Read the parameters_configuration file. This file contains all the parameters for testing
+#     with caplog.at_level(logging.ERROR):
+#         with pytest.raises(ValueError):
+#             params = yaml.safe_load(
+#                 open(testingDir + "/parameters_configuration.yaml", "r")
+#             )
+#
+#             parseConfig(params, version_check_flag=False)
+#
+#     assert "(patch_size) - This parameter is required. Please define it" in caplog.text
+#     assert "(model) - This parameter is required. Please define it" in caplog.text
+#     assert "(modality) - This parameter is required. Please define it" in caplog.text
+#     assert (
+#         "(loss_function) - This parameter is required. Please define it" in caplog.text
+#     )
+#     assert (
+#         "(nested_training) - This parameter is required. Please define it"
+#         in caplog.text
+#     )
