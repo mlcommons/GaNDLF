@@ -6,11 +6,10 @@ from GANDLF.configuration.differential_privacy_config import DifferentialPrivacy
 from GANDLF.data.post_process import postprocessing_after_reverse_one_hot_encoding
 import numpy as np
 import sys
-from GANDLF.configuration.optimizer_config import OptimizerConfig
+from GANDLF.configuration.optimizer_config import OptimizerConfig, optimizer_dict_config
 from GANDLF.configuration.patch_sampler_config import PatchSamplerConfig
 from GANDLF.configuration.scheduler_config import (
     SchedulerConfig,
-    base_triangle_config,
     schedulers_dict_config,
 )
 from GANDLF.configuration.utils import initialize_key, combine_models
@@ -203,6 +202,13 @@ def validate_scheduler(value, learning_rate, num_epochs):
 def validate_optimizer(value):
     if isinstance(value, str):
         value = OptimizerConfig(type=value)
+
+    combine_optimizer_class = optimizer_dict_config[value.type]
+    # Combine it with the OptimizerConfig class
+    optimizerConfigCombine = combine_models(OptimizerConfig, combine_optimizer_class)
+    combineOptimizer = optimizerConfigCombine(**value.model_dump())
+    value = OptimizerConfig(**combineOptimizer.model_dump())
+
     return value
 
 
