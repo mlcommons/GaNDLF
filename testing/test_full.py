@@ -239,9 +239,11 @@ def write_temp_config_path(parameters_to_write):
     # if found in previous run, discard.
     if os.path.exists(temp_config_path):
         os.remove(temp_config_path)
-    #Solve the problem !!python/tuple
+
+    # Solve the problem !!python/tuple
     def tuple_representer(dumper, data):
-        return dumper.represent_sequence('tag:yaml.org,2002:seq', data)
+        return dumper.represent_sequence("tag:yaml.org,2002:seq", data)
+
     yaml.add_representer(tuple, tuple_representer)
 
     if parameters_to_write is not None:
