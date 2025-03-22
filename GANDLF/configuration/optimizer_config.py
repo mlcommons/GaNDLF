@@ -1,5 +1,8 @@
+from typing import Tuple
+
 from pydantic import BaseModel, Field, ConfigDict
-from typing_extensions import Literal, Tuple
+from typing_extensions import Literal
+
 from GANDLF.optimizers import global_optimizer_dict
 
 # takes the keys from global optimizer
