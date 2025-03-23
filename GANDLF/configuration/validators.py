@@ -444,7 +444,6 @@ def validate_data_augmentation(value, patch_size) -> dict:
 
 
 def validate_postprocessing(value):
-
     post_processing = PostProcessingConfig(**value)
     return post_processing.model_dump(include={field for field in value.keys()})
 
