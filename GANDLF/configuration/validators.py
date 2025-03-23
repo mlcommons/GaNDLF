@@ -3,6 +3,7 @@ import traceback
 from copy import deepcopy
 
 from GANDLF.configuration.differential_privacy_config import DifferentialPrivacyConfig
+from GANDLF.configuration.post_processing_config import PostProcessingConfig
 from GANDLF.data.post_process import postprocessing_after_reverse_one_hot_encoding
 import numpy as np
 import sys
@@ -440,6 +441,12 @@ def validate_data_augmentation(value, patch_size) -> dict:
                         value[key], "probability", value["default_probability"]
                     )
     return value
+
+
+def validate_postprocessing(value):
+
+    post_processing = PostProcessingConfig(**value)
+    return post_processing.model_dump(include={field for field in value.keys()})
 
 
 def validate_differential_privacy(value, batch_size):

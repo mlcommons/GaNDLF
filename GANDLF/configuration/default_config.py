@@ -1,6 +1,9 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, AfterValidator
 from typing import Dict
-from typing_extensions import Union, Literal, Optional
+from typing_extensions import Union, Literal, Optional, Annotated
+
+from GANDLF.configuration.post_processing_config import PostProcessingConfig
+from GANDLF.configuration.validators import validate_postprocessing
 
 GRID_AGGREGATOR_OVERLAP_OPTIONS = Literal["crop", "average", "hann"]
 
@@ -53,9 +56,12 @@ class DefaultParameters(BaseModel):
     print_rgb_label_warning: bool = Field(
         default=True, description="Print a warning for RGB labels."
     )
-    data_postprocessing: Union[dict, set] = Field(
-        default={}, description="Default data postprocessing configuration."
-    )
+    data_postprocessing: Annotated[
+        dict,
+        Field(description="Default data postprocessing configuration.", default={}),
+        AfterValidator(validate_postprocessing),
+    ]
+
     grid_aggregator_overlap: GRID_AGGREGATOR_OVERLAP_OPTIONS = Field(
         default="crop", description="Default grid aggregator overlap strategy."
     )
