@@ -1,8 +1,7 @@
 from pydantic import BaseModel, Field, AfterValidator
 from typing import Dict
-from typing_extensions import Union, Literal, Optional, Annotated
+from typing_extensions import Literal, Optional, Annotated
 
-from GANDLF.configuration.post_processing_config import PostProcessingConfig
 from GANDLF.configuration.validators import validate_postprocessing
 
 GRID_AGGREGATOR_OVERLAP_OPTIONS = Literal["crop", "average", "hann"]

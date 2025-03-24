@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict, Field
-from typing_extensions import Optional, Any
+from typing_extensions import Any
 
 
 class PostProcessingConfig(BaseModel):
