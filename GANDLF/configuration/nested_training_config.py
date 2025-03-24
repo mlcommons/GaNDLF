@@ -10,6 +10,7 @@ class NestedTraining(BaseModel):
     testing: int = Field(
         default=-5,
         description="this controls the number of testing data folds for final model evaluation; [NOT recommended] to disable this, use '1'",
+        le=10,
     )
     validation: int = Field(
         default=-5,
