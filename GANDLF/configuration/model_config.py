@@ -33,7 +33,7 @@ class ModelConfig(BaseModel):
     dimension: Optional[DIMENSIONS_OPTIONS] = Field(
         description="model input dimension (2D or 3D)."
     )
-    architecture: Union[ARCHITECTURE_OPTIONS, dict] = Field(description="Architecture.")
+    architecture: ARCHITECTURE_OPTIONS = Field(description="Architecture.")
     final_layer: FINAL_LAYER_OPTIONS = Field(description="Final layer.")
     norm_type: Optional[NORM_TYPE_OPTIONS] = Field(
         description="Normalization type.", default="batch"
