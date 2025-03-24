@@ -48,7 +48,7 @@ class UserDefinedParameters(DefaultParameters):
     patch_size: Union[list[Union[int, float]], int, float] = Field(
         description="Patch size."
     )
-    model: ModelConfig = Field(..., description="The model to use. ")
+    model: ModelConfig = Field(description="The model to use. ")
     modality: Literal["rad", "histo", "path"] = Field(description="Modality.")
     loss_function: Annotated[
         Union[dict, str],
