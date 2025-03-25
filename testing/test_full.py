@@ -4,6 +4,7 @@ import SimpleITK as sitk
 import numpy as np
 import pandas as pd
 import logging
+import json
 
 from pydicom.data import get_testdata_file
 import cv2
@@ -238,6 +239,13 @@ def write_temp_config_path(parameters_to_write):
     # if found in previous run, discard.
     if os.path.exists(temp_config_path):
         os.remove(temp_config_path)
+
+    # Solve the problem !!python/tuple
+    def tuple_representer(dumper, data):
+        return dumper.represent_sequence("tag:yaml.org,2002:seq", data)
+
+    yaml.add_representer(tuple, tuple_representer)
+
     if parameters_to_write is not None:
         with open(temp_config_path, "w") as file:
             yaml.dump(parameters_to_write, file)
@@ -988,8 +996,8 @@ def test_train_scheduler_classification_rad_2d(device):
         parameters = populate_header_in_parameters(parameters, parameters["headers"])
         parameters["model"]["onnx_export"] = False
         parameters["model"]["print_summary"] = False
-        parameters["scheduler"] = {}
-        parameters["scheduler"]["type"] = scheduler
+        parameters["scheduler"] = scheduler
+        # parameters["scheduler"]["type"] = scheduler
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
         sanitize_outputDir()
@@ -3361,6 +3369,8 @@ def test_differential_privacy_epsilon_classification_rad_2d(device):
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
     parameters = parseConfig(file_config_temp, version_check_flag=True)
+
+    print(json.dumps(parameters))
 
     TrainingManager(
         dataframe=training_data,
