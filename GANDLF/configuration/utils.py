@@ -6,6 +6,7 @@ from typing import Type
 from pydantic import BaseModel, ValidationError, create_model
 from pydantic_core import ErrorDetails
 
+
 def initialize_key(
     parameters: dict, key: str, value: Optional[Union[str, float, list, dict]] = None
 ) -> dict:

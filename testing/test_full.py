@@ -3499,6 +3499,7 @@ def test_generic_profiling_function_mainrun(device):
 
     print("passed")
 
+
 def test_generic_required_parameters_pydantic_configuration():
     print("57: Starting parameters configuration (pydantic)")
     # The required fields
@@ -3558,6 +3559,7 @@ def test_generic_model_parameters_pydantic_configuration():
 
     print("passed")
 
+
 def test_generic_nesting_training_parameters_pydantic_configuration():
     print("59: Starting parameters configuration (pydantic) tests")
 
@@ -3565,24 +3567,28 @@ def test_generic_nesting_training_parameters_pydantic_configuration():
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
 
-    parameters["nested_training"]["stratified"] = 0.23 #invalid value, is bool
-    parameters["nested_training"]["testing"] = 0.23 #invalid value, is int
-    parameters["nested_training"]["validation"] = 0.23 # invalid value, is int
+    parameters["nested_training"]["stratified"] = 0.23  # invalid value, is bool
+    parameters["nested_training"]["testing"] = 0.23  # invalid value, is int
+    parameters["nested_training"]["validation"] = 0.23  # invalid value, is int
 
     with pytest.raises(ValidationError) as exc_info:
         ConfigManager(parameters, version_check_flag=False)
     assert exc_info.value.error_count() == 3
 
-    #if proportional is not None, the stratified should have  the same value with proportional
+    # if proportional is not None, the stratified should have  the same value with proportional
     parameters = ConfigManager(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
     parameters["nested_training"]["stratified"] = False
     parameters["nested_training"]["proportional"] = True
     parameters = ConfigManager(parameters, version_check_flag=False)
-    assert parameters["nested_training"]["proportional"] == parameters["nested_training"]["stratified"]
+    assert (
+        parameters["nested_training"]["proportional"]
+        == parameters["nested_training"]["stratified"]
+    )
 
     print("passed")
+
 
 def test_generic_patch_sampler_parameters_pydantic_configuration():
     print("60: Starting parameters configuration (pydantic) tests")
@@ -3590,12 +3596,13 @@ def test_generic_patch_sampler_parameters_pydantic_configuration():
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
 
-    parameters.pop("patch_sampler") # pop the default patch sampler
-    parameters["patch_sampler"] = "test_type" # invalid value
+    parameters.pop("patch_sampler")  # pop the default patch sampler
+    parameters["patch_sampler"] = "test_type"  # invalid value
 
     with pytest.raises(ValidationError) as exc_info:
         ConfigManager(parameters, version_check_flag=False)
     assert exc_info.value.error_count() == 1
+
 
 def test_generic_optimizer_parameters_pydantic_configuration():
     print("61: Starting parameters configuration (pydantic) tests")
@@ -3603,12 +3610,12 @@ def test_generic_optimizer_parameters_pydantic_configuration():
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
 
-    parameters["optimizer"] = "test" #not valid value
+    parameters["optimizer"] = "test"  # not valid value
     with pytest.raises(ValidationError) as exc_info:
         ConfigManager(parameters, version_check_flag=False)
     assert exc_info.value.error_count() == 1
 
-    for key,value in  optimizer_dict_config.items():
+    for key, value in optimizer_dict_config.items():
         parameters["optimizer"] = key
         configuration_parameters = value.model_fields.keys()
         parameters = ConfigManager(parameters, version_check_flag=False)
@@ -3617,18 +3624,19 @@ def test_generic_optimizer_parameters_pydantic_configuration():
 
     print("passed")
 
+
 def test_generic_scheduler_parameters_pydantic_configuration():
     print("62: Starting parameters configuration (pydantic) tests")
     parameters = ConfigManager(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
 
-    parameters["scheduler"] = "test" #not valid value
+    parameters["scheduler"] = "test"  # not valid value
     with pytest.raises(ValidationError) as exc_info:
         ConfigManager(parameters, version_check_flag=False)
     assert exc_info.value.error_count() == 1
 
-    for key,value in schedulers_dict_config.items():
+    for key, value in schedulers_dict_config.items():
         parameters["scheduler"] = key
         configuration_parameters = value.model_fields.keys()
         parameters = ConfigManager(parameters, version_check_flag=False)
