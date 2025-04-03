@@ -3626,7 +3626,7 @@ def test_generic_optimizer_parameters_pydantic_configuration():
 
 
 def test_generic_scheduler_parameters_pydantic_configuration():
-    print("62: Starting parameters configuration (pydantic) tests")
+    print("62: Starting parameters configuration (pydantic) tests for scheduler")
     parameters = ConfigManager(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
