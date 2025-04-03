@@ -5,20 +5,20 @@ from GANDLF.schedulers import global_schedulers_dict
 TYPE_OPTIONS = Literal[tuple(global_schedulers_dict.keys())]
 
 
-class base_triangle_config(BaseModel):
+class BaseTriangleConfig(BaseModel):
     min_lr: float = Field(default=(10**-3))
     max_lr: float = Field(default=1)
     step_size: float = Field(description="step_size", default=None)
 
 
-class triangle_modified_config(BaseModel):
+class TriangleModifiedConfig(BaseModel):
     min_lr: float = Field(default=0.000001)
     max_lr: float = Field(default=0.001)
     max_lr_multiplier: float = Field(default=1.0)
     step_size: float = Field(description="step_size", default=None)
 
 
-class cyclic_lr_base_config(BaseModel):
+class CyclicLrBaseConfig(BaseModel):
     # More details https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.CyclicLR.html
     min_lr: float = Field(
         default=None
@@ -32,23 +32,23 @@ class cyclic_lr_base_config(BaseModel):
     step_size: float = Field(description="step_size", default=None)
 
 
-class exp_config(BaseModel):
+class ExpConfig(BaseModel):
     gamma: float = Field(default=0.1)
 
 
-class step_config(BaseModel):
+class StepConfig(BaseModel):
     gamma: float = Field(default=0.1)
     step_size: float = Field(description="step_size", default=None)
 
 
-class cosineannealing_config(BaseModel):
+class CosineannealingConfig(BaseModel):
     # More details https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.CosineAnnealingWarmRestarts.html
     T_0: int = Field(default=5)
     T_mult: float = Field(default=1)
     min_lr: float = Field(default=0.001)
 
 
-class reduce_on_plateau_config(BaseModel):
+class ReduceOnPlateauConfig(BaseModel):
     # More details https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.ReduceLROnPlateau.html
     min_lr: Union[float, list] = Field(default=None)
     gamma: float = Field(default=0.1)
@@ -60,7 +60,7 @@ class reduce_on_plateau_config(BaseModel):
     threshold_mode: Literal["rel", "abs"] = Field(default="rel")
 
 
-class warmupcosineschedule_config(BaseModel):
+class WarmupcosinescheduleConfig(BaseModel):
     # More details https://docs.monai.io/en/stable/optimizers.html#monai.optimizers.WarmupCosineSchedule
     warmup_steps: int = Field(default=None)
 
@@ -73,18 +73,18 @@ class SchedulerConfig(BaseModel):
 
 # Define the type and the scheduler base model class
 schedulers_dict_config = {
-    "triangle": base_triangle_config,
-    "triangle_modified": triangle_modified_config,
-    "triangular": cyclic_lr_base_config,
-    "exp_range": cyclic_lr_base_config,
-    "exp": exp_config,
-    "exponential": exp_config,
-    "step": step_config,
-    "reduce_on_plateau": reduce_on_plateau_config,
-    "reduce-on-plateau": reduce_on_plateau_config,
-    "plateau": reduce_on_plateau_config,
-    "reduceonplateau": reduce_on_plateau_config,
-    "cosineannealing": cosineannealing_config,
-    "warmupcosineschedule": warmupcosineschedule_config,
-    "wcs": warmupcosineschedule_config,
+    "triangle": BaseTriangleConfig,
+    "triangle_modified": TriangleModifiedConfig,
+    "triangular": CyclicLrBaseConfig,
+    "exp_range": CyclicLrBaseConfig,
+    "exp": ExpConfig,
+    "exponential": ExpConfig,
+    "step": StepConfig,
+    "reduce_on_plateau": ReduceOnPlateauConfig,
+    "reduce-on-plateau": ReduceOnPlateauConfig,
+    "plateau": ReduceOnPlateauConfig,
+    "reduceonplateau": ReduceOnPlateauConfig,
+    "cosineannealing": CosineannealingConfig,
+    "warmupcosineschedule": WarmupcosinescheduleConfig,
+    "wcs": WarmupcosinescheduleConfig,
 }
