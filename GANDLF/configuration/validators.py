@@ -1,9 +1,12 @@
 import ast
 import traceback
 from copy import deepcopy
-
 from GANDLF.configuration.differential_privacy_config import DifferentialPrivacyConfig
 from GANDLF.configuration.post_processing_config import PostProcessingConfig
+from GANDLF.configuration.pre_processing_config import (
+    HistogramMatchingConfig,
+    PreProcessingConfig,
+)
 from GANDLF.data.post_process import postprocessing_after_reverse_one_hot_encoding
 import numpy as np
 import sys
@@ -276,21 +279,27 @@ def validate_data_preprocessing(value) -> dict:
                     if not "max" in value[key]:
                         value[key]["max"] = sys.float_info.max
 
-                if key == "histogram_matching":
-                    if value[key] is not False:
-                        if not (isinstance(value[key], dict)):
-                            value[key] = {}
+            key = "histogram_matching"
+            if key in value:
+                if value["histogram_matching"] is not False:
+                    if not (isinstance(value["histogram_matching"], dict)):
+                        value["histogram_matching"] = HistogramMatchingConfig()
 
-                if key == "histogram_equalization":
-                    if value[key] is not False:
-                        # if histogram equalization is enabled, call histogram_matching
-                        value["histogram_matching"] = {}
+            key = "histogram_equalization"
+            if key in value:
+                if value[key] is not False:
+                    # if histogram equalization is enabled, call histogram_matching
+                    value["histogram_matching"] = HistogramMatchingConfig()
+            key = "adaptive_histogram_equalization"
+            if key in value:
+                if value[key] is not False:
+                    # if histogram equalization is enabled, call histogram_matching
+                    value["histogram_matching"] = HistogramMatchingConfig(
+                        target="adaptive"
+                    )
 
-                if key == "adaptive_histogram_equalization":
-                    if value[key] is not False:
-                        # if histogram equalization is enabled, call histogram_matching
-                        value["histogram_matching"] = {"target": "adaptive"}
-    return value
+    pre_processing = PreProcessingConfig(**value)
+    return pre_processing.model_dump(include={field for field in value.keys()})
 
 
 def validate_data_postprocessing_after_reverse_one_hot_encoding(
