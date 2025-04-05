@@ -128,7 +128,6 @@ def validate_class_list(value):
                 value = ast.literal_eval(value)
                 return value
             except Exception as e:
-                ## todo: ensure logging captures assertion errors
                 assert (
                     False
                 ), f"Could not evaluate the `class_list` in `model`, Exception: {str(e)}, {traceback.format_exc()}"
@@ -168,9 +167,7 @@ def validate_norm_type(norm_type, architecture):
 
 def validate_parallel_compute_command(value):
     parallel_compute_command = value
-    parallel_compute_command = parallel_compute_command.replace(
-        "'", ""
-    )  # TODO: Check it again,should change from ' to `
+    parallel_compute_command = parallel_compute_command.replace("'", "")
     parallel_compute_command = parallel_compute_command.replace('"', "")
     value = parallel_compute_command
     return value

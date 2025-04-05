@@ -83,7 +83,7 @@ class NovogradConfig(BaseModel):
 
 
 class AdemamixConfig(BaseModel):
-    pass  # TODO: Check it because the default parameters are not in the optimizer dict
+    pass
 
 
 class LionConfig(BaseModel):
@@ -93,7 +93,7 @@ class LionConfig(BaseModel):
 
 
 class AdoptConfig(BaseModel):
-    pass  # TODO: Check it because the default parameters are not in the optimizer dict
+    pass
 
 
 class OptimizerConfig(BaseModel):

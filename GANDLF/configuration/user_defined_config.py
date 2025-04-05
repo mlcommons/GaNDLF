@@ -25,7 +25,7 @@ from GANDLF.configuration.validators import (
 from GANDLF.configuration.model_config import ModelConfig
 
 
-class Version(BaseModel):  # TODO: Maybe should be to another folder
+class Version(BaseModel):
     minimum: str
     maximum: str
 
@@ -69,7 +69,7 @@ class UserDefinedParameters(DefaultParameters):
     )
     optimizer: Union[str, OptimizerConfig] = Field(
         description="Optimizer.", default=OptimizerConfig(type="adam")
-    )  # TODO: Check it again for (opt)
+    )
     patch_sampler: Union[str, PatchSamplerConfig] = Field(
         description="Patch sampler.", default=PatchSamplerConfig()
     )
@@ -82,13 +82,12 @@ class UserDefinedParameters(DefaultParameters):
     differential_privacy: Union[bool, DifferentialPrivacyConfig] = Field(
         description="Differential privacy.", default=None
     )
-    # TODO: It should be defined with a better way (using a BaseModel class)
+
     data_preprocessing: Annotated[
         dict,
         Field(description="Data preprocessing."),
         AfterValidator(validate_data_preprocessing),
     ] = {}
-    # TODO: It should be defined with a better way (using a BaseModel class)
     data_augmentation: Annotated[dict, Field(description="Data augmentation.")] = {}
 
     # Validators
