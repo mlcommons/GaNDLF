@@ -3646,3 +3646,44 @@ def test_generic_scheduler_parameters_pydantic_configuration():
             assert parameter in parameters["scheduler"]
 
     print("passed")
+
+
+def test_generic_post_processing_parameters_pydantic_configuration():
+    print(
+        "63: Starting configuration (pydantic) testing for post processing parameters"
+    )
+    parameters = ConfigManager(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    # not allowed extra parameters
+    parameters["data_postprocessing"] = {"test": "test"}
+    with pytest.raises(ValidationError) as exc_info:
+        ConfigManager(parameters, version_check_flag=False)
+    assert exc_info.value.error_count() == 1
+
+
+def test_generic_pre_processing_parameters_pydantic_configuration():
+    print(
+        "63: Starting configuration (pydantic) testing for post processing parameters"
+    )
+    parameters = ConfigManager(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    # not allowed extra parameters
+    parameters["data_preprocessing"]["test"] = "test"
+    with pytest.raises(ValidationError) as exc_info:
+        ConfigManager(parameters, version_check_flag=False)
+    assert exc_info.value.error_count() == 1
+
+    parameters = ConfigManager(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+
+    parameters["data_preprocessing"][
+        "stain_normalization"
+    ] = {  # target parameter is required
+        "extractor": "test"  # invalid value
+    }
+    with pytest.raises(ValidationError) as exc_info:
+        ConfigManager(parameters, version_check_flag=False)
+    assert exc_info.value.error_count() == 2
