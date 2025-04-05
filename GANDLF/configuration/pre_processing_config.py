@@ -74,7 +74,12 @@ class PreProcessingConfig(BaseModel):
     histogram_equalization: HistogramMatchingConfig = Field(default=None)
     adaptive_histogram_equalization: Any = Field(default=None)
     resample: ResampleConfig = Field(default=None)
-    resize_image: list[int] = Field(default=None,validation_alias=AliasChoices("resize_image", "resize", "resize_image", "resize_images"))
+    resize_image: list[int] = Field(
+        default=None,
+        validation_alias=AliasChoices(
+            "resize_image", "resize", "resize_image", "resize_images"
+        ),
+    )
     resize_patch: list[int] = Field(default=None)
     stain_normalization: StainNormalizationConfig = Field(default=None)
     resample_min: ResampleMinConfig = Field(

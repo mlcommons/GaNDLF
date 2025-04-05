@@ -3501,7 +3501,7 @@ def test_generic_profiling_function_mainrun(device):
 
 
 def test_generic_required_parameters_pydantic_configuration():
-    print("57: Starting parameters configuration (pydantic)")
+    print("57: Starting configuration (pydantic) testing for required parameters")
     # The required fields
     # - patch_size
     # - model
@@ -3519,7 +3519,7 @@ def test_generic_required_parameters_pydantic_configuration():
 
 
 def test_generic_model_parameters_pydantic_configuration():
-    print("58: Starting parameters configuration (pydantic) for model tests")
+    print("58: Starting configuration (pydantic) testing for model parameters")
     parameters = ConfigManager(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
@@ -3561,7 +3561,9 @@ def test_generic_model_parameters_pydantic_configuration():
 
 
 def test_generic_nesting_training_parameters_pydantic_configuration():
-    print("59: Starting parameters configuration (pydantic) tests")
+    print(
+        "59: Starting configuration (pydantic) testing for nesting training parameters"
+    )
 
     parameters = ConfigManager(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
@@ -3591,7 +3593,7 @@ def test_generic_nesting_training_parameters_pydantic_configuration():
 
 
 def test_generic_patch_sampler_parameters_pydantic_configuration():
-    print("60: Starting parameters configuration (pydantic) tests")
+    print("60: Starting configuration (pydantic) testing for patch sampler parameters")
     parameters = ConfigManager(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
@@ -3605,7 +3607,7 @@ def test_generic_patch_sampler_parameters_pydantic_configuration():
 
 
 def test_generic_optimizer_parameters_pydantic_configuration():
-    print("61: Starting parameters configuration (pydantic) tests")
+    print("61: Starting configuration (pydantic) testing for optimizer parameters")
     parameters = ConfigManager(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
@@ -3626,7 +3628,7 @@ def test_generic_optimizer_parameters_pydantic_configuration():
 
 
 def test_generic_scheduler_parameters_pydantic_configuration():
-    print("62: Starting parameters configuration (pydantic) tests for scheduler")
+    print("62: Starting configuration (pydantic) testing for scheduler parameters")
     parameters = ConfigManager(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
