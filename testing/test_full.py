@@ -564,10 +564,11 @@ def test_train_regression_rad_3d(device):
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
+
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         if "efficientnet" in model:
-            parameters["patch_size"] = [16, 16, 16]
+            parameters["patch_size"] = [10, 10, 10]
         else:
             parameters["patch_size"] = patch_size["3D"]
 
