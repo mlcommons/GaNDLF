@@ -1,12 +1,10 @@
 import torch
 from torch.utils.data import DataLoader
 from opacus import PrivacyEngine
-from opacus.validators import ModuleValidator
 
 import collections.abc as abc
 from functools import partial
 from torch.utils.data._utils.collate import default_collate
-from torch.utils.data import DataLoader
 from typing import Union, Callable
 import copy
 from opacus.optimizers import DPOptimizer

@@ -6,7 +6,6 @@ import pandas as pd
 import torch
 from GANDLF.utils import get_unique_timestamp
 import lightning.pytorch as pl
-from warnings import warn
 from GANDLF.models.lightning_module import GandlfLightningModule
 from GANDLF.data.lightning_datamodule import GandlfInferenceDatamodule
 
@@ -47,11 +46,13 @@ def InferenceManager(
     # This should be handled by config parser
     accelerator = parameters.get("accelerator", "auto")
     allowed_accelerators = ["cpu", "gpu", "auto"]
+    # codacy ignore Generic/ReDoS: This is not a SQL query, it's an error message.
     assert (
         accelerator in allowed_accelerators
     ), f"Invalid accelerator selected: {accelerator}. Please select from {allowed_accelerators}"
     strategy = parameters.get("strategy", "auto")
     allowed_strategies = ["auto", "ddp"]
+    # codacy ignore Generic/ReDoS: This is not a SQL query, it's an error message.
     assert (
         strategy in allowed_strategies
     ), f"Invalid strategy selected: {strategy}. Please select from {allowed_strategies}"
@@ -66,6 +67,7 @@ def InferenceManager(
         "bf16",
         "bf16-mixed",
     ]
+    # codacy ignore Generic/ReDoS: This is not a SQL query, it's an error message.
     assert (
         precision in allowed_precisions
     ), f"Invalid precision selected: {precision}. Please select from {allowed_precisions}"

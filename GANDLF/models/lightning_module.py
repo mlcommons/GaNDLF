@@ -294,7 +294,7 @@ class GandlfLightningModule(pl.LightningModule):
             print(f"Previous latest model loaded from {self.model_paths['latest']}.")
         else:
             print(
-                f"Could not load any previous model, training from scratch.", flush=True
+                "Could not load any previous model, training from scratch.", flush=True
             )
 
     def _try_to_load_model(self, load_path: str):
@@ -709,7 +709,7 @@ class GandlfLightningModule(pl.LightningModule):
             os.remove(self.model_paths["latest"])
         self._save_model(self.current_epoch, self.model_paths["latest"], False)
 
-        print(f"Latest model saved")
+        print("Latest model saved")
 
     def _compute_metric_mean_across_values_from_batches(
         self, metric_values: List[Union[float, List[float]]]
@@ -769,7 +769,7 @@ class GandlfLightningModule(pl.LightningModule):
             + ".pth.tar",
         )
         self._save_model(self.current_epoch, epoch_save_path, False)
-        print(f"Epoch model saved.")
+        print("Epoch model saved.")
 
     @rank_zero_only
     def _print_epoch_end_time(self):
@@ -1587,7 +1587,7 @@ class GandlfLightningModule(pl.LightningModule):
             self.params["medcam_enabled"] = True
 
         self._current_test_epoch_save_dir = os.path.join(
-            self.output_dir, f"output_test", f"epoch_{self.current_epoch}"
+            self.output_dir, "output_test", f"epoch_{self.current_epoch}"
         )
         self._ensure_path_exists(self._current_test_epoch_save_dir)
 

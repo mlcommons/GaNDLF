@@ -82,7 +82,7 @@ def read_config():
         config = yaml.safe_load(file)
     parsed_config = parseConfig(config)
 
-    training_data, parsed_config["headers"] = parseTrainingCSV(csv_path)
+    _, parsed_config["headers"] = parseTrainingCSV(csv_path)
     parsed_config = populate_header_in_parameters(
         parsed_config, parsed_config["headers"]
     )
@@ -172,6 +172,7 @@ def test_port_loss_calculator_deep_supervision():
     processor = PredictionTargetProcessorFactory(
         config
     ).get_prediction_target_processor()
+    loss_calculator = LossCalculatorFactory(config).get_loss_calculator()
     assert isinstance(
         loss_calculator, LossCalculatorDeepSupervision
     ), f"Expected instance of {LossCalculatorDeepSupervision}, got {type(loss_calculator)}"

@@ -7,7 +7,6 @@ import logging
 
 from pydicom.data import get_testdata_file
 import cv2
-import pytest
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
 from GANDLF.utils import parseTestingCSV, get_tensor_from_image

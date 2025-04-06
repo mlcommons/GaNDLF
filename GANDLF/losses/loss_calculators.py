@@ -1,9 +1,7 @@
 import torch
-from torch.nn import functional as F
 from abc import ABC, abstractmethod
 
 from GANDLF.losses import get_loss
-from GANDLF.utils import one_hot, reverse_one_hot, get_linear_interpolation_mode
 
 
 class AbstractLossCalculator(ABC):
