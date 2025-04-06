@@ -1,5 +1,4 @@
 import torch
-from torch.utils.data import DataLoader
 from opacus import PrivacyEngine
 
 import collections.abc as abc

@@ -51,9 +51,9 @@ class LossCalculatorDeepSupervision(AbstractLossCalculator):
         self, prediction: torch.Tensor, target: torch.Tensor, *args
     ) -> torch.Tensor:
         loss_values = []
-        for i in range(len(prediction)):
+        for i, pred in enumerate(prediction):
             loss_values.append(
-                self.loss(prediction[i], target[i], self.params) * self.loss_weights[i]
+                self.loss(pred, target[i], self.params) * self.loss_weights[i]
             )
         loss = torch.stack(loss_values).sum()
         return loss
