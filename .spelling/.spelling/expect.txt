@@ -730,3 +730,4 @@ autograd
 cudagraph
 kwonly
 torchscript
+hann
