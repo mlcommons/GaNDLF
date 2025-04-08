@@ -4,10 +4,14 @@ import SimpleITK as sitk
 import numpy as np
 import pandas as pd
 import logging
+import json
 
+from pydantic import ValidationError
 from pydicom.data import get_testdata_file
 import cv2
 
+from GANDLF.configuration.optimizer_config import optimizer_dict_config
+from GANDLF.configuration.scheduler_config import schedulers_dict_config
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
 from GANDLF.utils import parseTestingCSV, get_tensor_from_image
@@ -238,6 +242,13 @@ def write_temp_config_path(parameters_to_write):
     # if found in previous run, discard.
     if os.path.exists(temp_config_path):
         os.remove(temp_config_path)
+
+    # Solve the problem !!python/tuple
+    def tuple_representer(dumper, data):
+        return dumper.represent_sequence("tag:yaml.org,2002:seq", data)
+
+    yaml.add_representer(tuple, tuple_representer)
+
     if parameters_to_write is not None:
         with open(temp_config_path, "w") as file:
             yaml.dump(parameters_to_write, file)
@@ -988,8 +999,8 @@ def test_train_scheduler_classification_rad_2d(device):
         parameters = populate_header_in_parameters(parameters, parameters["headers"])
         parameters["model"]["onnx_export"] = False
         parameters["model"]["print_summary"] = False
-        parameters["scheduler"] = {}
-        parameters["scheduler"]["type"] = scheduler
+        parameters["scheduler"] = scheduler
+        # parameters["scheduler"]["type"] = scheduler
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
         sanitize_outputDir()
@@ -3362,6 +3373,8 @@ def test_differential_privacy_epsilon_classification_rad_2d(device):
         yaml.dump(parameters, file)
     parameters = parseConfig(file_config_temp, version_check_flag=True)
 
+    print(json.dumps(parameters))
+
     TrainingManager(
         dataframe=training_data,
         outputDir=outputDir,
@@ -3485,3 +3498,192 @@ def test_generic_profiling_function_mainrun(device):
     sanitize_outputDir()
 
     print("passed")
+
+
+def test_generic_required_parameters_pydantic_configuration():
+    print("57: Starting configuration (pydantic) testing for required parameters")
+    # The required fields
+    # - patch_size
+    # - model
+    # - modality
+    # - loss_function
+    # - metrics
+    # - nested training
+    parameters = {}
+    with pytest.raises(ValidationError) as exc_info:
+        ConfigManager(parameters, version_check_flag=False)
+
+    assert exc_info.value.error_count() == 6
+
+    print("passed")
+
+
+def test_generic_model_parameters_pydantic_configuration():
+    print("58: Starting configuration (pydantic) testing for model parameters")
+    parameters = ConfigManager(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+
+    # define false configuration for model
+    parameters["model"]["architecture"] = "test"  # invalid value
+    parameters["model"]["final_layer"] = "test_final"  # invalid value
+    parameters["model"]["norm_type"] = "test_type"  # invalid value
+    parameters["model"]["type"] = "test_type"  # invalid value
+
+    with pytest.raises(ValidationError) as exc_info:
+        ConfigManager(parameters, version_check_flag=False)
+
+    assert exc_info.value.error_count() == 4
+
+    # These parameters are required
+    parameters = ConfigManager(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    parameters["model"].pop("architecture")
+    parameters["model"].pop("final_layer")
+
+    with pytest.raises(ValidationError) as exc_info:
+        ConfigManager(parameters, version_check_flag=False)
+
+    assert exc_info.value.error_count() == 2
+
+    # The num_channels parameter can be "n_channels", "channels", "model_channels"
+    parameters = ConfigManager(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    for item in ["n_channels", "channels", "model_channels"]:
+        parameters["model"].pop("num_channels")
+        parameters["model"][item] = 4
+        parameters = ConfigManager(parameters, version_check_flag=False)
+        assert parameters["model"]["num_channels"] == 4
+
+    print("passed")
+
+
+def test_generic_nesting_training_parameters_pydantic_configuration():
+    print(
+        "59: Starting configuration (pydantic) testing for nesting training parameters"
+    )
+
+    parameters = ConfigManager(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+
+    parameters["nested_training"]["stratified"] = 0.23  # invalid value, is bool
+    parameters["nested_training"]["testing"] = 0.23  # invalid value, is int
+    parameters["nested_training"]["validation"] = 0.23  # invalid value, is int
+
+    with pytest.raises(ValidationError) as exc_info:
+        ConfigManager(parameters, version_check_flag=False)
+    assert exc_info.value.error_count() == 3
+
+    # if proportional is not None, the stratified should have  the same value with proportional
+    parameters = ConfigManager(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    parameters["nested_training"]["stratified"] = False
+    parameters["nested_training"]["proportional"] = True
+    parameters = ConfigManager(parameters, version_check_flag=False)
+    assert (
+        parameters["nested_training"]["proportional"]
+        == parameters["nested_training"]["stratified"]
+    )
+
+    print("passed")
+
+
+def test_generic_patch_sampler_parameters_pydantic_configuration():
+    print("60: Starting configuration (pydantic) testing for patch sampler parameters")
+    parameters = ConfigManager(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+
+    parameters.pop("patch_sampler")  # pop the default patch sampler
+    parameters["patch_sampler"] = "test_type"  # invalid value
+
+    with pytest.raises(ValidationError) as exc_info:
+        ConfigManager(parameters, version_check_flag=False)
+    assert exc_info.value.error_count() == 1
+
+
+def test_generic_optimizer_parameters_pydantic_configuration():
+    print("61: Starting configuration (pydantic) testing for optimizer parameters")
+    parameters = ConfigManager(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+
+    parameters["optimizer"] = "test"  # not valid value
+    with pytest.raises(ValidationError) as exc_info:
+        ConfigManager(parameters, version_check_flag=False)
+    assert exc_info.value.error_count() == 1
+
+    for key, value in optimizer_dict_config.items():
+        parameters["optimizer"] = key
+        configuration_parameters = value.model_fields.keys()
+        parameters = ConfigManager(parameters, version_check_flag=False)
+        for parameter in configuration_parameters:
+            assert parameter in parameters["optimizer"]
+
+    print("passed")
+
+
+def test_generic_scheduler_parameters_pydantic_configuration():
+    print("62: Starting configuration (pydantic) testing for scheduler parameters")
+    parameters = ConfigManager(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+
+    parameters["scheduler"] = "test"  # not valid value
+    with pytest.raises(ValidationError) as exc_info:
+        ConfigManager(parameters, version_check_flag=False)
+    assert exc_info.value.error_count() == 1
+
+    for key, value in schedulers_dict_config.items():
+        parameters["scheduler"] = key
+        configuration_parameters = value.model_fields.keys()
+        parameters = ConfigManager(parameters, version_check_flag=False)
+        for parameter in configuration_parameters:
+            assert parameter in parameters["scheduler"]
+
+    print("passed")
+
+
+def test_generic_post_processing_parameters_pydantic_configuration():
+    print(
+        "63: Starting configuration (pydantic) testing for post processing parameters"
+    )
+    parameters = ConfigManager(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    # not allowed extra parameters
+    parameters["data_postprocessing"] = {"test": "test"}
+    with pytest.raises(ValidationError) as exc_info:
+        ConfigManager(parameters, version_check_flag=False)
+    assert exc_info.value.error_count() == 1
+
+
+def test_generic_pre_processing_parameters_pydantic_configuration():
+    print(
+        "63: Starting configuration (pydantic) testing for post processing parameters"
+    )
+    parameters = ConfigManager(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    # not allowed extra parameters
+    parameters["data_preprocessing"]["test"] = "test"
+    with pytest.raises(ValidationError) as exc_info:
+        ConfigManager(parameters, version_check_flag=False)
+    assert exc_info.value.error_count() == 1
+
+    parameters = ConfigManager(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+
+    parameters["data_preprocessing"][
+        "stain_normalization"
+    ] = {  # target parameter is required
+        "extractor": "test"  # invalid value
+    }
+    with pytest.raises(ValidationError) as exc_info:
+        ConfigManager(parameters, version_check_flag=False)
+    assert exc_info.value.error_count() == 2
