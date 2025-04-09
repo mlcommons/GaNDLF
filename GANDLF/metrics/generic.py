@@ -34,7 +34,7 @@ def generic_function_output_with_check(
         print(
             "WARNING: Negative values detected in prediction, cannot compute torchmetrics calculations."
         )
-        return torch.zeros((1), device=prediction.device)
+        return torch.tensor(0, device=prediction.device)
     else:
         # I need to do this with try-except, otherwise for binary problems it will
         # raise and error as the binary metrics do not have .num_classes

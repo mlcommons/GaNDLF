@@ -35,236 +35,216 @@ test_cases = [
         new_way_lines=[
             # full command except --resume, --output-path
             "--config config.yaml --input-data input.csv --train --model-dir model/ "
-            + "--device cuda --reset",
+            + "--reset",
             # tests short arg aliases
-            "-c config.yaml -i input.csv -t -m model/ -d cuda -rt",
+            "-c config.yaml -i input.csv -t -m model/ -rt",
             # test presence of --raw-input (and its uselessness)
-            "-c config.yaml -i input.csv -t -m model/ -d cuda -rt --raw-input blabla",
+            "-c config.yaml -i input.csv -t -m model/ -rt --raw-input blabla",
         ],
         old_way_lines=[
-            "--config config.yaml --inputdata input.csv --train True --modeldir model/ --device cuda --reset True",
-            "--parameters_file config.yaml --data_path input.csv --train True --modeldir model/ --device cuda --reset True",
-            "-c config.yaml -i input.csv -t True -m model/ -d cuda -rt True",
+            "--config config.yaml --inputdata input.csv --train True --modeldir model/ --reset True",
+            "--parameters_file config.yaml --data_path input.csv --train True --modeldir model/ --reset True",
+            "-c config.yaml -i input.csv -t True -m model/ -rt True",
             # test presence of --raw-input (and its uselessness)
-            "-c config.yaml -i input.csv -t True -m model/ -d cuda -rt True --rawinput blabla",
-            "-c config.yaml -i input.csv -t True -m model/ -d cuda -rt True -rawinput blabla",
+            "-c config.yaml -i input.csv -t True -m model/  -rt True --rawinput blabla",
+            "-c config.yaml -i input.csv -t True -m model/ -rt True -rawinput blabla",
         ],
         expected_args={
             "data_csv": "input.csv",
             "config_file": "config.yaml",
             "model_dir": "model/",
             "train_mode": True,
-            "device": "cuda",
             "reset": True,
             "resume": False,
             "output_dir": None,
-            "_profile": False,
+            "profile": False,
         },
     ),
     CliCase(
         should_succeed=True,
         new_way_lines=[
             # --resume instead of --reset
-            "-c config.yaml -i input.csv -t -m model/ -d cuda --resume",
-            "-c config.yaml -i input.csv -t -m model/ -d cuda -rm",
+            "-c config.yaml -i input.csv -t -m model/  --resume",
+            "-c config.yaml -i input.csv -t -m model/ -rm",
         ],
         old_way_lines=[
-            "-c config.yaml -i input.csv -t True -m model/ -d cuda --resume True",
-            "-c config.yaml -i input.csv -t True -m model/ -d cuda -rm True",
+            "-c config.yaml -i input.csv -t True -m model/  --resume True",
+            "-c config.yaml -i input.csv -t True -m model/ -rm True",
         ],
         expected_args={
             "data_csv": "input.csv",
             "config_file": "config.yaml",
             "model_dir": "model/",
             "train_mode": True,
-            "device": "cuda",
             "reset": False,
             "resume": True,
             "output_dir": None,
-            "_profile": False,
+            "profile": False,
         },
     ),
     CliCase(  # inference mode + --output-path
         should_succeed=True,
         new_way_lines=[
-            "-c config.yaml -i input.csv --infer -m model/ -d cuda --output-path output/",
-            "-c config.yaml -i input.csv --infer -m model/ -d cuda -o output/",
+            "-c config.yaml -i input.csv --infer -m model/ --output-path output/",
+            "-c config.yaml -i input.csv --infer -m model/  -o output/",
         ],
-        old_way_lines=[
-            "-c config.yaml -i input.csv -t False -m model/ -d cuda -o output/"
-        ],
+        old_way_lines=["-c config.yaml -i input.csv -t False -m model/  -o output/"],
         expected_args={
             "data_csv": "input.csv",
             "config_file": "config.yaml",
             "model_dir": "model/",
             "train_mode": False,
-            "device": "cuda",
             "reset": False,
             "resume": False,
             "output_dir": "output/",
-            "_profile": False,
+            "profile": False,
         },
     ),
     CliCase(  # check that `model_dir` can be skipped (used output instead)
         should_succeed=True,
         new_way_lines=[
-            "-c config.yaml -i input.csv --train -d cuda -o output/",
-            "-c config.yaml -i input.csv --infer -d cuda -o output/",
+            "-c config.yaml -i input.csv --train  -o output/",
+            "-c config.yaml -i input.csv --infer  -o output/",
         ],
         old_way_lines=[
-            "-c config.yaml -i input.csv -t True -d cuda -o output/",
-            "-c config.yaml -i input.csv -t False -d cuda -o output/",
+            "-c config.yaml -i input.csv -t True  -o output/",
+            "-c config.yaml -i input.csv -t False -o output/",
         ],
         expected_args={
             "data_csv": "input.csv",
             "config_file": "config.yaml",
             "model_dir": "output/",
             "train_mode": ...,
-            "device": "cuda",
             "reset": False,
             "resume": False,
             "output_dir": "output/",
-            "_profile": False,
+            "profile": False,
         },
     ),
     CliCase(  # check that both output + model cannot be empty simultaneously
         should_succeed=False,
         new_way_lines=[
-            "-c config.yaml -i input.csv --train -d cuda",
-            "-c config.yaml -i input.csv --infer -d cuda",
+            "-c config.yaml -i input.csv --train ",
+            "-c config.yaml -i input.csv --infer ",
         ],
         old_way_lines=[
-            "-c config.yaml -i input.csv -t True -d cuda",
-            "-c config.yaml -i input.csv -t False -d cuda",
+            "-c config.yaml -i input.csv -t True ",
+            "-c config.yaml -i input.csv -t False ",
         ],
     ),
     CliCase(  # check device
         should_succeed=True,
         new_way_lines=[
-            "-c config.yaml -i input.csv --train -m model/ -d cpu -o output/",
-            "-c config.yaml -i input.csv --infer -m model/ -d cpu -o output/",
+            "-c config.yaml -i input.csv --train -m model/  -o output/",
+            "-c config.yaml -i input.csv --infer -m model/  -o output/",
         ],
         old_way_lines=[
-            "-c config.yaml -i input.csv -t True -m model/ -d cpu -o output/",
-            "-c config.yaml -i input.csv -t False -m model/ -d cpu -o output/",
+            "-c config.yaml -i input.csv -t True -m model/  -o output/",
+            "-c config.yaml -i input.csv -t False -m model/ -o output/",
         ],
         expected_args={
             "data_csv": "input.csv",
             "config_file": "config.yaml",
             "model_dir": "model/",
             "train_mode": ...,
-            "device": "cpu",
             "reset": False,
             "resume": False,
             "output_dir": "output/",
-            "_profile": False,
+            "profile": False,
         },
     ),
     CliCase(  # reset + resume simultaneously => disabling reset in favor of resume
         should_succeed=True,
         new_way_lines=[
-            "-c config.yaml -i input.csv --train -m model/ -d cpu -o output/ -rt -rm"
+            "-c config.yaml -i input.csv --train -m model/ -o output/ -rt -rm"
         ],
         old_way_lines=[
-            "-c config.yaml -i input.csv -t True -m model/ -d cpu -o output/ -rt True -rm True"
+            "-c config.yaml -i input.csv -t True -m model/ -o output/ -rt True -rm True"
         ],
         expected_args={
             "data_csv": "input.csv",
             "config_file": "config.yaml",
             "model_dir": "model/",
             "train_mode": True,
-            "device": "cpu",
             "reset": False,
             "resume": True,
             "output_dir": "output/",
-            "_profile": False,
+            "profile": False,
         },
     ),
     CliCase(  # input data may point to folder with 'data.csv'
         should_succeed=True,
-        new_way_lines=["-c config.yaml -i input/ --train -m model/ -d cpu"],
-        old_way_lines=["-c config.yaml -i input/ -t True -m model/ -d cpu"],
+        new_way_lines=["-c config.yaml -i input/ --train -m model/ "],
+        old_way_lines=["-c config.yaml -i input/ -t True -m model/ "],
         expected_args={
             "data_csv": "input/data.csv",
             "config_file": "config.yaml",
             "model_dir": "model/",
             "train_mode": True,
-            "device": "cpu",
             "reset": False,
             "resume": False,
             "output_dir": None,
-            "_profile": False,
+            "profile": False,
         },
     ),
     CliCase(  # input data may point to comma-separated list of csvs
         should_succeed=True,
-        new_way_lines=["-c config.yaml -i train.csv,val.csv --train -m model/ -d cpu"],
-        old_way_lines=["-c config.yaml -i train.csv,val.csv -t True -m model/ -d cpu"],
+        new_way_lines=["-c config.yaml -i train.csv,val.csv --train -m model/ "],
+        old_way_lines=["-c config.yaml -i train.csv,val.csv -t True -m model/ "],
         expected_args={
             "data_csv": "train.csv,val.csv",
             "config_file": "config.yaml",
             "model_dir": "model/",
             "train_mode": True,
-            "device": "cpu",
             "reset": False,
             "resume": False,
             "output_dir": None,
-            "_profile": False,
+            "profile": False,
         },
     ),
     CliCase(  # output-path may point to non-existent path
         should_succeed=True,
-        new_way_lines=[
-            "-c config.yaml -i input.csv --train -m model/ -d cpu -o output_na/"
-        ],
-        old_way_lines=[
-            "-c config.yaml -i input.csv -t True -m model/ -d cpu -o output_na/"
-        ],
+        new_way_lines=["-c config.yaml -i input.csv --train -m model/  -o output_na/"],
+        old_way_lines=["-c config.yaml -i input.csv -t True -m model/  -o output_na/"],
         expected_args={
             "data_csv": "input.csv",
             "config_file": "config.yaml",
             "model_dir": "model/",
             "train_mode": True,
-            "device": "cpu",
             "reset": False,
             "resume": False,
             "output_dir": "output_na/",
-            "_profile": False,
+            "profile": False,
         },
     ),
     CliCase(
         should_succeed=False,
         new_way_lines=[
             # config, input-data, train/infer, device are required
-            "               -i input/ --train -m model/ -d cpu",
-            "-c config.yaml           --train -m model/ -d cpu",
-            "-c config.yaml -i input/         -m model/ -d cpu",
-            "-c config.yaml -i input/ --train -m model/       ",
+            "               -i input/ --train -m model/ ",
+            "-c config.yaml           --train -m model/ ",
             # config should point to existing file
-            "-c config_dir/ -i input/ --train -m model/ -d cpu",
-            "-c path_na -i input/ --train -m model/ -d cpu",
+            "-c config_dir/ -i input/ --train -m model/ ",
+            "-c path_na -i input/ --train -m model/ ",
             # output should not point to file
-            "-c config.yaml -i input/ --train -d cpu -o output.csv",
+            "-c config.yaml -i input/ --train  -o output.csv",
             # model should not point to file
-            "-c config.yaml -i input/ --train -m model.file -d cpu",
-            # device should not support anything other beside cuda/cpu
-            "-c config.yaml -i input/ --train -m model/ -d mps",
+            "-c config.yaml -i input/ --train -m model.file ",
         ],
         old_way_lines=[
-            # config, input-data, train/infer, device are required
-            "               -i input/ -t True -m model/ -d cpu",
-            "-c config.yaml           -t True -m model/ -d cpu",
-            "-c config.yaml -i input/         -m model/ -d cpu",
-            "-c config.yaml -i input/ -t True -m model/       ",
+            # config, input-data, train/infer, are required
+            "               -i input/ -t True -m model/ ",
+            "-c config.yaml           -t True -m model/ ",
+            "-c config.yaml -i input/         -m model/ ",
             # config should point to existing file
-            "-c config_dir/ -i input/ -t True -m model/ -d cpu",
-            "-c path_na -i input/ --train -m model/ -d cpu",
+            "-c config_dir/ -i input/ -t True -m model/ ",
+            "-c path_na -i input/ --train -m model/ ",
             # output should not point to file
-            # "-c config.yaml -i input/ -t True -d cpu -o output.csv",  # no such check in old way
+            # "-c config.yaml -i input/ -t True  -o output.csv",  # no such check in old way
             # model should not point to file
-            # "-c config.yaml -i input/ -t True -m model.file -d cpu",  # no such check in old way
+            # "-c config.yaml -i input/ -t True -m model.file ",  # no such check in old way
             # device should not support anything other beside cuda/cpu
-            # "-c config.yaml -i input/ -t True -m model/ -d mps",  # no such check in old way
+            # "-c config.yaml -i input/ -t True -m model/ ",  # no such check in old way
         ],
     ),
 ]

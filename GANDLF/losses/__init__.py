@@ -13,7 +13,6 @@ from .segmentation import (
 from .regression import CE, CEL, MSE_loss, L1_loss
 from .hybrid import DCCE, DCCE_Logits, DC_Focal
 
-
 # global defines for the losses
 global_losses_dict = {
     "dc": MCD_loss,
@@ -38,3 +37,26 @@ global_losses_dict = {
     "focal": FocalLoss,
     "dc_focal": DC_Focal,
 }
+
+
+def get_loss(params: dict) -> object:
+    """
+    Function to get the loss definition.
+
+    Args:
+        params (dict): The parameters' dictionary.
+
+    Returns:
+        loss (object): The loss definition.
+    """
+    # TODO This check looks like legacy code, should we have it?
+
+    if isinstance(params["loss_function"], dict):
+        chosen_loss = list(params["loss_function"].keys())[0].lower()
+    else:
+        chosen_loss = params["loss_function"].lower()
+    assert (
+        chosen_loss in global_losses_dict
+    ), f"Could not find the requested loss function '{params['loss_function']}'"
+
+    return global_losses_dict[chosen_loss]
