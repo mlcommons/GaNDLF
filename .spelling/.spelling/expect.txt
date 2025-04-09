@@ -728,6 +728,7 @@ autograd
 cudagraph
 kwonly
 torchscript
+hann
 angi
 progbar
 ddp
