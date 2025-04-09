@@ -4,6 +4,8 @@
 
 
 import sys, re, os
+
+
 from setuptools import setup, find_packages
 
 
@@ -67,7 +69,7 @@ requirements = [
     "pydicom",
     "onnx",
     "torchinfo==1.7.0",
-    "segmentation-models-pytorch==0.3.3",
+    "segmentation-models-pytorch==0.4.0",
     "ACSConv==0.1.1",
     # https://github.com/docker/docker-py/issues/3256
     "requests>=2.32.2",
@@ -87,6 +89,7 @@ requirements = [
     "openslide-bin",
     "openslide-python==1.4.1",
     "lion-pytorch==0.2.2",
+    "pydantic==2.10.6",
 ]
 
 if __name__ == "__main__":
