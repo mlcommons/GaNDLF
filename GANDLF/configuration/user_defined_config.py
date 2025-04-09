@@ -82,7 +82,9 @@ class UserDefinedParameters(DefaultParameters):
     differential_privacy: Union[bool, DifferentialPrivacyConfig] = Field(
         description="Differential privacy.", default=None
     )
-    clip_mode:Literal["norm", "value"]=Field(description="Clip mode.", default="norm")
+    clip_mode: Literal["norm", "value"] = Field(
+        description="Clip mode.", default="norm"
+    )
     data_preprocessing: Annotated[
         dict,
         Field(description="Data preprocessing."),
