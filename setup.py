@@ -66,7 +66,7 @@ requirements = [
     "pydicom",
     "onnx",
     "torchinfo==1.7.0",
-    "segmentation-models-pytorch==0.3.3",
+    "segmentation-models-pytorch==0.4.0",
     "ACSConv==0.1.1",
     # https://github.com/docker/docker-py/issues/3256
     "requests>=2.32.2",
