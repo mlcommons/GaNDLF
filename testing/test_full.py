@@ -3157,7 +3157,7 @@ def test_generic_cli_function_metrics_cli_rad_nd():
         {
             "SubjectID": [subject_id],
             "Prediction": [prediction_image_file],
-            "Reference": [reference_image_file],
+            "Target": [reference_image_file],
         }
     )
     temp_infer_csv = os.path.join(outputDir, "temp_csv.csv")
