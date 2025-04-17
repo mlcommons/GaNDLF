@@ -1,0 +1,50 @@
+!Panoptica_Evaluator
+decision_metric: null
+decision_threshold: null
+edge_case_handler: !EdgeCaseHandler
+  empty_list_std: !EdgeCaseResult NAN
+  listmetric_zeroTP_handling:
+    !Metric DSC: !MetricZeroTPEdgeCaseHandling {empty_prediction_result: !EdgeCaseResult ZERO,
+      empty_reference_result: !EdgeCaseResult ZERO, no_instances_result: !EdgeCaseResult NAN,
+      normal: !EdgeCaseResult ZERO}
+    !Metric clDSC: !MetricZeroTPEdgeCaseHandling {empty_prediction_result: !EdgeCaseResult ZERO,
+      empty_reference_result: !EdgeCaseResult ZERO, no_instances_result: !EdgeCaseResult NAN,
+      normal: !EdgeCaseResult ZERO}
+    !Metric IOU: !MetricZeroTPEdgeCaseHandling {empty_prediction_result: !EdgeCaseResult ZERO,
+      empty_reference_result: !EdgeCaseResult ZERO, no_instances_result: !EdgeCaseResult NAN,
+      normal: !EdgeCaseResult ZERO}
+    !Metric ASSD: !MetricZeroTPEdgeCaseHandling {empty_prediction_result: !EdgeCaseResult INF,
+      empty_reference_result: !EdgeCaseResult INF, no_instances_result: !EdgeCaseResult NAN,
+      normal: !EdgeCaseResult INF}
+    !Metric RVD: !MetricZeroTPEdgeCaseHandling {empty_prediction_result: !EdgeCaseResult NAN,
+      empty_reference_result: !EdgeCaseResult NAN, no_instances_result: !EdgeCaseResult NAN,
+      normal: !EdgeCaseResult NAN}
+    !Metric RVAE: !MetricZeroTPEdgeCaseHandling {empty_prediction_result: !EdgeCaseResult NAN,
+      empty_reference_result: !EdgeCaseResult NAN, no_instances_result: !EdgeCaseResult NAN,
+      normal: !EdgeCaseResult NAN}
+expected_input: !InputType SEMANTIC
+global_metrics: [!Metric DSC]
+instance_approximator: !ConnectedComponentsInstanceApproximator {cca_backend: null}
+instance_matcher: !NaiveThresholdMatching {allow_many_to_one: false, matching_metric: !Metric IOU,
+  matching_threshold: 0.5}
+instance_metrics: [!Metric DSC, !Metric IOU, !Metric ASSD, !Metric RVD]
+log_times: false
+save_group_times: false
+segmentation_class_groups: !SegmentationClassGroups
+  groups:
+    ed: !LabelGroup
+      single_instance: false
+      value_labels: [2]
+    et: !LabelGroup
+      single_instance: false
+      value_labels: [3]
+    net: !LabelGroup
+      single_instance: false
+      value_labels: [1]
+    tc: !LabelMergeGroup
+      single_instance: false
+      value_labels: [1, 3]
+    wt: !LabelMergeGroup
+      single_instance: false
+      value_labels: [1, 2, 3]
+verbose: false

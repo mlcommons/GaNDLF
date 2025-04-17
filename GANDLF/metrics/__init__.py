@@ -40,6 +40,7 @@ from .synthesis import (
 )
 import GANDLF.metrics.classification as classification
 import GANDLF.metrics.regression as regression
+from .segmentation_panoptica import generate_instance_segmentation
 
 
 # global defines for the metrics
