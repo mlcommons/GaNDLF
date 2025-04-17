@@ -731,3 +731,7 @@ cudagraph
 kwonly
 torchscript
 hann
+ASSD
+listmetric
+panoptica
+RVAE
