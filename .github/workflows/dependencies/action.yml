@@ -89,7 +89,7 @@ runs:
         if: ${{steps.changed-files.outputs.other_modified_files_count > 0}} # Run on any non-docs change
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.11"
 
 
       - name: Install dependencies and package

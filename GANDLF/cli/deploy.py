@@ -246,7 +246,7 @@ def get_metrics_mlcube_config(
         mlcube_config = yaml.safe_load(f)
     if entrypoint_script:
         # modify the entrypoint to run a custom script
-        mlcube_config["tasks"]["evaluate"]["entrypoint"] = "python3.12 /entrypoint.py"
+        mlcube_config["tasks"]["evaluate"]["entrypoint"] = "python3.11 /entrypoint.py"
     mlcube_config["docker"]["build_strategy"] = "auto"
     return mlcube_config
 
@@ -315,7 +315,7 @@ def get_model_mlcube_config(
         device = "cuda" if requires_gpu else "cpu"
         mlcube_config["tasks"]["infer"][
             "entrypoint"
-        ] = f"python3.12 /entrypoint.py --device {device}"
+        ] = f"python3.11 /entrypoint.py --device {device}"
 
     return mlcube_config
     # Duplicate training task into one from reset (must be explicit) and one that resumes with new data
