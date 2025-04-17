@@ -39,6 +39,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip==24.0
+        python -m pip install --upgrade setuptools
         pip install scikit-build
         pip install -e .
         pip install build
