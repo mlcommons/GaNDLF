@@ -64,6 +64,7 @@ requirements = [
     "opencv-python",
     "torchmetrics==1.1.2",
     "zarr==2.10.3",
+    "numcodecs<0.16.0",
     "pydicom",
     "onnx",
     "torchinfo==1.7.0",
