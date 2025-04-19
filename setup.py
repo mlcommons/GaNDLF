@@ -130,6 +130,7 @@ if __name__ == "__main__":
             "Operating System :: OS Independent",
             "Programming Language :: Python :: 3.10",
             "Programming Language :: Python :: 3.11",
+            "Programming Language :: Python :: 3.12",
             "Topic :: Scientific/Engineering :: Medical Science Apps.",
         ],
         description=(
