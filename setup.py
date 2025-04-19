@@ -41,7 +41,7 @@ black_version = "23.11.0"
 requirements = [
     "torch==2.5.0",
     f"black=={black_version}",
-    "numpy==1.25.0",
+    "numpy==1.26.4",
     "scipy",
     "SimpleITK!=2.0.*",
     "SimpleITK!=2.2.1",  # https://github.com/mlcommons/GaNDLF/issues/536
