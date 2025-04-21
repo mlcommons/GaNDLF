@@ -8,21 +8,21 @@ LABEL version=1.0
 # The base image contains ROCm, python 3.9 and pytorch already, no need to install those
 RUN apt-get update && apt-get install -y software-properties-common
 RUN add-apt-repository ppa:deadsnakes/ppa
-RUN apt-get install -y  python3.11 python3-pip libjpeg8-dev zlib1g-dev python3-dev libpython3.11-dev libffi-dev libgl1 python-setuptools
+RUN apt-get install -y  python3.12 python3-pip libjpeg8-dev zlib1g-dev python3-dev libpython3.12-dev libffi-dev libgl1 python-setuptools
 # fix pip version because of weird PyYAML issue
-RUN python3.11 -m pip install --upgrade pip==24.0
-RUN python3.11 -m pip install setuptools
-RUN python3.11 -m pip install torch==2.5.0 torchvision==0.20.0 torchaudio==2.5.0 --index-url https://download.pytorch.org/whl/rocm6.1
-RUN python3.11 -m pip install openvino-dev==2024.1.0 opencv-python-headless mlcube_docker
+RUN python3.12 -m pip install --upgrade pip==24.0
+RUN python3.12 -m pip install setuptools
+RUN python3.12 -m pip install torch==2.5.0 torchvision==0.20.0 torchaudio==2.5.0 --index-url https://download.pytorch.org/whl/rocm6.1
+RUN python3.12 -m pip install openvino-dev==2024.1.0 opencv-python-headless mlcube_docker
 
 # Do some dependency installation separately here to make layer caching more efficient
 COPY ./setup.py ./setup.py
-RUN python3.11 -c "from setup import requirements; file = open('requirements.txt', 'w'); file.writelines([req + '\n' for req in requirements]); file.close()" \
-    && python3.11 -m pip install -r ./requirements.txt
+RUN python3.12 -c "from setup import requirements; file = open('requirements.txt', 'w'); file.writelines([req + '\n' for req in requirements]); file.close()" \
+    && python3.12 -m pip install -r ./requirements.txt
 
 COPY . /GaNDLF
 WORKDIR /GaNDLF
-RUN python3.11 -m pip install -e .
+RUN python3.12 -m pip install -e .
 
 # Entrypoint forces all commands given via "docker run" to go through python, CMD forces the default entrypoint script argument to be gandlf run
 # If a user calls "docker run gandlf:[tag] anonymize", it will resolve to running "gandlf anonymize" instead.
