@@ -2,6 +2,7 @@ FROM rocm/pytorch:rocm6.1_ubuntu22.04_py3.10_pytorch_2.4
 LABEL github="https://github.com/mlcommons/GaNDLF"
 LABEL docs="https://mlcommons.github.io/GaNDLF/"
 LABEL version=1.0
+ARG SETUPTOOLS_USE_DISTUTILS=local
 
 # Quick start instructions on using Docker with ROCm: https://github.com/RadeonOpenCompute/ROCm-docker/blob/master/quick-start.md
 

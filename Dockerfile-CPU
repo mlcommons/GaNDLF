@@ -2,6 +2,7 @@ FROM ubuntu:22.04
 LABEL github="https://github.com/mlcommons/GaNDLF"
 LABEL docs="https://mlcommons.github.io/GaNDLF/"
 LABEL version=1.0
+ARG SETUPTOOLS_USE_DISTUTILS=local
 
 # Install fresh Python and dependencies for build-from-source
 RUN apt-get update && apt-get install -y software-properties-common

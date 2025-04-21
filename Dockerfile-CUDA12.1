@@ -2,6 +2,7 @@ FROM nvidia/cuda:12.1.0-devel-ubuntu22.04
 LABEL github="https://github.com/mlcommons/GaNDLF"
 LABEL docs="https://mlcommons.github.io/GaNDLF/"
 LABEL version=1.0
+ARG SETUPTOOLS_USE_DISTUTILS=local
 
 # Install instructions for NVIDIA Container Toolkit allowing you to use the host's GPU: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html
 # Note that to do this on a Windows host you need experimental feature "CUDA on WSL" -- not yet stable.
