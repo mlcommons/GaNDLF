@@ -246,7 +246,7 @@ def get_metrics_mlcube_config(
         mlcube_config = yaml.safe_load(f)
     if entrypoint_script:
         # modify the entrypoint to run a custom script
-        mlcube_config["tasks"]["evaluate"]["entrypoint"] = "python3.12 /entrypoint.py"
+        mlcube_config["tasks"]["evaluate"]["entrypoint"] = "python3.11 /entrypoint.py"
     mlcube_config["docker"]["build_strategy"] = "auto"
     return mlcube_config
 
