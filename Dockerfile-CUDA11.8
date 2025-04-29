@@ -17,7 +17,7 @@ RUN apt-get install -y python3.11 libpython3.11-dev python3-dev python3-pip libj
 RUN python3.11 -m pip install --upgrade setuptools
 RUN python3.11 -m pip install --upgrade pip
 RUN python3.11 -m pip install torch==2.5.0 torchvision==0.20.0 torchaudio==2.5.0 --index-url https://download.pytorch.org/whl/cu118
-RUN python3.11 -m pip install openvino-dev==2024.1.0 opencv-python-headless mlcube_docker
+RUN python3.11 -m pip install openvino-dev opencv-python-headless mlcube_docker
 
 # Do some dependency installation separately here to make layer caching more efficient
 COPY ./setup.py ./setup.py
