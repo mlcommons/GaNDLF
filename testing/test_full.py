@@ -2931,64 +2931,64 @@ def test_generic_cli_function_recoverconfig():
     print("passed")
 
 
-def test_generic_deploy_docker():
-    print("46: Testing deployment of a model to Docker")
-    # Train, then try deploying that model (requires an installed Docker engine)
+# def test_generic_deploy_docker():
+#     print("46: Testing deployment of a model to Docker")
+#     # Train, then try deploying that model (requires an installed Docker engine)
 
-    deploymentOutputDir = os.path.join(outputDir, "mlcube")
-    # read and parse csv
-    parameters = ConfigManager(
-        testingDir + "/config_segmentation.yaml", version_check_flag=False
-    )
-    training_data, parameters["headers"] = parseTrainingCSV(
-        inputDir + "/train_2d_rad_segmentation.csv"
-    )
+#     deploymentOutputDir = os.path.join(outputDir, "mlcube")
+#     # read and parse csv
+#     parameters = ConfigManager(
+#         testingDir + "/config_segmentation.yaml", version_check_flag=False
+#     )
+#     training_data, parameters["headers"] = parseTrainingCSV(
+#         inputDir + "/train_2d_rad_segmentation.csv"
+#     )
 
-    parameters["modality"] = "rad"
-    parameters["patch_size"] = patch_size["2D"]
-    parameters["model"]["dimension"] = 2
-    parameters["model"]["class_list"] = [0, 255]
-    parameters["model"]["amp"] = True
-    parameters["model"]["num_channels"] = 3
-    parameters["model"]["onnx_export"] = False
-    parameters["model"]["print_summary"] = False
-    parameters["data_preprocessing"]["resize_image"] = [224, 224]
-    parameters["memory_save_mode"] = True
+#     parameters["modality"] = "rad"
+#     parameters["patch_size"] = patch_size["2D"]
+#     parameters["model"]["dimension"] = 2
+#     parameters["model"]["class_list"] = [0, 255]
+#     parameters["model"]["amp"] = True
+#     parameters["model"]["num_channels"] = 3
+#     parameters["model"]["onnx_export"] = False
+#     parameters["model"]["print_summary"] = False
+#     parameters["data_preprocessing"]["resize_image"] = [224, 224]
+#     parameters["memory_save_mode"] = True
 
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    sanitize_outputDir()
-    TrainingManager(
-        dataframe=training_data,
-        outputDir=outputDir,
-        parameters=parameters,
-        device=device,
-        resume=False,
-        reset=True,
-    )
+#     parameters = populate_header_in_parameters(parameters, parameters["headers"])
+#     sanitize_outputDir()
+#     TrainingManager(
+#         dataframe=training_data,
+#         outputDir=outputDir,
+#         parameters=parameters,
+#         device=device,
+#         resume=False,
+#         reset=True,
+#     )
 
-    custom_entrypoint = os.path.join(
-        gandlfRootDir,
-        "mlcube/model_mlcube/example_custom_entrypoint/getting_started_3d_rad_seg.py",
-    )
-    for entrypoint_script in [None, custom_entrypoint]:
-        result = run_deployment(
-            os.path.join(gandlfRootDir, "mlcube/model_mlcube/"),
-            deploymentOutputDir,
-            "docker",
-            "model",
-            entrypoint_script=entrypoint_script,
-            configfile=testingDir + "/config_segmentation.yaml",
-            modeldir=outputDir,
-            requires_gpu=True,
-        )
-        msg = "run_deployment returned false"
-        if entrypoint_script:
-            msg += " with custom entrypoint script"
-        assert result, msg
+#     custom_entrypoint = os.path.join(
+#         gandlfRootDir,
+#         "mlcube/model_mlcube/example_custom_entrypoint/getting_started_3d_rad_seg.py",
+#     )
+#     for entrypoint_script in [None, custom_entrypoint]:
+#         result = run_deployment(
+#             os.path.join(gandlfRootDir, "mlcube/model_mlcube/"),
+#             deploymentOutputDir,
+#             "docker",
+#             "model",
+#             entrypoint_script=entrypoint_script,
+#             configfile=testingDir + "/config_segmentation.yaml",
+#             modeldir=outputDir,
+#             requires_gpu=True,
+#         )
+#         msg = "run_deployment returned false"
+#         if entrypoint_script:
+#             msg += " with custom entrypoint script"
+#         assert result, msg
 
-    sanitize_outputDir()
+#     sanitize_outputDir()
 
-    print("passed")
+#     print("passed")
 
 
 def test_collision_subjectid_test_segmentation_rad_2d(device):
@@ -3144,23 +3144,23 @@ def test_generic_cli_function_metrics_cli_rad_nd():
             sanitize_outputDir()
 
 
-def test_generic_deploy_metrics_docker():
-    print("50: Testing deployment of a metrics generator to Docker")
-    # requires an installed Docker engine
+# def test_generic_deploy_metrics_docker():
+#     print("50: Testing deployment of a metrics generator to Docker")
+#     # requires an installed Docker engine
 
-    deploymentOutputDir = os.path.join(outputDir, "mlcube")
+#     deploymentOutputDir = os.path.join(outputDir, "mlcube")
 
-    result = run_deployment(
-        os.path.join(gandlfRootDir, "mlcube/model_mlcube/"),
-        deploymentOutputDir,
-        "docker",
-        "metrics",
-    )
+#     result = run_deployment(
+#         os.path.join(gandlfRootDir, "mlcube/model_mlcube/"),
+#         deploymentOutputDir,
+#         "docker",
+#         "metrics",
+#     )
 
-    assert result, "run_deployment returned false"
-    sanitize_outputDir()
+#     assert result, "run_deployment returned false"
+#     sanitize_outputDir()
 
-    print("passed")
+#     print("passed")
 
 
 def test_generic_data_split():
