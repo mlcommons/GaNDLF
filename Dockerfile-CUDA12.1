@@ -8,25 +8,25 @@ LABEL version=1.0
 # Note that to do this on a Windows host you need experimental feature "CUDA on WSL" -- not yet stable.
 ENV DEBIAN_FRONTEND=noninteractive 
 
-# Explicitly install python3.11 (this uses 11.1 for now, as PyTorch LTS 1.8.2 is built against it)
+# Explicitly install python3.12 (this uses 11.1 for now, as PyTorch LTS 1.8.2 is built against it)
 RUN apt-get update && apt-get install -y software-properties-common
 RUN add-apt-repository ppa:deadsnakes/ppa
 RUN apt-get install -y python-setuptools python3-distutils
-RUN apt-get install -y python3.11 libpython3.11-dev python3-dev python3-pip libjpeg8-dev zlib1g-dev libffi-dev libgl1
+RUN apt-get install -y python3.12 libpython3.12-dev python3-dev python3-pip libjpeg8-dev zlib1g-dev libffi-dev libgl1
 # fix pip version because of weird PyYAML issue
-RUN python3.11 -m pip install --upgrade setuptools
-RUN python3.11 -m pip install --upgrade pip
-RUN python3.11 -m pip install torch==2.5.0 torchvision==0.20.0 torchaudio==2.5.0 --index-url https://download.pytorch.org/whl/cu121
-RUN python3.11 -m pip install openvino-dev opencv-python-headless
+RUN python3.12 -m pip install --upgrade setuptools
+RUN python3.12 -m pip install --upgrade pip
+RUN python3.12 -m pip install torch==2.5.0 torchvision==0.20.0 torchaudio==2.5.0 --index-url https://download.pytorch.org/whl/cu121
+RUN python3.12 -m pip install openvino-dev opencv-python-headless
 
 # Do some dependency installation separately here to make layer caching more efficient
 COPY ./setup.py ./setup.py
-RUN python3.11 -c "from setup import requirements; file = open('requirements.txt', 'w'); file.writelines([req + '\n' for req in requirements]); file.close()" \
-    && python3.11 -m pip install -r ./requirements.txt
+RUN python3.12 -c "from setup import requirements; file = open('requirements.txt', 'w'); file.writelines([req + '\n' for req in requirements]); file.close()" \
+    && python3.12 -m pip install -r ./requirements.txt
 
 COPY . /GaNDLF
 WORKDIR /GaNDLF
-RUN python3.11 -m pip install -e .
+RUN python3.12 -m pip install -e .
 
 # Entrypoint forces all commands given via "docker run" to go through python, CMD forces the default entrypoint script argument to be gandlf run
 # If a user calls "docker run gandlf:[tag] anonymize", it will resolve to running "gandlf anonymize" instead.
