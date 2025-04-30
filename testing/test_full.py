@@ -3165,7 +3165,7 @@ def test_generic_cli_function_metrics_cli_rad_nd():
 
     # read and initialize parameters for specific data dimension
     parameters = ConfigManager(
-        testingDir + f"/config_segmentation.yaml", version_check_flag=False
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
@@ -3176,7 +3176,9 @@ def test_generic_cli_function_metrics_cli_rad_nd():
     output_file = os.path.join(outputDir, "output_single-csv.json")
     generate_metrics_dict(temp_infer_csv, temp_config, output_file)
 
-    assert os.path.isfile(output_file), "Metrics output file was not generated for single-csv input"
+    assert os.path.isfile(
+        output_file
+    ), "Metrics output file was not generated for single-csv input"
 
     sanitize_outputDir()
 
