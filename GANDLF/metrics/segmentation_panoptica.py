@@ -3,14 +3,8 @@ from pathlib import Path
 import numpy as np
 
 from panoptica import (
-    InputType,
     Panoptica_Evaluator,
-    Panoptica_Aggregator,
-    ConnectedComponentsInstanceApproximator,
-    NaiveThresholdMatching,
 )
-from panoptica.utils.segmentation_class import SegmentationClassGroups
-from panoptica.utils.label_group import LabelMergeGroup
 
 
 def generate_instance_segmentation(
