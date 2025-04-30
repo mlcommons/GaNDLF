@@ -2,9 +2,7 @@ from pathlib import Path
 
 import numpy as np
 
-from panoptica import (
-    Panoptica_Evaluator,
-)
+from panoptica import Panoptica_Evaluator
 
 
 def generate_instance_segmentation(
