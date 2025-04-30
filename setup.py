@@ -40,7 +40,7 @@ black_version = "23.11.0"
 requirements = [
     "torch==2.5.0",
     f"black=={black_version}",
-    "numpy==1.25.0",
+    "numpy==1.26.4",
     "scipy",
     "SimpleITK!=2.0.*",
     "SimpleITK!=2.2.1",  # https://github.com/mlcommons/GaNDLF/issues/536
@@ -52,7 +52,7 @@ requirements = [
     "scikit-image>=0.19.1",
     "setuptools",
     "seaborn",
-    "pyyaml==6.0.1",
+    "pyyaml",
     "matplotlib",
     "gdown==5.1.0",
     "pytest",
@@ -63,6 +63,7 @@ requirements = [
     "opencv-python",
     "torchmetrics==1.1.2",
     "zarr==2.10.3",
+    "numcodecs<0.16.0",
     "pydicom",
     "onnx",
     "torchinfo==1.7.0",
@@ -73,9 +74,8 @@ requirements = [
     "docker",
     "dicom-anonymizer==1.0.12",
     "twine",
-    "zarr",
     "keyring",
-    "monai==1.3.0",
+    "monai==1.4.0",
     "click>=8.0.0",
     "deprecated",
     "packaging==24.0",
@@ -96,7 +96,7 @@ if __name__ == "__main__":
         version=__version__,
         author="MLCommons",
         author_email="gandlf@mlcommons.org",
-        python_requires=">3.8, <3.12",
+        python_requires=">3.9, <3.13",
         packages=find_packages(
             where=os.path.dirname(os.path.abspath(__file__)),
             exclude=toplevel_package_excludes,
@@ -129,6 +129,7 @@ if __name__ == "__main__":
             "Operating System :: OS Independent",
             "Programming Language :: Python :: 3.10",
             "Programming Language :: Python :: 3.11",
+            "Programming Language :: Python :: 3.12",
             "Topic :: Scientific/Engineering :: Medical Science Apps.",
         ],
         description=(

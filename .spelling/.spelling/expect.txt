@@ -731,6 +731,7 @@ cudagraph
 kwonly
 torchscript
 hann
+numcodecs
 ASSD
 listmetric
 panoptica

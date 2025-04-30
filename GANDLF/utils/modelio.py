@@ -96,10 +96,12 @@ def optimize_and_save_model(
             from openvino.tools.mo import convert_model
             from openvino.runtime import get_version
 
-            openvino_present = False
-            # check for the correct openvino version to prevent inadvertent api breaks
-            if "2023.0.1" in get_version():
-                openvino_present = True
+            # debugging
+            openvino_present = True
+            # openvino_present = False
+            # # check for the correct openvino version to prevent inadvertent api breaks
+            # if "2024.1.0" in get_version():
+            #     openvino_present = True
         except ImportError:
             print("WARNING: OpenVINO is not present.")
 

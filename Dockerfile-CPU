@@ -1,21 +1,31 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 LABEL github="https://github.com/mlcommons/GaNDLF"
 LABEL docs="https://mlcommons.github.io/GaNDLF/"
 LABEL version=1.0
+# ARG SETUPTOOLS_USE_DISTUTILS=local
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Install fresh Python and dependencies for build-from-source
 RUN apt-get update && apt-get install -y software-properties-common
 RUN add-apt-repository ppa:deadsnakes/ppa
-RUN apt-get update &&  apt-get install -y  python3.11 libpython3.11-dev python3-pip libjpeg8-dev zlib1g-dev python3-dev libffi-dev libgl1
-RUN python3.11 -m pip install --upgrade pip==24.0
+RUN apt install -y python3.11 
+RUN apt install -y libpython3.11-dev 
+RUN apt install -y libpython3.11 
+# RUN apt install -y python-distutils-extra
+RUN apt install -y python3.11-venv 
+# RUN apt install -y python-setuptools
+RUN apt install -y python3-pip
+RUN apt-get install -y libjpeg8-dev zlib1g-dev libffi-dev libgl1
+# fix pip version because of weird PyYAML issue
+RUN python3.11 -m pip install --upgrade pip
 # EXPLICITLY install cpu versions of torch/torchvision (not all versions have +cpu modes on PyPI...)
 RUN python3.11 -m pip install torch==2.5.0 torchvision==0.20.0 torchaudio==2.5.0 --index-url https://download.pytorch.org/whl/cpu
-RUN python3.11 -m pip install openvino-dev==2023.0.1 opencv-python-headless mlcube_docker
+RUN python3.11 -m pip install openvino-dev opencv-python-headless
 
 # Do some dependency installation separately here to make layer caching more efficient
 COPY ./setup.py ./setup.py
 RUN python3.11 -c "from setup import requirements; file = open('requirements.txt', 'w'); file.writelines([req + '\n' for req in requirements]); file.close()" \
-    && python3.11 -m pip install -r ./requirements.txt
+  && python3.11 -m pip install -r ./requirements.txt
 
 COPY . /GaNDLF
 WORKDIR /GaNDLF
@@ -31,7 +41,7 @@ CMD run
 # As a side benefit this also decreases the likelihood that users on a cluster won't be able to access their files.
 # See https://github.com/hexops/dockerfile as a best practices guide.
 #RUN addgroup --gid 10001 --system nonroot \
-# && adduser  --uid 10000 --system --ingroup nonroot --home /home/nonroot nonroot
+# && adduser --uid 10000 --system --ingroup nonroot --home /home/nonroot nonroot
 #
 #USER nonroot
 
