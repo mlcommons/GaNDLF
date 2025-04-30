@@ -3176,9 +3176,7 @@ def test_generic_cli_function_metrics_cli_rad_nd():
     output_file = os.path.join(outputDir, "output_single-csv.json")
     generate_metrics_dict(temp_infer_csv, temp_config, output_file)
 
-    assert os.path.isfile(
-        output_file
-    ), "Metrics output file was not generated for single-csv input"
+    assert os.path.isfile(output_file), "Metrics output file was not generated for single-csv input"
 
     sanitize_outputDir()
 
