@@ -16,7 +16,7 @@ RUN apt install -y libpython3.12-dev
 RUN apt install -y libpython3.12 
 # RUN apt install -y python-distutils-extra
 RUN apt install -y python3.12-venv 
-RUN apt install -y python-setuptools 
+RUN apt install -y python-setuptools python3-pip 
 RUN apt-get install -y libjpeg8-dev zlib1g-dev libffi-dev libgl1
 # fix pip version because of weird PyYAML issue
 RUN python3.12 -m pip install --upgrade pip

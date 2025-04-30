@@ -53,7 +53,7 @@ requirements = [
     "scikit-image>=0.19.1",
     "setuptools",
     "seaborn",
-    "pyyaml==6.0.1",
+    "pyyaml",
     "matplotlib",
     "gdown==5.1.0",
     "pytest",
