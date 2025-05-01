@@ -3143,6 +3143,45 @@ def test_generic_cli_function_metrics_cli_rad_nd():
 
             sanitize_outputDir()
 
+    # this is for the brats segmentation metrics test
+    problem_type = "segmentation_brats"
+    reference_image_file = os.path.join(
+        inputDir, "metrics", "brats", "reference.nii.gz"
+    )
+    prediction_image_file = os.path.join(
+        inputDir, "metrics", "brats", "prediction.nii.gz"
+    )
+    subject_id = "brats_subject_1"
+    # write to a temporary CSV file
+    df = pd.DataFrame(
+        {
+            "SubjectID": [subject_id],
+            "Prediction": [prediction_image_file],
+            "Target": [reference_image_file],
+        }
+    )
+    temp_infer_csv = os.path.join(outputDir, "temp_csv.csv")
+    df.to_csv(temp_infer_csv, index=False)
+
+    # read and initialize parameters for specific data dimension
+    parameters = ConfigManager(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = patch_size["3D"]
+    parameters["model"]["dimension"] = 3
+    parameters["verbose"] = False
+    temp_config = write_temp_config_path(parameters)
+
+    output_file = os.path.join(outputDir, "output_single-csv.json")
+    generate_metrics_dict(temp_infer_csv, temp_config, output_file)
+
+    assert os.path.isfile(
+        output_file
+    ), "Metrics output file was not generated for single-csv input"
+
+    sanitize_outputDir()
+
 
 # def test_generic_deploy_metrics_docker():
 #     print("50: Testing deployment of a metrics generator to Docker")

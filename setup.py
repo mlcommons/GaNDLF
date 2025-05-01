@@ -4,8 +4,6 @@
 
 
 import sys, re, os
-
-
 from setuptools import setup, find_packages
 
 
@@ -33,7 +31,8 @@ dockerfiles = [
 ]
 
 # Any extra files should be located at `GANDLF` module folder (not in repo root)
-extra_files = ["logging_config.yaml"]
+extra_files_root = ["logging_config.yaml"]
+extra_files_metrics = ["panoptica_config_brats.yaml"]
 toplevel_package_excludes = ["testing*"]
 
 # specifying version for `black` separately because it is also used to [check for lint](https://github.com/mlcommons/GaNDLF/blob/master/.github/workflows/black.yml)
@@ -88,6 +87,7 @@ requirements = [
     "openslide-python==1.4.1",
     "lion-pytorch==0.2.2",
     "pydantic==2.10.6",
+    "panoptica>=1.3.3",
 ]
 
 if __name__ == "__main__":
@@ -140,7 +140,10 @@ if __name__ == "__main__":
         long_description=readme,
         long_description_content_type="text/markdown",
         include_package_data=True,
-        package_data={"GANDLF": extra_files},
+        package_data={
+            "GANDLF": extra_files_root,
+            "GANDLF.metrics": extra_files_metrics,
+        },
         keywords="semantic, segmentation, regression, classification, data-augmentation, medical-imaging, clinical-workflows, deep-learning, pytorch",
         zip_safe=False,
     )

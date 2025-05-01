@@ -20,6 +20,7 @@ from GANDLF.metrics import (
     mean_squared_log_error,
     mean_absolute_error,
     ncc_metrics,
+    generate_instance_segmentation,
 )
 from GANDLF.losses.segmentation import dice
 from GANDLF.metrics.segmentation import (
@@ -258,6 +259,26 @@ def generate_metrics_dict(
                 overall_stats_dict[current_subject_id][
                     "volumeSimilarity_" + str(class_index)
                 ] = label_overlap_filter.GetVolumeSimilarity()
+
+    elif problem_type == "segmentation_brats":
+        for _, row in tqdm(input_df.iterrows(), total=input_df.shape[0]):
+            current_subject_id = row["SubjectID"]
+            overall_stats_dict[current_subject_id] = {}
+            label_image = torchio.LabelMap(row["Target"])
+            pred_image = torchio.LabelMap(row["Prediction"])
+            label_tensor = label_image.data
+            pred_tensor = pred_image.data
+            spacing = label_image.spacing
+            if label_tensor.data.shape[-1] == 1:
+                spacing = spacing[0:2]
+            # add dimension for batch
+            parameters["subject_spacing"] = torch.Tensor(spacing).unsqueeze(0)
+            label_array = label_tensor.unsqueeze(0).numpy()
+            pred_array = pred_tensor.unsqueeze(0).numpy()
+
+            overall_stats_dict[current_subject_id] = generate_instance_segmentation(
+                prediction=pred_array, target=label_array
+            )
 
     elif problem_type == "synthesis":
 
