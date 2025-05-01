@@ -41,9 +41,9 @@ The [0.0.20 release](https://github.com/mlcommons/GaNDLF/releases/tag/0.0.20) wa
 - This is going to be updated to use [pydantic](https://docs.pydantic.dev/latest/) in the near future [[ref](https://github.com/mlcommons/GaNDLF/issues/758)].
 
 
-## Post 0.1.3-dev release
+## Post 0.1.4-dev release
 
-The 0.1.3-dev release has introduced [Pytorch Lightning](https://lightning.ai/) as the primary orchestration framework for core GaNDLF functionality. From the user perspective, the changes are minimal, but the underlying architecture has been significantly updated.
+The `0.1.4-dev` release has introduced [Pytorch Lightning](https://lightning.ai/) as the primary orchestration framework for core GaNDLF functionality. From the user perspective, the changes are minimal, but the underlying architecture has been significantly updated.
 
 ### User-level Changes
 
