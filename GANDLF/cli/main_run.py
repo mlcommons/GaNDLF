@@ -16,10 +16,9 @@ def main_run(
     config_file: str,
     model_dir: str,
     train_mode: bool,
-    device: str,
     resume: bool,
     reset: bool,
-    _profile: Optional[bool] = False,
+    profile: Optional[bool] = False,
     output_dir: Optional[str] = None,
 ) -> None:
     """
@@ -30,9 +29,9 @@ def main_run(
         config_file (str): The YAML file of the training configuration.
         model_dir (str): The model directory; for training, model is written out here, and for inference, trained model is expected here.
         train_mode (bool): Whether to train or infer.
-        device (str): The device type.
         resume (bool): Whether the previous run will be resumed or not.
         reset (bool): Whether the previous run will be reset or not.
+        profile (bool): Whether to profile the training or not. Defaults to False.
         output_dir (str): The output directory for the inference session. Defaults to None.
 
     Returns:
@@ -40,9 +39,7 @@ def main_run(
     """
     file_data_full = data_csv
     model_parameters = config_file
-    device = device
     parameters = ConfigManager(model_parameters)
-    parameters["device_id"] = -1
 
     if train_mode:
         if resume:
@@ -59,9 +56,6 @@ def main_run(
     if parameters["output_dir"] is None:
         parameters["output_dir"] = model_dir
     Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
-
-    if "-1" in device:
-        device = "cpu"
 
     # parse training CSV
     if "," in file_data_full:
@@ -96,10 +90,9 @@ def main_run(
                 dataframe_testing=data_testing,
                 outputDir=parameters["output_dir"],
                 parameters=parameters,
-                device=device,
                 resume=resume,
                 reset=reset,
-                _profile=_profile,
+                profile=profile,
             )
     else:
         data_full, headers = parseTrainingCSV(file_data_full, train=train_mode)
@@ -109,9 +102,9 @@ def main_run(
                 dataframe=data_full,
                 outputDir=parameters["output_dir"],
                 parameters=parameters,
-                device=device,
                 resume=resume,
                 reset=reset,
+                profile=profile,
             )
         else:
             _, data_full, headers = parseTestingCSV(
@@ -122,5 +115,4 @@ def main_run(
                 modelDir=model_dir,
                 outputDir=output_dir,
                 parameters=parameters,
-                device=device,
             )

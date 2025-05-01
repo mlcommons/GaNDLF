@@ -1,6 +1,7 @@
 """
 All the metrics are to be called from here
 """
+from warnings import warn
 from typing import Union
 
 from GANDLF.losses.regression import MSE_loss, CEL
@@ -99,6 +100,30 @@ surface_distance_ids = [
     "normalized_sd",
     "normalized_sd_per_label",
 ]
+
+
+def get_metrics(params: dict) -> dict:
+    """
+    Returns an dictionary of containing calculators of the specified metric functions
+
+    Args:
+        params (dict): A dictionary containing the overall training parameters.
+
+    Returns:
+        metric_calculators (dict): A dictionary containing the calculators of the specified metric functions.
+    """
+    metric_calculators = {}
+    for metric_name in params["metrics"]:
+        metric_name = metric_name.lower()
+        if metric_name not in global_metrics_dict:
+            warn(
+                f"Metric {metric_name} not found in global metrics dictionary, it will not be used.",
+                UserWarning,
+            )
+            continue
+        else:
+            metric_calculators[metric_name] = global_metrics_dict[metric_name]
+    return metric_calculators
 
 
 def overall_stats(predictions, ground_truth, params) -> dict[str, Union[float, list]]:

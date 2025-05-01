@@ -87,7 +87,8 @@ def generic_loss_calculator(
     accumulated_loss = 0
     # default to a ridiculous value so that it is ignored by default
     ignore_class = -1e10 if ignore_class is None else ignore_class
-
+    predicted = predicted.squeeze(-1)
+    target = target.squeeze(-1)
     for class_index in range(num_class):
         if class_index != ignore_class:
             current_loss = loss_criteria(
@@ -334,7 +335,7 @@ def FocalLoss(
             torch.Tensor: Computed focal loss for a single class.
         """
         ce_loss = torch.nn.CrossEntropyLoss(reduce=False)
-        logpt = ce_loss(preds, target)
+        logpt = ce_loss(preds.squeeze(-1), target.squeeze(-1))
         pt = torch.exp(-logpt)
         loss = ((1 - pt) ** gamma) * logpt
         return_loss = loss.sum()

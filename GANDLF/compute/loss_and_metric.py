@@ -1,4 +1,3 @@
-import sys
 import warnings
 from typing import Dict, Tuple, Union
 from GANDLF.losses import global_losses_dict
@@ -134,7 +133,7 @@ def get_loss_and_metrics(
     # Metrics should be a list
     for metric in params["metrics"]:
         metric_lower = metric.lower()
-        metric_output[metric] = 0
+        metric_output[metric] = 0.0
         if metric_lower not in global_metrics_dict:
             warnings.warn("WARNING: Could not find the requested metric '" + metric)
             continue

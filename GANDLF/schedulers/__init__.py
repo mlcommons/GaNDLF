@@ -38,6 +38,10 @@ def get_scheduler(params):
         params (dict): The parameters' dictionary.
 
     Returns:
-        model (object): The scheduler definition.
+        scheduler (object): The scheduler definition.
     """
-    return global_schedulers_dict[params["scheduler"]["type"]](params)
+    chosen_scheduler = params["scheduler"]["type"].lower()
+    assert (
+        chosen_scheduler in global_schedulers_dict
+    ), f"Could not find the requested scheduler '{params['scheduler']['type']}'"
+    return global_schedulers_dict[chosen_scheduler](params)

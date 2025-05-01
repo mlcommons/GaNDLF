@@ -286,12 +286,8 @@ def run_test_case(
                     )
                 else:
                     assert result.exit_code != 0
-            except BaseException:
-                print(f"Test failed on the new case: {new_line}")
-                print(f"Exception: {result.exception}")
-                print(f"Exc info: {result.exc_info}")
-                print(f"output: {result.output}")
-                raise
+            except Exception as e:
+                raise e
 
         # tests that old way commands via `gandlf_*` script trigger the same expected_args
         for old_line in case.old_way_lines or []:

@@ -40,6 +40,7 @@ black_version = "23.11.0"
 requirements = [
     "torch==2.5.0",
     f"black=={black_version}",
+    "lightning==2.4.0",
     "numpy==1.26.4",
     "scipy",
     "SimpleITK!=2.0.*",
@@ -55,6 +56,7 @@ requirements = [
     "pyyaml",
     "matplotlib",
     "gdown==5.1.0",
+    "overrides==7.7.0",
     "pytest",
     "coverage",
     "pytest-cov",

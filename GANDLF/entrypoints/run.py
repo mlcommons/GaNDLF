@@ -14,17 +14,19 @@ from GANDLF.cli import main_run, copyrightMessage
 from GANDLF.entrypoints import append_copyright_to_help
 from GANDLF.utils import logger_setup
 
+from warnings import warn
+
 
 def _run(
     config: str,
     input_data: str,
     train_flag: bool,
     model_dir: str,
-    device: str,
     reset_flag: bool,
     resume_flag: bool,
+    device: Optional[str],
     output_path: Optional[str],
-    _profile: Optional[bool] = False,
+    profile: Optional[bool] = False,
 ):
     if model_dir is None and output_path:
         model_dir = output_path
@@ -49,7 +51,11 @@ def _run(
             "'reset' and 'resume' are mutually exclusive; 'resume' will be used."
         )
         reset_flag = False
-
+    if device is not None:
+        warn(
+            "Device parameter is deprecated and has no effect. See migration guide docs.",
+            DeprecationWarning,
+        )
     # TODO: check that output_path is not passed in training mode;
     #  maybe user misconfigured the command
 
@@ -57,22 +63,20 @@ def _run(
     logging.debug(f"{input_data=}")
     logging.debug(f"{train_flag=}")
     logging.debug(f"{model_dir=}")
-    logging.debug(f"{device=}")
     logging.debug(f"{reset_flag=}")
     logging.debug(f"{resume_flag=}")
     logging.debug(f"{output_path=}")
-    logging.debug(f"{_profile=}")
+    logging.debug(f"{profile=}")
 
     main_run(
         data_csv=input_data,
         config_file=config,
         model_dir=model_dir,
         train_mode=train_flag,
-        device=device,
         resume=resume_flag,
         reset=reset_flag,
         output_dir=output_path,
-        _profile=_profile,
+        profile=profile,
     )
     print("Finished.")
 
@@ -109,21 +113,6 @@ def _run(
     "inference: location of previous training session output",
 )
 @click.option(
-    "--device",
-    "-d",
-    # TODO: Not sure it's worth to restrict this list. What about other devices?
-    #  GaNDLF guarantees to work properly with these two options, but
-    #  other values may be partially working also.
-    #  * GaNDLF code convert `-1` to `cpu` (i.e. it is expected somebody may pass -1)
-    #  * `cuda:0` should work also, isn't it? Just would not be treated as `cuda`
-    #  * Would `mps` work?
-    #  * int values (like `1`) - are they supported? (legacy mode for cuda https://pytorch.org/docs/stable/tensor_attributes.html#torch-device)
-    type=click.Choice(["cuda", "cpu"]),
-    required=True,  # FIXME: either keep default value, or set required flag
-    help="Device to perform requested session on 'cpu' or 'cuda'; "
-    "for cuda, ensure CUDA_VISIBLE_DEVICES env var is set",
-)
-@click.option(
     "--reset",
     "-rt",
     is_flag=True,
@@ -154,19 +143,25 @@ def _run(
     is_flag=True,
     help="Track the run time and memory consumption for each layer",
 )
+@click.option(
+    "--device",
+    "-d",
+    type=str,
+    help="DEPRECATED - has no effect, see migration guide docs. Device to run the model on.",
+)
 @append_copyright_to_help
 def new_way(
     config: str,
     input_data: str,
     train: bool,
     model_dir: str,
-    device: str,
     reset: bool,
     resume: bool,
     output_path: str,
     raw_input: str,
     profile: bool,
     log_file: str,
+    device: str,
 ):
     """Semantic segmentation, regression, and classification for medical images using Deep Learning."""
 
@@ -176,11 +171,11 @@ def new_way(
         input_data=input_data,
         train_flag=train,
         model_dir=model_dir,
-        device=device,
         reset_flag=reset,
         resume_flag=resume,
         output_path=output_path,
-        _profile=profile,
+        profile=profile,
+        device=device,
     )
 
 
@@ -238,15 +233,7 @@ def old_way():
         type=str,
         help="Training: Output directory to save intermediate files and model weights; inference: location of previous training session output",
     )
-    parser.add_argument(
-        "-d",
-        "--device",
-        default="cuda",  # TODO: default value doesn't work as arg is required
-        metavar="",
-        type=str,
-        required=True,
-        help="Device to perform requested session on 'cpu' or 'cuda'; for cuda, ensure CUDA_VISIBLE_DEVICES env var is set",
-    )
+
     parser.add_argument(
         "-rt",
         "--reset",
@@ -278,6 +265,13 @@ def old_way():
         version="%(prog)s v{}".format(version) + "\n\n" + copyrightMessage,
         help="Show program's version number and exit.",
     )
+    parser.add_argument(
+        "-d",
+        "--device",
+        metavar="",
+        type=str,
+        help="DEPRECATED - has no effect, see migration guide docs. Device to run the model on.",
+    )
 
     # This is a dummy argument that exists to trigger MLCube mounting requirements.
     # Do not remove.
@@ -293,10 +287,10 @@ def old_way():
         input_data=args.inputdata,
         train_flag=args.train,
         model_dir=args.modeldir,
-        device=args.device,
         reset_flag=args.reset,
         resume_flag=args.resume,
         output_path=args.outputdir,
+        device=args.device,
     )
 
 

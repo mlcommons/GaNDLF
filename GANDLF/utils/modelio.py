@@ -20,9 +20,9 @@ model_dict_full = {
 
 model_dict_required = {"model_state_dict": None, "optimizer_state_dict": None}
 
-best_model_path_end = "_best.pth.tar"
-latest_model_path_end = "_latest.pth.tar"
-initial_model_path_end = "_initial.pth.tar"
+BEST_MODEL_PATH_END = "_best.pth.tar"
+LATEST_MODEL_PATH_END = "_latest.pth.tar"
+INITIAL_MODEL_PATH_END = "_initial.pth.tar"
 
 
 def optimize_and_save_model(
