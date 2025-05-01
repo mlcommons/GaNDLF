@@ -730,6 +730,10 @@ kwonly
 torchscript
 hann
 numcodecs
+ASSD
+listmetric
+panoptica
+RVAE
 angi
 progbar
 ddp
