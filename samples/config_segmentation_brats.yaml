@@ -1,8 +1,8 @@
 # affix version
 version:
   {
-    minimum: 0.1.3,
-    maximum: 0.1.3 # this should NOT be made a variable, but should be tested after every tag is created
+    minimum: 0.1.4-dev,
+    maximum: 0.1.4-dev # this should NOT be made a variable, but should be tested after every tag is created
   }
 # Choose the model parameters here
 model:
