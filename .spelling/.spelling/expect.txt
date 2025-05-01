@@ -729,6 +729,7 @@ cudagraph
 kwonly
 torchscript
 hann
+numcodecs
 angi
 progbar
 ddp
