@@ -63,7 +63,7 @@ jobs:
         fi
     - name: Publish package    
       if: env.publish_nightly
-      uses: pypa/gh-action-pypi-publish@v1.9.0
+      uses: pypa/gh-action-pypi-publish@v1.12.4
       continue-on-error: true
       with:
         user: __token__
