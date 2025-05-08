@@ -152,73 +152,75 @@ def prerequisites_constructTrainingCSV():
             os.remove(os.path.join(inputDir, item))
 
     for application_data in os.listdir(inputDir):
-        currentApplicationDir = os.path.join(inputDir, application_data)
+        if "segmentation" in application_data:
+            # this is to ensure other types of unit-testing data do not inadvertently get pulled in during testing
+            currentApplicationDir = os.path.join(inputDir, application_data)
 
-        if "2d_rad_segmentation" in application_data:
-            channelsID = "image.png"
-            labelID = "mask.png"
-        elif "3d_rad_segmentation" in application_data:
-            channelsID = "image"
-            labelID = "mask"
-        elif "2d_histo_segmentation" in application_data:
-            channelsID = "image"
-            labelID = "mask"
-        # else:
-        #     continue
-        outputFile = inputDir + "/train_" + application_data + ".csv"
-        outputFile_rel = inputDir + "/train_" + application_data + "_relative.csv"
-        # Test with various combinations of relative/absolute paths
-        # Absolute input/output
-        writeTrainingCSV(
-            currentApplicationDir,
-            channelsID,
-            labelID,
-            outputFile,
-            relativizePathsToOutput=False,
-        )
-        writeTrainingCSV(
-            currentApplicationDir,
-            channelsID,
-            labelID,
-            outputFile_rel,
-            relativizePathsToOutput=True,
-        )
+            if "2d_rad_segmentation" in application_data:
+                channelsID = "image.png"
+                labelID = "mask.png"
+            elif "3d_rad_segmentation" in application_data:
+                channelsID = "image"
+                labelID = "mask"
+            elif "2d_histo_segmentation" in application_data:
+                channelsID = "image"
+                labelID = "mask"
+            # else:
+            #     continue
+            outputFile = inputDir + "/train_" + application_data + ".csv"
+            outputFile_rel = inputDir + "/train_" + application_data + "_relative.csv"
+            # Test with various combinations of relative/absolute paths
+            # Absolute input/output
+            writeTrainingCSV(
+                currentApplicationDir,
+                channelsID,
+                labelID,
+                outputFile,
+                relativizePathsToOutput=False,
+            )
+            writeTrainingCSV(
+                currentApplicationDir,
+                channelsID,
+                labelID,
+                outputFile_rel,
+                relativizePathsToOutput=True,
+            )
 
-        # write regression and classification files
-        application_data_regression = application_data.replace(
-            "segmentation", "regression"
-        )
-        application_data_classification = application_data.replace(
-            "segmentation", "classification"
-        )
-        with open(
-            inputDir + "/train_" + application_data + ".csv", "r"
-        ) as read_f, open(
-            inputDir + "/train_" + application_data_regression + ".csv", "w", newline=""
-        ) as write_reg, open(
-            inputDir + "/train_" + application_data_classification + ".csv",
-            "w",
-            newline="",
-        ) as write_class:
-            csv_reader = csv.reader(read_f)
-            csv_writer_1 = csv.writer(write_reg)
-            csv_writer_2 = csv.writer(write_class)
-            i = 0
-            for row in csv_reader:
-                if i == 0:
-                    row.append("ValueToPredict")
-                    csv_writer_2.writerow(row)
-                    # row.append('ValueToPredict_2')
-                    csv_writer_1.writerow(row)
-                else:
-                    row_regression = copy.deepcopy(row)
-                    row_classification = copy.deepcopy(row)
-                    row_regression.append(str(random.uniform(0, 1)))
-                    # row_regression.append(str(random.uniform(0, 1)))
-                    row_classification.append(str(random.randint(0, 2)))
-                    csv_writer_1.writerow(row_regression)
-                    csv_writer_2.writerow(row_classification)
-                i += 1
+            # write regression and classification files
+            application_data_regression = application_data.replace(
+                "segmentation", "regression"
+            )
+            application_data_classification = application_data.replace(
+                "segmentation", "classification"
+            )
+            with open(
+                inputDir + "/train_" + application_data + ".csv", "r"
+            ) as read_f, open(
+                inputDir + "/train_" + application_data_regression + ".csv", "w", newline=""
+            ) as write_reg, open(
+                inputDir + "/train_" + application_data_classification + ".csv",
+                "w",
+                newline="",
+            ) as write_class:
+                csv_reader = csv.reader(read_f)
+                csv_writer_1 = csv.writer(write_reg)
+                csv_writer_2 = csv.writer(write_class)
+                i = 0
+                for row in csv_reader:
+                    if i == 0:
+                        row.append("ValueToPredict")
+                        csv_writer_2.writerow(row)
+                        # row.append('ValueToPredict_2')
+                        csv_writer_1.writerow(row)
+                    else:
+                        row_regression = copy.deepcopy(row)
+                        row_classification = copy.deepcopy(row)
+                        row_regression.append(str(random.uniform(0, 1)))
+                        # row_regression.append(str(random.uniform(0, 1)))
+                        row_classification.append(str(random.randint(0, 2)))
+                        csv_writer_1.writerow(row_regression)
+                        csv_writer_2.writerow(row_classification)
+                    i += 1
 
 
 def test_prepare_data_for_ci():
