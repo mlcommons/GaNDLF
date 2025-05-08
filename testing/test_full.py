@@ -196,7 +196,9 @@ def prerequisites_constructTrainingCSV():
             with open(
                 inputDir + "/train_" + application_data + ".csv", "r"
             ) as read_f, open(
-                inputDir + "/train_" + application_data_regression + ".csv", "w", newline=""
+                inputDir + "/train_" + application_data_regression + ".csv",
+                "w",
+                newline="",
             ) as write_reg, open(
                 inputDir + "/train_" + application_data_classification + ".csv",
                 "w",
