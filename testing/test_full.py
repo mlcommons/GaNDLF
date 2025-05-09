@@ -152,6 +152,9 @@ def prerequisites_constructTrainingCSV():
             os.remove(os.path.join(inputDir, item))
 
     for application_data in os.listdir(inputDir):
+        if "segmentation" not in application_data:
+            continue
+        # this is to ensure other types of unit-testing data do not inadvertently get pulled in during testing
         currentApplicationDir = os.path.join(inputDir, application_data)
 
         if "2d_rad_segmentation" in application_data:
