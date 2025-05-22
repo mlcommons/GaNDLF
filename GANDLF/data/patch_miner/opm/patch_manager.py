@@ -8,6 +8,7 @@ from tqdm import tqdm
 from pathlib import Path
 import pandas as pd
 import openslide
+import GANDLF.data.patch_miner.opm.dsa_annotations as dsa_annotations
 
 
 class PatchManager:
@@ -49,13 +50,18 @@ class PatchManager:
         Add associated label map to Patch Manager.
         @param path: path to label map.
         """
-        self.label_map = convert_to_tiff(path, self.output_dir, "mask")
-        self.label_map_object = openslide.open_slide(self.label_map)
-
-        assert all(
-            x == y for x, y in zip(self.label_map_object.dimensions, self.slide_dims)
-        ), "Label map must have same dimensions as main slide."
-        self.label_map_folder = Path(path).stem
+        if path.endswith(".json"):
+            print("Json file")
+            self.label_map = dsa_annotations.load_annotations(path)
+            print(self.label_map_object)
+        else:
+            self.label_map = convert_to_tiff(path, self.output_dir, "mask")
+            self.label_map_object = openslide.open_slide(self.label_map)
+            assert all(
+                x == y
+                for x, y in zip(self.label_map_object.dimensions, self.slide_dims)
+            ), "Label map must have same dimensions as main slide."
+            self.label_map_folder = Path(path).stem
 
     def set_valid_mask(self, mask, scale=(1, 1)):
         self.valid_mask = mask
@@ -65,7 +71,6 @@ class PatchManager:
     def add_patch(self, patch, overlap_factor, patch_size):
         """
         Add patch to manager and take care of self.mined_mask update so it doesn't pull the same patch twice.
-
         This method works by first finding the coordinates of the upper-left corner of the patch. It then multiples the
         inverse overlap factor (0 = full overlap -> 1 = no overlap) by the patch dimensions to find the region that
         should be excluded from being called again. It does this from the top-left to bottom-right of the coordinate to
