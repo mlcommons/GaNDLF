@@ -78,7 +78,7 @@ requirements = [
     "twine",
     "keyring",
     "monai==1.4.0",
-    "click>=8.0.0",
+    "click==8.1.8",
     "deprecated",
     "packaging==24.0",
     "typer==0.9.0",
