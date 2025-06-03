@@ -55,10 +55,10 @@ jobs:
     # Below steps are for GitHub Packages integration, metadata and signing
     # See https://github.com/mlcommons/GaNDLF/new/master?filename=.github%2Fworkflows%2Fdocker-publish.yml&workflow_template=docker-publish
     
-    # Install the cosign tool except on PR
-    # https://github.com/sigstore/cosign-installer
-    - name: Install cosign
-      uses: sigstore/cosign-installer@v3.2.0
+    # # Install the cosign tool except on PR
+    # # https://github.com/sigstore/cosign-installer
+    # - name: Install cosign
+    #   uses: sigstore/cosign-installer@v3.2.0
         
     - name: Log into GitHub Packages registry (ghcr.io)
       if: github.event_name != 'pull_request'
