@@ -22,7 +22,7 @@ def generate_instance_segmentation(
 
     cwd = Path(__file__).parent.absolute()
     panoptica_config_path = (
-        cwd / "panoptica_config_path.yaml"
+        cwd / "panoptica_config_brats.yaml"
         if panoptica_config_path is None
         else panoptica_config_path
     )
