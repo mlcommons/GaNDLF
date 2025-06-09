@@ -10,7 +10,11 @@ import SimpleITK as sitk
 import numpy as np
 
 from GANDLF.config_manager import ConfigManager
-from GANDLF.utils import find_problem_type_from_parameters, one_hot
+from GANDLF.utils import (
+    find_problem_type_from_parameters,
+    one_hot,
+    sanity_check_on_file_readers,
+)
 from GANDLF.metrics import (
     overall_stats,
     structural_similarity_index,
@@ -176,6 +180,9 @@ def generate_metrics_dict(
         for _, row in tqdm(input_df.iterrows(), total=input_df.shape[0]):
             current_subject_id = row["SubjectID"]
             overall_stats_dict[current_subject_id] = {}
+            sanity_check_on_file_readers(
+                row["Target"], row["Prediction"], current_subject_id
+            )
             label_image = torchio.LabelMap(row["Target"])
             pred_image = torchio.LabelMap(row["Prediction"])
             label_tensor = label_image.data
@@ -264,17 +271,20 @@ def generate_metrics_dict(
         for _, row in tqdm(input_df.iterrows(), total=input_df.shape[0]):
             current_subject_id = row["SubjectID"]
             overall_stats_dict[current_subject_id] = {}
+            sanity_check_on_file_readers(
+                row["Target"], row["Prediction"], current_subject_id
+            )
             label_image = torchio.LabelMap(row["Target"])
             pred_image = torchio.LabelMap(row["Prediction"])
             label_tensor = label_image.data
             pred_tensor = pred_image.data
             spacing = label_image.spacing
-            if label_tensor.data.shape[-1] == 1:
-                spacing = spacing[0:2]
-            # add dimension for batch
-            parameters["subject_spacing"] = torch.Tensor(spacing).unsqueeze(0)
-            label_array = label_tensor.unsqueeze(0).numpy()
-            pred_array = pred_tensor.unsqueeze(0).numpy()
+            # if label_tensor.data.shape[-1] == 1:
+            #     spacing = spacing[0:2]
+            # remove dimension to ensure 3D tensors
+            if label_tensor.data.ndim == 4:
+                label_array = label_tensor.squeeze(0).numpy().astype(int)
+                pred_array = pred_tensor.squeeze(0).numpy().astype(int)
 
             overall_stats_dict[current_subject_id] = generate_instance_segmentation(
                 prediction=pred_array, target=label_array
@@ -340,6 +350,9 @@ def generate_metrics_dict(
         for _, row in tqdm(input_df.iterrows(), total=input_df.shape[0]):
             current_subject_id = row["SubjectID"]
             overall_stats_dict[current_subject_id] = {}
+            sanity_check_on_file_readers(
+                row["Target"], row["Prediction"], current_subject_id
+            )
             target_image = __fix_2d_tensor(torchio.ScalarImage(row["Target"]).data)
             pred_image = __fix_2d_tensor(torchio.ScalarImage(row["Prediction"]).data)
             # if "Mask" is not in the row, we assume that the whole image is the mask
