@@ -123,6 +123,56 @@ def softer_sanity_check(
     return result
 
 
+def sanity_check_on_file_readers(
+    file_reader_0: Union[str, sitk.ImageFileReader],
+    file_reader_1: Union[str, sitk.ImageFileReader],
+    subject_id: Optional[str] = "",
+    threshold: Optional[float] = 0.00001,
+) -> bool:
+    """
+    This function performs a sanity check on the file readers to ensure that the properties of the images are consistent.
+
+    Args:
+        file_reader_0 (Union[str, sitk.ImageFileReader]): The first file reader.
+        file_reader_1 (Union[str, sitk.ImageFileReader]): The second file reader.
+        threshold (Optional[float], optional): The threshold for comparison. Defaults to 0.00001.
+
+    Returns:
+        bool: True if the sanity check passes.
+    """
+
+    if isinstance(file_reader_0, str):
+        temp_file = file_reader_0
+        file_reader_0 = sitk.ImageFileReader()
+        file_reader_0.SetFileName(temp_file)
+        file_reader_0.ReadImageInformation()
+
+    if isinstance(file_reader_1, str):
+        temp_file = file_reader_1
+        file_reader_1 = sitk.ImageFileReader()
+        file_reader_1.SetFileName(temp_file)
+        file_reader_1.ReadImageInformation()
+    # this check needs to be absolute
+    assert file_reader_0.GetDimension() == file_reader_1.GetDimension(), (
+        "Dimensions for Subject '" + subject_id + "' are not consistent."
+    )
+
+    # other checks can be softer
+    assert softer_sanity_check(
+        file_reader_0.GetOrigin(), file_reader_1.GetOrigin(), threshold=threshold
+    ), ("Origin for Subject '" + subject_id + "' are not consistent.")
+
+    assert softer_sanity_check(
+        file_reader_0.GetDirection(), file_reader_1.GetDirection(), threshold=threshold
+    ), ("Orientation for Subject '" + subject_id + "' are not consistent.")
+
+    assert softer_sanity_check(
+        file_reader_0.GetSpacing(), file_reader_1.GetSpacing(), threshold=threshold
+    ), ("Spacing for Subject '" + subject_id + "' are not consistent.")
+
+    return True
+
+
 def perform_sanity_check_on_subject(subject: torchio.Subject, parameters: dict) -> bool:
     """
     This function performs a sanity check on the image modalities in input subject to ensure that they are consistent.
@@ -169,39 +219,11 @@ def perform_sanity_check_on_subject(subject: torchio.Subject, parameters: dict) 
             else:
                 file_reader_current = _get_itkimage_or_filereader(subject[str(key)])
 
-                # this check needs to be absolute
-                assert (
-                    file_reader_base.GetDimension()
-                    == file_reader_current.GetDimension()
-                ), (
-                    "Dimensions for Subject '"
-                    + subject["subject_id"]
-                    + "' are not consistent."
-                )
-
-                # other checks can be softer
-                assert softer_sanity_check(
-                    file_reader_base.GetOrigin(), file_reader_current.GetOrigin()
-                ), (
-                    "Origin for Subject '"
-                    + subject["subject_id"]
-                    + "' are not consistent."
-                )
-
-                assert softer_sanity_check(
-                    file_reader_base.GetDirection(), file_reader_current.GetDirection()
-                ), (
-                    "Orientation for Subject '"
-                    + subject["subject_id"]
-                    + "' are not consistent."
-                )
-
-                assert softer_sanity_check(
-                    file_reader_base.GetSpacing(), file_reader_current.GetSpacing()
-                ), (
-                    "Spacing for Subject '"
-                    + subject["subject_id"]
-                    + "' are not consistent."
+                sanity_check_on_file_readers(
+                    file_reader_base,
+                    file_reader_current,
+                    subject_id=subject["subject_id"],
+                    threshold=parameters.get("sanity_check_threshold", 0.00001),
                 )
 
     return True

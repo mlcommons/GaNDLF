@@ -745,3 +745,5 @@ ntasks
 SBATCH
 srun
 tpu
+snfh
+netc

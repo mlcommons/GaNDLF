@@ -7,6 +7,7 @@ from .imaging import (
     resize_image,
     resample_image,
     perform_sanity_check_on_subject,
+    sanity_check_on_file_readers,
     write_training_patches,
     get_correct_padding_size,
     applyCustomColorMap,
