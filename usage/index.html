@@ -1,0 +1,1467 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="../images/favicon.png">
+      <meta name="generator" content="mkdocs-1.4.1, mkdocs-material-8.5.7">
+    
+    
+      
+        <title>Usage - GaNDLF</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.20d9efc8.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.cbb835fc.min.css">
+        
+      
+      
+  
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+  
+  <style>:root{--md-admonition-icon--note:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 7.775V2.75a.25.25 0 0 1 .25-.25h5.025a.25.25 0 0 1 .177.073l6.25 6.25a.25.25 0 0 1 0 .354l-5.025 5.025a.25.25 0 0 1-.354 0l-6.25-6.25a.25.25 0 0 1-.073-.177zm-1.5 0V2.75C1 1.784 1.784 1 2.75 1h5.025c.464 0 .91.184 1.238.513l6.25 6.25a1.75 1.75 0 0 1 0 2.474l-5.026 5.026a1.75 1.75 0 0 1-2.474 0l-6.25-6.25A1.75 1.75 0 0 1 1 7.775zM6 5a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/></svg>');--md-admonition-icon--abstract:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 1.75a.25.25 0 0 1 .25-.25h8.5a.25.25 0 0 1 .25.25v7.736a.75.75 0 1 0 1.5 0V1.75A1.75 1.75 0 0 0 11.25 0h-8.5A1.75 1.75 0 0 0 1 1.75v11.5c0 .966.784 1.75 1.75 1.75h3.17a.75.75 0 0 0 0-1.5H2.75a.25.25 0 0 1-.25-.25V1.75zM4.75 4a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5h-4.5zM4 7.75A.75.75 0 0 1 4.75 7h2a.75.75 0 0 1 0 1.5h-2A.75.75 0 0 1 4 7.75zm11.774 3.537a.75.75 0 0 0-1.048-1.074L10.7 14.145 9.281 12.72a.75.75 0 0 0-1.062 1.058l1.943 1.95a.75.75 0 0 0 1.055.008l4.557-4.45z"/></svg>');--md-admonition-icon--info:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm6.5-.25A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75zM8 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg>');--md-admonition-icon--tip:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M3.499.75a.75.75 0 0 1 1.5 0v.996C5.9 2.903 6.793 3.65 7.662 4.376l.24.202c-.036-.694.055-1.422.426-2.163C9.1.873 10.794-.045 12.622.26 14.408.558 16 1.94 16 4.25c0 1.278-.954 2.575-2.44 2.734l.146.508.065.22c.203.701.412 1.455.476 2.226.142 1.707-.4 3.03-1.487 3.898C11.714 14.671 10.27 15 8.75 15h-6a.75.75 0 0 1 0-1.5h1.376a4.489 4.489 0 0 1-.563-1.191 3.833 3.833 0 0 1-.05-2.063 4.636 4.636 0 0 1-2.025-.293.75.75 0 1 1 .525-1.406c1.357.507 2.376-.006 2.698-.318l.009-.01a.748.748 0 0 1 1.06 0 .75.75 0 0 1-.012 1.074c-.912.92-.992 1.835-.768 2.586.221.74.745 1.337 1.196 1.621H8.75c1.343 0 2.398-.296 3.074-.836.635-.507 1.036-1.31.928-2.602-.05-.603-.216-1.224-.422-1.93l-.064-.221c-.12-.407-.246-.84-.353-1.29a2.404 2.404 0 0 1-.507-.441 3.063 3.063 0 0 1-.633-1.248.75.75 0 0 1 1.455-.364c.046.185.144.436.31.627.146.168.353.305.712.305.738 0 1.25-.615 1.25-1.25 0-1.47-.95-2.315-2.123-2.51-1.172-.196-2.227.387-2.706 1.345-.46.92-.27 1.774.019 3.062l.042.19a.753.753 0 0 1 .01.05c.348.443.666.949.94 1.553a.75.75 0 1 1-1.365.62c-.553-1.217-1.32-1.94-2.3-2.768a85.08 85.08 0 0 0-.317-.265c-.814-.68-1.75-1.462-2.692-2.619a3.74 3.74 0 0 0-1.023.88c-.406.495-.663 1.036-.722 1.508.116.122.306.21.591.239.388.038.797-.06 1.032-.19a.75.75 0 0 1 .728 1.31c-.515.287-1.23.439-1.906.373-.682-.067-1.473-.38-1.879-1.193L.75 5.677V5.5c0-.984.48-1.94 1.077-2.664.46-.559 1.05-1.055 1.673-1.353V.75z"/></svg>');--md-admonition-icon--success:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0z"/></svg>');--md-admonition-icon--question:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm9 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM6.92 6.085c.081-.16.19-.299.34-.398.145-.097.371-.187.74-.187.28 0 .553.087.738.225A.613.613 0 0 1 9 6.25c0 .177-.04.264-.077.318a.956.956 0 0 1-.277.245c-.076.051-.158.1-.258.161l-.007.004a7.728 7.728 0 0 0-.313.195 2.416 2.416 0 0 0-.692.661.75.75 0 0 0 1.248.832.956.956 0 0 1 .276-.245 6.3 6.3 0 0 1 .26-.16l.006-.004c.093-.057.204-.123.313-.195.222-.149.487-.355.692-.662.214-.32.329-.702.329-1.15 0-.76-.36-1.348-.863-1.725A2.76 2.76 0 0 0 8 4c-.631 0-1.155.16-1.572.438-.413.276-.68.638-.849.977a.75.75 0 1 0 1.342.67z"/></svg>');--md-admonition-icon--warning:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.22 1.754a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368L8.22 1.754zm-1.763-.707c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575L6.457 1.047zM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-.25-5.25a.75.75 0 0 0-1.5 0v2.5a.75.75 0 0 0 1.5 0v-2.5z"/></svg>');--md-admonition-icon--failure:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M3.404 12.596a6.5 6.5 0 1 1 9.192-9.192 6.5 6.5 0 0 1-9.192 9.192zM2.344 2.343a8 8 0 1 0 11.313 11.314A8 8 0 0 0 2.343 2.343zM6.03 4.97a.75.75 0 0 0-1.06 1.06L6.94 8 4.97 9.97a.75.75 0 1 0 1.06 1.06L8 9.06l1.97 1.97a.75.75 0 1 0 1.06-1.06L9.06 8l1.97-1.97a.75.75 0 1 0-1.06-1.06L8 6.94 6.03 4.97z"/></svg>');--md-admonition-icon--danger:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M10.561 1.5a.016.016 0 0 0-.01.004L3.286 8.571A.25.25 0 0 0 3.462 9H6.75a.75.75 0 0 1 .694 1.034l-1.713 4.188 6.982-6.793A.25.25 0 0 0 12.538 7H9.25a.75.75 0 0 1-.683-1.06l2.008-4.418.003-.006a.02.02 0 0 0-.004-.009.02.02 0 0 0-.006-.006L10.56 1.5zM9.504.43a1.516 1.516 0 0 1 2.437 1.713L10.415 5.5h2.123c1.57 0 2.346 1.909 1.22 3.004l-7.34 7.142a1.25 1.25 0 0 1-.871.354h-.302a1.25 1.25 0 0 1-1.157-1.723L5.633 10.5H3.462c-1.57 0-2.346-1.909-1.22-3.004L9.503.429z"/></svg>');--md-admonition-icon--bug:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.72.22a.75.75 0 0 1 1.06 0l1 .999a3.492 3.492 0 0 1 2.441 0l.999-1a.75.75 0 1 1 1.06 1.061l-.775.776c.616.63.995 1.493.995 2.444v.327c0 .1-.009.197-.025.292.408.14.764.392 1.029.722l1.968-.787a.75.75 0 0 1 .556 1.392L13 7.258V9h2.25a.75.75 0 0 1 0 1.5H13v.5c0 .409-.049.806-.141 1.186l2.17.868a.75.75 0 0 1-.557 1.392l-2.184-.873A4.997 4.997 0 0 1 8 16a4.997 4.997 0 0 1-4.288-2.427l-2.183.873a.75.75 0 0 1-.558-1.392l2.17-.868A5.013 5.013 0 0 1 3 11v-.5H.75a.75.75 0 0 1 0-1.5H3V7.258L.971 6.446a.75.75 0 0 1 .558-1.392l1.967.787c.265-.33.62-.583 1.03-.722a1.684 1.684 0 0 1-.026-.292V4.5c0-.951.38-1.814.995-2.444L4.72 1.28a.75.75 0 0 1 0-1.06zM6.173 5h3.654A.173.173 0 0 0 10 4.827V4.5a2 2 0 1 0-4 0v.327c0 .096.077.173.173.173zM5.25 6.5a.75.75 0 0 0-.75.75V11a3.5 3.5 0 1 0 7 0V7.25a.75.75 0 0 0-.75-.75h-5.5z"/></svg>');--md-admonition-icon--example:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M5 5.782V2.5h-.25a.75.75 0 0 1 0-1.5h6.5a.75.75 0 0 1 0 1.5H11v3.282l3.666 5.76C15.619 13.04 14.543 15 12.767 15H3.233c-1.776 0-2.852-1.96-1.899-3.458L5 5.782zM9.5 2.5h-3V6a.75.75 0 0 1-.117.403L4.73 9h6.54L9.617 6.403A.75.75 0 0 1 9.5 6V2.5zm-6.9 9.847L3.775 10.5h8.45l1.175 1.847a.75.75 0 0 1-.633 1.153H3.233a.75.75 0 0 1-.633-1.153z"/></svg>');--md-admonition-icon--quote:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.75 2.5a.75.75 0 0 0 0 1.5h10.5a.75.75 0 0 0 0-1.5H1.75zm4 5a.75.75 0 0 0 0 1.5h8.5a.75.75 0 0 0 0-1.5h-8.5zm0 5a.75.75 0 0 0 0 1.5h8.5a.75.75 0 0 0 0-1.5h-8.5zM2.5 7.75a.75.75 0 0 0-1.5 0v6a.75.75 0 0 0 1.5 0v-6z"/></svg>');}</style>
+
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#introduction" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="GaNDLF" class="md-header__button md-logo" aria-label="GaNDLF" data-md-component="logo">
+      
+  <img src="../images/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GaNDLF
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Usage
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent=""  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6zm0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4zM7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent=""  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7 0-.24-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91 1.61 0 2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08Z"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/mlcommons/gandlf" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    mlcommons/gandlf
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="GaNDLF" class="md-nav__button md-logo" aria-label="GaNDLF" data-md-component="logo">
+      
+  <img src="../images/logo.png" alt="logo">
+
+    </a>
+    GaNDLF
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/mlcommons/gandlf" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    mlcommons/gandlf
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/" class="md-nav__link">
+        Getting Started
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../setup/" class="md-nav__link">
+        Installation
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Usage
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Usage
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#preparing-the-data" class="md-nav__link">
+    Preparing the Data
+  </a>
+  
+    <nav class="md-nav" aria-label="Preparing the Data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#anonymize-data" class="md-nav__link">
+    Anonymize Data
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cleanupharmonizecurate-data" class="md-nav__link">
+    Cleanup/Harmonize/Curate Data
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#offline-patch-extraction-for-histology-images-only" class="md-nav__link">
+    Offline Patch Extraction (for histology images only)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-preprocessing-before-traininginference-optional" class="md-nav__link">
+    Running preprocessing before training/inference (optional)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#constructing-the-data-csv" class="md-nav__link">
+    Constructing the Data CSV
+  </a>
+  
+    <nav class="md-nav" aria-label="Constructing the Data CSV">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-the-gandlf-construct-csv-command" class="md-nav__link">
+    Using the gandlf construct-csv command
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-the-gandlf-split-csv-command" class="md-nav__link">
+    Using the gandlf split-csv command
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-the-log-file-parameter" class="md-nav__link">
+    Using the --log-file parameter
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customize-the-training" class="md-nav__link">
+    Customize the Training
+  </a>
+  
+    <nav class="md-nav" aria-label="Customize the Training">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#running-multiple-experiments-optional" class="md-nav__link">
+    Running multiple experiments (optional)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-gandlf-traininginference" class="md-nav__link">
+    Running GaNDLF (Training/Inference)
+  </a>
+  
+    <nav class="md-nav" aria-label="Running GaNDLF (Training/Inference)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#special-notes-for-inference-for-histology-images" class="md-nav__link">
+    Special notes for Inference for Histology images
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#generate-metrics" class="md-nav__link">
+    Generate Metrics
+  </a>
+  
+    <nav class="md-nav" aria-label="Generate Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#special-cases" class="md-nav__link">
+    Special cases
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gpu-usage-parallelization-and-numerical-precision" class="md-nav__link">
+    GPU usage, parallelization and numerical precision
+  </a>
+  
+    <nav class="md-nav" aria-label="GPU usage, parallelization and numerical precision">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-gpu" class="md-nav__link">
+    Using GPU
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-gpu-training" class="md-nav__link">
+    Multi-GPU training
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-node-training-and-hpc-environments" class="md-nav__link">
+    Multi-node training and HPC environments
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#choosing-numerical-precision" class="md-nav__link">
+    Choosing numerical precision
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#expected-outputs" class="md-nav__link">
+    Expected Output(s)
+  </a>
+  
+    <nav class="md-nav" aria-label="Expected Output(s)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#training" class="md-nav__link">
+    Training
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inference" class="md-nav__link">
+    Inference
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plot-the-final-results" class="md-nav__link">
+    Plot the final results
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#m3d-cam-usage" class="md-nav__link">
+    M3D-CAM usage
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-training-model-optimization" class="md-nav__link">
+    Post-Training Model Optimization
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment" class="md-nav__link">
+    Deployment
+  </a>
+  
+    <nav class="md-nav" aria-label="Deployment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#deploy-as-a-model-warning-this-feature-is-not-fully-supported-in-the-current-release" class="md-nav__link">
+    Deploy as a Model (WARNING - this feature is not fully supported in the current release!)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deploy-as-a-metrics-generator" class="md-nav__link">
+    Deploy as a Metrics Generator
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#federating-your-model-using-openfl" class="md-nav__link">
+    Federating your model using OpenFL
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#federating-your-model-evaluation-using-medperf" class="md-nav__link">
+    Federating your model evaluation using MedPerf
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-with-docker" class="md-nav__link">
+    Running with Docker
+  </a>
+  
+    <nav class="md-nav" aria-label="Running with Docker">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mounting-input-and-output" class="md-nav__link">
+    Mounting Input and Output
+  </a>
+  
+    <nav class="md-nav" aria-label="Mounting Input and Output">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#special-case-for-training" class="md-nav__link">
+    Special Case for Training
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enabling-gpus" class="md-nav__link">
+    Enabling GPUs
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mlcubes" class="md-nav__link">
+    MLCubes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#huggingface-cli" class="md-nav__link">
+    HuggingFace CLI
+  </a>
+  
+    <nav class="md-nav" aria-label="HuggingFace CLI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#download-an-entire-repository" class="md-nav__link">
+    Download an entire repository
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#revision" class="md-nav__link">
+    Revision
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specify-a-token" class="md-nav__link">
+    Specify a token
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specify-cache-directory" class="md-nav__link">
+    Specify cache directory
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#download-to-a-local-folder" class="md-nav__link">
+    Download to a local folder
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#force-download" class="md-nav__link">
+    Force Download
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#upload-an-entire-folder" class="md-nav__link">
+    Upload an entire folder
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#upload-to-a-specific-path-in-repo" class="md-nav__link">
+    Upload to a Specific Path in Repo
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#upload-multiple-files" class="md-nav__link">
+    Upload multiple files
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specify-a-token_1" class="md-nav__link">
+    Specify a token
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specify-a-commit-message" class="md-nav__link">
+    Specify a commit message
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#upload-to-a-dataset-or-space" class="md-nav__link">
+    Upload to a dataset or Space
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#huggingface-template-for-upload" class="md-nav__link">
+    Huggingface Template For Upload
+  </a>
+  
+    <nav class="md-nav" aria-label="Huggingface Template For Upload">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#design-and-modify-template" class="md-nav__link">
+    Design and Modify Template
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mentioned-the-huggingface-template" class="md-nav__link">
+    Mentioned The Huggingface Template
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../migration_guide/" class="md-nav__link">
+        Migration Guide
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../customize/" class="md-nav__link">
+        Customize Training and Inference
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../extending/" class="md-nav__link">
+        Extending GaNDLF
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../itcr_connectivity/" class="md-nav__link">
+        ITCR Connectivity
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        FAQ
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../acknowledgements/" class="md-nav__link">
+        Acknowledgements
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  <a href="https://github.com/mlcommons/gandlf/edit/master/docs/usage.md" title="Edit this page" class="md-content__button md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+  <h1>Usage</h1>
+
+<h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h2>
+<p>For any DL pipeline, the following flow needs to be performed:</p>
+<ol>
+<li>Data preparation</li>
+<li>Split data into training, validation, and testing</li>
+<li>Customize the training parameters</li>
+</ol>
+<p>A detailed data flow diagram is presented in <a href="https://github.com/mlcommons/GaNDLF/blob/master/docs/README.md#flowchart">this link</a>.</p>
+<p>GaNDLF addresses all of these, and the information is divided as described in the following sections.</p>
+<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
+<p>Please follow the <a href="../setup/#installation">installation instructions</a> to install GaNDLF. When the installation is complete, you should end up with the shell that looks like the following, which indicates that the GaNDLF virtual environment has been activated:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="o">(</span>venv_gandlf<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span><span class="c1">### subsequent commands go here</span>
+</span></code></pre></div>
+<h2 id="preparing-the-data">Preparing the Data<a class="headerlink" href="#preparing-the-data" title="Permanent link">&para;</a></h2>
+<h3 id="anonymize-data">Anonymize Data<a class="headerlink" href="#anonymize-data" title="Permanent link">&para;</a></h3>
+<p>A major reason why one would want to anonymize data is to ensure that trained models do not inadvertently do not encode protect health information [<a href="https://doi.org/10.1145/3436755">1</a>,<a href="https://doi.org/10.1038/s42256-020-0186-1">2</a>]. GaNDLF can anonymize single images or a collection of images using the <code>gandlf anonymizer</code> command. It can be used as follows:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># continue from previous shell</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="o">(</span>venv_gandlf<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>gandlf<span class="w"> </span>anonymizer
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="c1"># -h, --help         Show help message and exit</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span>-c<span class="w"> </span>./samples/config_anonymizer.yaml<span class="w"> </span><span class="se">\ </span><span class="c1"># anonymizer configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span>-i<span class="w"> </span>./input_dir_or_file<span class="w"> </span><span class="se">\ </span><span class="c1"># input directory containing series of images to anonymize or a single image</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span>-o<span class="w"> </span>./output_dir_or_file<span class="w"> </span><span class="c1"># output directory to save anonymized images or a single output image file (for a DICOM to NIfTi conversion specify a .nii.gz file)</span>
+</span></code></pre></div>
+<h3 id="cleanupharmonizecurate-data">Cleanup/Harmonize/Curate Data<a class="headerlink" href="#cleanupharmonizecurate-data" title="Permanent link">&para;</a></h3>
+<p>It is <strong>highly</strong> recommended that the dataset you want to train/infer on has been harmonized. The following requirements should be considered:</p>
+<ul>
+<li>Registration<ul>
+<li>Within-modality co-registration [<a href="https://doi.org/10.1109/TMI.2014.2377694">1</a>, <a href="https://doi.org/10.1038/sdata.2017.117">2</a>, <a href="https://arxiv.org/abs/1811.02629">3</a>].</li>
+<li><strong>OPTIONAL</strong>: Registration of all datasets to patient atlas, if applicable [<a href="https://doi.org/10.1109/TMI.2014.2377694">1</a>, <a href="https://doi.org/10.1038/sdata.2017.117">2</a>, <a href="https://arxiv.org/abs/1811.02629">3</a>].</li>
+</ul>
+</li>
+<li><strong>Intensity harmonization</strong>: Same intensity profile, i.e., normalization [<a href="https://doi.org/10.1016/j.nicl.2014.08.008">4</a>, <a href="https://visualstudiomagazine.com/articles/2020/08/04/ml-data-prep-normalization.aspx">5</a>, <a href="https://developers.google.com/machine-learning/data-prep/transform/normalization">6</a>, <a href="https://towardsdatascience.com/understand-data-normalization-in-machine-learning-8ff3062101f0">7</a>]. GaNDLF offers <a href="#customize-the-training">multiple options</a> for intensity normalization, including Z-scoring, Min-Max scaling, and Histogram matching. </li>
+<li><strong>Resolution harmonization</strong>: Ensures that the images have <em>similar</em> physical definitions (i.e., voxel/pixel size/resolution/spacing). An illustration of the impact of voxel size/resolution/spacing can be found <a href="https://upenn.box.com/v/spacingsIssue">here</a>, and it is encourage to read <a href="https://www.nature.com/articles/s41592-020-01008-z#:~:text=of%20all%20images.-,Resampling,-In%20some%20datasets">this article</a> to added context on how this issue impacts a deep learning pipeline. This functionality is available via <a href="#customize-the-training">GaNDLF's preprocessing module</a>.</li>
+</ul>
+<p>Recommended tools for tackling all aforementioned curation and annotation tasks: 
+- <a href="https://github.com/CBICA/CaPTk">Cancer Imaging Phenomics Toolkit (CaPTk)</a> 
+- <a href="https://github.com/FETS-AI/Front-End">Federated Tumor Segmentation (FeTS) Front End</a>
+- <a href="https://www.slicer.org">3D Slicer</a>
+- <a href="http://www.itksnap.org/pmwiki/pmwiki.php">ITK-SNAP</a></p>
+<h3 id="offline-patch-extraction-for-histology-images-only">Offline Patch Extraction (for histology images only)<a class="headerlink" href="#offline-patch-extraction-for-histology-images-only" title="Permanent link">&para;</a></h3>
+<p>GaNDLF can be used to convert a Whole Slide Image (WSI) with or without a corresponding label map to patches/tiles using GaNDLF’s integrated patch miner, which would need the following files:</p>
+<ol>
+<li>A configuration file that dictates how the patches/tiles will be extracted. A sample configuration to extract patches is presented <a href="https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_segmentation_histo2d_patchExtraction.yaml">here</a>. The options that the can be defined in the configuration are as follows:<ul>
+<li><code>patch_size</code>: defines the size of the patches to extract, should be a tuple type of integers (e.g., <code>[256,256]</code>) or a string containing patch size in microns (e.g., <code>[100m,100m]</code>). This parameter always needs to be specified.</li>
+<li><code>scale</code>: scale at which operations such as tissue mask calculation happens; defaults to <code>16</code>.</li>
+<li><code>num_patches</code>: defines the number of patches to extract, use <code>-1</code> to mine until exhaustion; defaults to <code>-1</code>.</li>
+<li><code>value_map</code>: mapping RGB values in label image to integer values for training; defaults to <code>None</code>.</li>
+<li><code>read_type</code>: either <code>random</code> or <code>sequential</code> (latter is more efficient); defaults to <code>random</code>.</li>
+<li><code>overlap_factor</code>: Portion of patches that are allowed to overlap (<code>0-&gt;1</code>); defaults to <code>0.0</code>.</li>
+<li><code>num_workers</code>: number of workers to use for patch extraction (note that this does not scale according to the number of threads available on your machine); defaults to <code>1</code>.</li>
+</ul>
+</li>
+<li>A CSV file with the following columns:<ul>
+<li><code>SubjectID</code>: the ID of the subject for the WSI</li>
+<li><code>Channel_0</code>: the full path to the WSI file which will be used to extract patches</li>
+<li><code>Label</code>: (optional) full path to the label map file</li>
+</ul>
+</li>
+</ol>
+<p>Once these files are present, the patch miner can be run using the following command:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># continue from previous shell</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="o">(</span>venv_gandlf<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>gandlf<span class="w"> </span>patch-miner<span class="w"> </span><span class="se">\ </span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="c1"># -h, --help         Show help message and exit</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span>-c<span class="w"> </span>./exp_patchMiner/config.yaml<span class="w"> </span><span class="se">\ </span><span class="c1"># patch extraction configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span>-i<span class="w"> </span>./exp_patchMiner/input.csv<span class="w"> </span><span class="se">\ </span><span class="c1"># data in CSV format </span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span>-o<span class="w"> </span>./exp_patchMiner/output_dir/<span class="w"> </span><span class="c1"># output directory</span>
+</span></code></pre></div>
+<h3 id="running-preprocessing-before-traininginference-optional">Running preprocessing before training/inference (optional)<a class="headerlink" href="#running-preprocessing-before-traininginference-optional" title="Permanent link">&para;</a></h3>
+<p>Running preprocessing before training/inference is optional, but recommended. It will significantly reduce the computational footprint during training/inference at the expense of larger storage requirements. To run preprocessing before training/inference you can use the following command, which will save the processed data in <code>./experiment_0/output_dir/</code> with a new data CSV and the corresponding model configuration:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># continue from previous shell</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="o">(</span>venv_gandlf<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>gandlf<span class="w"> </span>preprocess<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="c1"># -h, --help         Show help message and exit</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span>-c<span class="w"> </span>./experiment_0/model.yaml<span class="w"> </span><span class="se">\ </span><span class="c1"># model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span>-i<span class="w"> </span>./experiment_0/train.csv<span class="w"> </span><span class="se">\ </span><span class="c1"># data in CSV format </span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span>-o<span class="w"> </span>./experiment_0/output_dir/<span class="w"> </span><span class="c1"># output directory</span>
+</span></code></pre></div>
+<h2 id="constructing-the-data-csv">Constructing the Data CSV<a class="headerlink" href="#constructing-the-data-csv" title="Permanent link">&para;</a></h2>
+<p>This application can leverage multiple channels/modalities for training while using a multi-class segmentation file. The expected format is shown as an example in <a href="https://github.com/mlcommons/GaNDLF/blob/master/samples/sample_train.csv">samples/sample_train.csv</a> and needs to be structured with the following header format (which shows a CSV with <code>N</code> subjects, each having <code>X</code> channels/modalities that need to be processed):</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>SubjectID,Channel_0,Channel_1,...,Channel_X,Label
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>001,/full/path/001/0.nii.gz,/full/path/001/1.nii.gz,...,/full/path/001/X.nii.gz,/full/path/001/segmentation.nii.gz
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>002,/full/path/002/0.nii.gz,/full/path/002/1.nii.gz,...,/full/path/002/X.nii.gz,/full/path/002/segmentation.nii.gz
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>...
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>N,/full/path/N/0.nii.gz,/full/path/N/1.nii.gz,...,/full/path/N/X.nii.gz,/full/path/N/segmentation.nii.gz
+</span></code></pre></div>
+<p><strong>Notes:</strong></p>
+<ul>
+<li><code>Channel</code> can be substituted with <code>Modality</code> or <code>Image</code></li>
+<li><code>Label</code> can be substituted with <code>Mask</code> or <code>Segmentation</code>and is used to specify the annotation file for segmentation models</li>
+<li>For classification/regression, add a column called <code>ValueToPredict</code>. Currently, we are supporting only a single value prediction per model.</li>
+<li>Only a single <code>Label</code> or <code>ValueToPredict</code> header should be passed <ul>
+<li>Multiple segmentation classes should be in a single file with unique label numbers.</li>
+<li>Multi-label classification/regression is currently not supported.</li>
+</ul>
+</li>
+</ul>
+<h3 id="using-the-gandlf-construct-csv-command">Using the <code>gandlf construct-csv</code> command<a class="headerlink" href="#using-the-gandlf-construct-csv-command" title="Permanent link">&para;</a></h3>
+<p>To make the process of creating the CSV easier, we have provided a <code>gandlf construct-csv</code> command. This script works when the data is arranged in the following format (example shown of the data directory arrangement from the <a href="https://www.synapse.org/brats">Brain Tumor Segmentation (BraTS) Challenge</a>):</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nv">$DATA_DIRECTORY</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>│
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>└───Patient_001<span class="w"> </span><span class="c1"># this is constructed from the ${PatientID} header of CSV</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>│<span class="w">   </span>│<span class="w"> </span>Patient_001_brain_t1.nii.gz
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>│<span class="w">   </span>│<span class="w"> </span>Patient_001_brain_t1ce.nii.gz
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>│<span class="w">   </span>│<span class="w"> </span>Patient_001_brain_t2.nii.gz
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>│<span class="w">   </span>│<span class="w"> </span>Patient_001_brain_flair.nii.gz
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>│<span class="w">   </span>│<span class="w"> </span>Patient_001_seg.nii.gz<span class="w"> </span><span class="c1"># optional for segmentation tasks</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>│
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>└───Patient_002<span class="w"> </span><span class="c1"># this is constructed from the ${PatientID} header of CSV</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>│<span class="w">   </span>│<span class="w"> </span>Patient_002_brain_t1.nii.gz
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>│<span class="w">   </span>│<span class="w"> </span>Patient_002_brain_t1ce.nii.gz
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>│<span class="w">   </span>│<span class="w"> </span>Patient_002_brain_t2.nii.gz
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>│<span class="w">   </span>│<span class="w"> </span>Patient_002_brain_flair.nii.gz
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>│<span class="w">   </span>│<span class="w"> </span>Patient_002_seg.nii.gz<span class="w"> </span><span class="c1"># optional for segmentation tasks</span>
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>│
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>└───JaneDoe<span class="w"> </span><span class="c1"># this is constructed from the ${PatientID} header of CSV</span>
+</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>│<span class="w">   </span>│<span class="w"> </span>randomFileName_0_t1.nii.gz<span class="w"> </span><span class="c1"># the string identifier needs to be the same for each modality</span>
+</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>│<span class="w">   </span>│<span class="w"> </span>randomFileName_1_t1ce.nii.gz
+</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>│<span class="w">   </span>│<span class="w"> </span>randomFileName_2_t2.nii.gz
+</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>│<span class="w">   </span>│<span class="w"> </span>randomFileName_3_flair.nii.gz
+</span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>│<span class="w">   </span>│<span class="w"> </span>randomFileName_seg.nii.gz<span class="w"> </span><span class="c1"># optional for segmentation tasks</span>
+</span><span id="__span-5-23"><a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>│
+</span><span id="__span-5-24"><a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a>...
+</span></code></pre></div>
+<p>The following command shows how the script works:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># continue from previous shell</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="o">(</span>venv_gandlf<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>gandlf<span class="w"> </span>construct-csv<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="c1"># -h, --help         Show help message and exit</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span>-i<span class="w"> </span><span class="nv">$DATA_DIRECTORY</span><span class="w"> </span><span class="c1"># this is the main data directory </span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span>-c<span class="w"> </span>_t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz<span class="w"> </span><span class="se">\ </span><span class="c1"># an example image identifier for 4 structural brain MR sequences for BraTS, and can be changed based on your data</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">  </span>-l<span class="w"> </span>_seg.nii.gz<span class="w"> </span><span class="se">\ </span><span class="c1"># an example label identifier - not needed for regression/classification, and can be changed based on your data</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">  </span>-o<span class="w"> </span>./experiment_0/train_data.csv<span class="w"> </span><span class="c1"># output CSV to be used for training</span>
+</span></code></pre></div>
+<p><strong>Notes</strong>:</p>
+<ul>
+<li>For classification/regression, add a column called <code>ValueToPredict</code>. Currently, we are supporting only a single value prediction per model.</li>
+<li><code>SubjectID</code> or <code>PatientName</code> is used to ensure that the randomized split is done per-subject rather than per-image.</li>
+<li>For data arrangement different to what is described above, a customized script will need to be written to generate the CSV, or you can enter the data manually into the CSV. </li>
+</ul>
+<h3 id="using-the-gandlf-split-csv-command">Using the <code>gandlf split-csv</code> command<a class="headerlink" href="#using-the-gandlf-split-csv-command" title="Permanent link">&para;</a></h3>
+<p>To split the data CSV into training, validation, and testing CSVs, the <code>gandlf split-csv</code> script can be used. The following command shows how the script works:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># continue from previous shell</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="o">(</span>venv_gandlf<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>gandlf<span class="w"> </span>split-csv<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="c1"># -h, --help         Show help message and exit</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span>-i<span class="w"> </span>./experiment_0/train_data.csv<span class="w"> </span><span class="se">\ </span><span class="c1"># output CSV from the `gandlf construct-csv` script</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span>-c<span class="w"> </span><span class="nv">$gandlf_config</span><span class="w"> </span><span class="se">\ </span><span class="c1"># the GaNDLF config (in YAML) with the `nested_training` key specified to the folds needed</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">  </span>-o<span class="w"> </span><span class="nv">$output_dir</span><span class="w"> </span><span class="c1"># the output directory to save the split data</span>
+</span></code></pre></div>
+<h3 id="using-the-log-file-parameter">Using the <code>--log-file</code> parameter<a class="headerlink" href="#using-the-log-file-parameter" title="Permanent link">&para;</a></h3>
+<p>By default, only the <code>info</code> and <code>error</code> logs will be <strong>displayed</strong> in the console and
+the log file will be <strong>saved</strong> in <code>$(home)/.gandlf/&lt;timestamp&gt;.log</code>.</p>
+<p>Also, you can use the <code>--log-file</code> and provide the file that you want to save the logs
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="o">(</span>venv_gandlf<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>gandlf<span class="w"> </span>&lt;command&gt;<span class="w"> </span>--log-file<span class="w"> </span>&lt;log_file_path&gt;
+</span></code></pre></div></p>
+<h2 id="customize-the-training">Customize the Training<a class="headerlink" href="#customize-the-training" title="Permanent link">&para;</a></h2>
+<p>GaNDLF requires a YAML-based configuration that controls various aspects of the training/inference process. There are multiple samples for users to start as their baseline for further customization. A list of the available samples is presented as follows:</p>
+<ul>
+<li><a href="https://github.com/mlcommons/GaNDLF/blob/master/samples/config_all_options.yaml">Sample showing all the available options</a></li>
+<li><a href="https://github.com/mlcommons/GaNDLF/blob/master/samples/config_segmentation_brats.yaml">Segmentation example</a></li>
+<li><a href="https://github.com/mlcommons/GaNDLF/blob/master/samples/config_regression.yaml">Regression example</a></li>
+<li><a href="https://github.com/mlcommons/GaNDLF/blob/master/samples/config_classification.yaml">Classification example</a></li>
+</ul>
+<p><strong>Notes</strong>: </p>
+<ul>
+<li>More details on the configuration options are available in the <a href="../customize/">customization page</a>.</li>
+<li>Ensure that the configuration has valid syntax by checking the file using any YAML validator such as <a href="https://yamlchecker.com/">yamlchecker.com</a> or <a href="https://yamlvalidator.com/">yamlvalidator.com</a> <strong>before</strong> trying to train.</li>
+</ul>
+<h3 id="running-multiple-experiments-optional">Running multiple experiments (optional)<a class="headerlink" href="#running-multiple-experiments-optional" title="Permanent link">&para;</a></h3>
+<ol>
+<li>The <code>gandlf config-generator</code> command can be used to generate a grid of configurations for tuning the hyperparameters of a baseline configuration that works for your dataset and problem. </li>
+<li>Use a strategy file (example is shown in <a href="https://github.com/mlcommons/GaNDLF/blob/master/samples/config_generator_sample_strategy.yaml">samples/config_generator_strategy.yaml</a>.</li>
+<li>Provide the baseline configuration which has enabled you to successfully train a model for <code>1</code> epoch for your dataset and problem at hand (regardless of the efficacy).</li>
+<li>Run the following command:</li>
+</ol>
+<p><div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># continue from previous shell</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="o">(</span>venv_gandlf<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>gandlf<span class="w"> </span>config-generator<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="c1"># -h, --help         Show help message and exit</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">  </span>-c<span class="w"> </span>./samples/config_all_options.yaml<span class="w"> </span><span class="se">\ </span><span class="c1"># baseline configuration</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">  </span>-s<span class="w"> </span>./samples/config_generator_strategy.yaml<span class="w"> </span><span class="se">\ </span><span class="c1"># strategy file</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">  </span>-o<span class="w"> </span>./all_experiments/<span class="w"> </span><span class="c1"># output directory</span>
+</span></code></pre></div>
+5. For example, to generate <code>4</code> configurations that leverage <code>unet</code> and <code>resunet</code> architectures for learning rates of <code>[0.1,0.01]</code>,  you can use the following strategy file:
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nt">model</span><span class="p">:</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span><span class="p p-Indicator">{</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="nt">    architecture</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">unet</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">resunet</span><span class="p p-Indicator">],</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">  </span><span class="p p-Indicator">}</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.01</span><span class="p p-Indicator">]</span>
+</span></code></pre></div></p>
+<h2 id="running-gandlf-traininginference">Running GaNDLF (Training/Inference)<a class="headerlink" href="#running-gandlf-traininginference" title="Permanent link">&para;</a></h2>
+<p>You can use the following code snippet to run GaNDLF:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># continue from previous shell</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="o">(</span>venv_gandlf<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>gandlf<span class="w"> </span>run<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">  </span><span class="c1"># -h, --help         Show help message and exit</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">  </span><span class="c1"># -v, --version      Show program&#39;s version number and exit.</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">  </span>-c<span class="w"> </span>./experiment_0/model.yaml<span class="w"> </span><span class="se">\ </span><span class="c1"># model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">  </span>-i<span class="w"> </span>./experiment_0/train.csv<span class="w"> </span><span class="se">\ </span><span class="c1"># data in CSV format </span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">  </span>-m<span class="w"> </span>./experiment_0/model_dir/<span class="w"> </span><span class="se">\ </span><span class="c1"># model directory (i.e., the `model-dir`) where the output of the training will be stored, created if not present </span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">  </span>--train<span class="w"> </span><span class="se">\ </span><span class="c1"># --train/-t or --infer</span>
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">  </span><span class="c1"># ensure CUDA_VISIBLE_DEVICES env variable is set when using GPU </span>
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="w">  </span><span class="c1"># -rt , --reset # [optional] completely resets the previous run by deleting `model-dir`</span>
+</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="w">  </span><span class="c1"># -rm , --resume # [optional] resume previous training by only keeping model dict in `model-dir`</span>
+</span></code></pre></div>
+<h3 id="special-notes-for-inference-for-histology-images">Special notes for Inference for Histology images<a class="headerlink" href="#special-notes-for-inference-for-histology-images" title="Permanent link">&para;</a></h3>
+<ul>
+<li>If you trying to perform inference on pre-extracted patches, please change the <code>modality</code> key in the configuration to <code>rad</code>. This will ensure the histology-specific pipelines are not triggered.</li>
+<li>However, if you are trying to perform inference on full WSIs, <code>modality</code> should be kept as <code>histo</code>.</li>
+</ul>
+<h2 id="generate-metrics">Generate Metrics<a class="headerlink" href="#generate-metrics" title="Permanent link">&para;</a></h2>
+<p>GaNDLF provides a script to generate metrics after an inference process is done.The script can be used as follows:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># continue from previous shell</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="o">(</span>venv_gandlf<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>gandlf<span class="w"> </span>generate-metrics<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">  </span><span class="c1"># -h, --help         Show help message and exit</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">  </span><span class="c1"># -v, --version      Show program&#39;s version number and exit.</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">  </span>-c<span class="w"> </span>,<span class="w"> </span>--config<span class="w">       </span>The<span class="w"> </span>configuration<span class="w"> </span>file<span class="w"> </span><span class="o">(</span>contains<span class="w"> </span>all<span class="w"> </span>the<span class="w"> </span>information<span class="w"> </span>related<span class="w"> </span>to<span class="w"> </span>the<span class="w"> </span>training/inference<span class="w"> </span>session<span class="o">)</span>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">  </span>-i<span class="w"> </span>,<span class="w"> </span>--input-data<span class="w">    </span>CSV<span class="w"> </span>file<span class="w"> </span>that<span class="w"> </span>is<span class="w"> </span>used<span class="w"> </span>to<span class="w"> </span>generate<span class="w"> </span>the<span class="w"> </span>metrics<span class="p">;</span><span class="w"> </span>should<span class="w"> </span>contain<span class="w"> </span><span class="m">3</span><span class="w"> </span>columns:<span class="w"> </span><span class="s1">&#39;SubjectID,Target,Prediction&#39;</span>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">  </span>-o<span class="w"> </span>,<span class="w"> </span>--output-file<span class="w">   </span>Location<span class="w"> </span>to<span class="w"> </span>save<span class="w"> </span>the<span class="w"> </span>output<span class="w"> </span>dictionary.<span class="w"> </span>If<span class="w"> </span>not<span class="w"> </span>provided,<span class="w"> </span>will<span class="w"> </span>print<span class="w"> </span>to<span class="w"> </span>stdout.
+</span></code></pre></div>
+<p>Once you have your CSV in the specific format, you can pass it on to generate the metrics. Here is an example for segmentation:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>SubjectID,Target,Prediction
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>001,/path/to/001/target.nii.gz,/path/to/001/prediction.nii.gz
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>002,/path/to/002/target.nii.gz,/path/to/002/prediction.nii.gz
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>...
+</span></code></pre></div>
+<p>Similarly, for classification or regression (<code>A</code>, <code>B</code>, <code>C</code>, <code>D</code> are integers for classification and floats for regression):</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>SubjectID,Target,Prediction
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>001,A,B
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>002,C,D
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>...
+</span></code></pre></div>
+<h3 id="special-cases">Special cases<a class="headerlink" href="#special-cases" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>BraTS Segmentation Metrics</strong>: To generate annotation to annotation metrics for BraTS segmentation tasks [<a href="https://www.synapse.org/brats">ref</a>], ensure that the config has <code>problem_type: segmentation_brats</code>, and the CSV can be in the same format as segmentation:</li>
+</ul>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>SubjectID,Target,Prediction
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>001,/path/to/001/target_image.nii.gz,/path/to/001/prediction_image.nii.gz
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>002,/path/to/002/target_image.nii.gz,/path/to/002/prediction_image.nii.gz
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>...
+</span></code></pre></div>
+<p>This can also be customized using the <code>panoptica_config</code> dictionary. See <a href="https://github.com/mlcommons/GaNDLF/blob/master/samples/config_segmentation_metrics_brats_default.yaml">this sample</a> for an example. Additionally, a more "concise" variant of the config is present <a href="https://github.com/mlcommons/GaNDLF/blob/master/samples/config_segmentation_metrics_brats_concise.yaml">here</a>.</p>
+<ul>
+<li><strong>BraTS Synthesis Metrics</strong>: To generate image to image metrics for synthesis tasks (including for the BraTS synthesis tasks [<a href="https://www.synapse.org/#!Synapse:syn51156910/wiki/622356">1</a>, <a href="https://www.synapse.org/#!Synapse:syn51156910/wiki/622357">2</a>]), ensure that the config has <code>problem_type: synthesis</code>, and the CSV can be in the same format as segmentation (note that the <code>Mask</code> column is optional):</li>
+</ul>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>SubjectID,Target,Prediction,Mask
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>001,/path/to/001/target_image.nii.gz,/path/to/001/prediction_image.nii.gz,/path/to/001/brain_mask.nii.gz
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>002,/path/to/002/target_image.nii.gz,/path/to/002/prediction_image.nii.gz,/path/to/002/brain_mask.nii.gz
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>...
+</span></code></pre></div>
+<h2 id="gpu-usage-parallelization-and-numerical-precision">GPU usage, parallelization and numerical precision<a class="headerlink" href="#gpu-usage-parallelization-and-numerical-precision" title="Permanent link">&para;</a></h2>
+<h3 id="using-gpu">Using GPU<a class="headerlink" href="#using-gpu" title="Permanent link">&para;</a></h3>
+<p>By default, GaNDLF will use GPU accelerator if <code>CUDA_VISIBLE_DEVICES</code> environment variable is set <a href="https://developer.nvidia.com/blog/cuda-pro-tip-control-gpu-visibility-cuda_visible_devices/">ref</a>. To explicitly configure usage of GPU/CPU, you can set the <code>accelerator</code> key in the configuration file to <code>cuda</code> or <code>cpu</code>. By default, it is set to <code>auto</code>, which will use GPU if available, otherwise CPU.</p>
+<h3 id="multi-gpu-training">Multi-GPU training<a class="headerlink" href="#multi-gpu-training" title="Permanent link">&para;</a></h3>
+<p>GaNDLF enables relatively straightforward multi-GPU training. Simply set the <code>CUDA_VISIBLE_DEVICES</code> environment variable includes the GPU IDs you want to use (see above paragraph for reference about this variable). GaNDLF will automatically distribute the training across the GPUs using Distributed Data Parallel (DDP) strategy. To explicitly set the strategy, set the <code>strategy</code> key in the configuration file to <code>ddp</code>. By default, it is set to <code>auto</code>, which will use DDP if multiple GPUs are available, otherwise single GPU or CPU.</p>
+<h3 id="multi-node-training-and-hpc-environments">Multi-node training and HPC environments<a class="headerlink" href="#multi-node-training-and-hpc-environments" title="Permanent link">&para;</a></h3>
+<p>In the current release, GaNDLF does not support multi-node training. This feature will be enabled in the upcoming releases.</p>
+<h3 id="choosing-numerical-precision">Choosing numerical precision<a class="headerlink" href="#choosing-numerical-precision" title="Permanent link">&para;</a></h3>
+<p>By default, GaNDLF uses <code>float32</code> for training and inference computations. To change the numerical precision, set the <code>precision</code> key in the configuration file to one of the values <code>[16, 32, 64, "64-true", "32-true", "16-mixed", "bf16", "bf16-mixed"]</code>. Using reduced precision usually results in faster computations and lower memory usage, although in some cases it may lead to numerical instability - be sure to observe the training process and adjust the precision accordingly. Good rule of thumb is to start in default precision (<code>32</code>) and then experiment with lower precisions.</p>
+<h2 id="expected-outputs">Expected Output(s)<a class="headerlink" href="#expected-outputs" title="Permanent link">&para;</a></h2>
+<h3 id="training">Training<a class="headerlink" href="#training" title="Permanent link">&para;</a></h3>
+<p>Once your model is trained, you should see the following output:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># continue from previous shell</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="o">(</span>venv_gandlf<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>ls<span class="w"> </span>./experiment_0/model_dir/
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>data_<span class="si">${</span><span class="nv">cohort_type</span><span class="si">}</span>.csv<span class="w">  </span><span class="c1"># data CSV used for the different cohorts, which can be either training/validation/testing</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>data_<span class="si">${</span><span class="nv">cohort_type</span><span class="si">}</span>.pkl<span class="w">  </span><span class="c1"># same as above, but in pickle format</span>
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>logs_<span class="si">${</span><span class="nv">cohort_type</span><span class="si">}</span>.csv<span class="w">  </span><span class="c1"># logs for the different cohorts that contain the various metrics, which can be either training/validation/testing</span>
+</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="si">${</span><span class="nv">architecture_name</span><span class="si">}</span>_best.pth.tar<span class="w"> </span><span class="c1"># the best model in native PyTorch format</span>
+</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="si">${</span><span class="nv">architecture_name</span><span class="si">}</span>_latest.pth.tar<span class="w"> </span><span class="c1"># the latest model in native PyTorch format</span>
+</span><span id="__span-17-8"><a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="si">${</span><span class="nv">architecture_name</span><span class="si">}</span>_initial.pth.tar<span class="w"> </span><span class="c1"># the initial model in native PyTorch format</span>
+</span><span id="__span-17-9"><a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="si">${</span><span class="nv">architecture_name</span><span class="si">}</span>_initial.<span class="o">{</span>onnx/xml/bin<span class="o">}</span><span class="w"> </span><span class="c1"># [optional] if ${architecture_name} is supported, the graph-optimized best model in ONNX format</span>
+</span><span id="__span-17-10"><a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a><span class="c1"># other files dependent on if training/validation/testing output was enabled in configuration</span>
+</span></code></pre></div>
+<h3 id="inference">Inference<a class="headerlink" href="#inference" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The output of inference will be predictions based on the model that was trained. </li>
+<li>The predictions will be saved in the same directory as the model if <code>output-dir</code> is not passed to <code>gandlf run</code>.</li>
+<li>For segmentation, a directory will be created per subject ID in the input CSV.</li>
+<li>For classification/regression, the predictions will be generated in the <code>output-dir</code> or <code>model-dir</code> as a CSV file.</li>
+</ul>
+<h2 id="plot-the-final-results">Plot the final results<a class="headerlink" href="#plot-the-final-results" title="Permanent link">&para;</a></h2>
+<p>After the testing/validation training is finished, GaNDLF enables the collection of all the statistics from the final models for testing and validation datasets and plot them. The <a href="https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/entrypoints/collect_stats.py">gandlf collect-stats</a> command can be used for plotting:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1"># continue from previous shell</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="o">(</span>venv_gandlf<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>gandlf<span class="w"> </span>collect-stats<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">  </span>-m<span class="w"> </span>/path/to/trained/models<span class="w"> </span><span class="se">\ </span><span class="w"> </span><span class="c1"># directory which contains testing and validation models</span>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="w">  </span>-o<span class="w"> </span>./experiment_0/output_dir_stats/<span class="w">  </span><span class="c1"># output directory to save stats and plot</span>
+</span></code></pre></div>
+<h2 id="m3d-cam-usage">M3D-CAM usage<a class="headerlink" href="#m3d-cam-usage" title="Permanent link">&para;</a></h2>
+<p>The integration of the <a href="https://arxiv.org/abs/2007.00453">M3D-CAM library</a> into GaNDLF enables the generation of attention maps for 3D/2D images in the validation epoch for classification and segmentation tasks.
+To activate M3D-CAM you just need to add the following parameter to the config:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="nt">medcam</span><span class="p">:</span><span class="w"> </span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="p p-Indicator">{</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="nt">  backend</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;gcam&quot;</span><span class="p p-Indicator">,</span>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="nt">  layer</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;auto&quot;</span>
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="p p-Indicator">}</span>
+</span></code></pre></div>
+<p>You can choose one of the following backends:</p>
+<ul>
+<li>Grad-CAM (<code>gcam</code>)</li>
+<li>Guided Backpropagation (<code>gbp</code>)</li>
+<li>Guided Grad-CAM (<code>ggcam</code>)</li>
+<li>Grad-CAM++ (<code>gcampp</code>)</li>
+</ul>
+<p>Optionally one can also change the name of the layer for which the attention maps should be generated. The default behavior is <code>auto</code> which chooses the last convolutional layer.</p>
+<p>All generated attention maps can be found in the experiment's output directory. Link to the original repository: <a href="https://github.com/MECLabTUDA/M3d-Cam">github.com/MECLabTUDA/M3d-Cam</a></p>
+<h2 id="post-training-model-optimization">Post-Training Model Optimization<a class="headerlink" href="#post-training-model-optimization" title="Permanent link">&para;</a></h2>
+<p>If you have a model previously trained using GaNDLF that you wish to run graph optimizations on, you can use the <code>gandlf optimize-model</code> command to do so. The following command shows how it works:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1"># continue from previous shell</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="o">(</span>venv_gandlf<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>gandlf<span class="w"> </span>optimize-model<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="w">  </span>-m<span class="w"> </span>/path/to/trained/<span class="si">${</span><span class="nv">architecture_name</span><span class="si">}</span>_best.pth.tar<span class="w">  </span><span class="c1"># directory which contains testing and validation models</span>
+</span></code></pre></div>
+<p>If <code>${architecture_name}</code> is supported, the optimized model will get generated in the model directory, with the name <code>${architecture_name}_optimized.onnx</code>.</p>
+<h2 id="deployment">Deployment<a class="headerlink" href="#deployment" title="Permanent link">&para;</a></h2>
+<h3 id="deploy-as-a-model-warning-this-feature-is-not-fully-supported-in-the-current-release">Deploy as a Model (WARNING - this feature is not fully supported in the current release!)<a class="headerlink" href="#deploy-as-a-model-warning-this-feature-is-not-fully-supported-in-the-current-release" title="Permanent link">&para;</a></h3>
+<p>GaNDLF provides the ability to deploy models into easy-to-share, easy-to-use formats -- users of your model do not even need to install GaNDLF. Currently, Docker images are supported (which can be converted to <a href="https://apptainer.org/docs/user/main/docker_and_oci.html">Apptainer/Singularity format</a>). These images meet <a href="https://mlcommons.org/en/mlcube/">the MLCube interface</a>. This allows your algorithm to be used in a consistent manner with other machine learning tools.</p>
+<p>The resulting image contains your specific version of GaNDLF (including any custom changes you have made) and your trained model and configuration. This ensures that upstream changes to GaNDLF will not break compatibility with your model.</p>
+<p>To deploy a model, simply run the <code>gandlf deploy</code> command after training a model. You will need the <a href="https://www.docker.com/get-started/">Docker engine</a> installed to build Docker images. This will create the image and, for MLCubes, generate an MLCube directory complete with an <code>mlcube.yaml</code> specifications file, along with the workspace directory copied from a pre-existing template. </p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="c1"># continue from previous shell</span>
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="o">(</span>venv_gandlf<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>gandlf<span class="w"> </span>deploy<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="w">  </span><span class="c1"># -h, --help         Show help message and exit</span>
+</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="w">  </span>-c<span class="w"> </span>./experiment_0/model.yaml<span class="w"> </span><span class="se">\ </span><span class="c1"># Configuration to bundle with the model (you can recover it with `gandlf recover-config` first if needed)</span>
+</span><span id="__span-21-5"><a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="w">  </span>-m<span class="w"> </span>./experiment_0/model_dir/<span class="w"> </span><span class="se">\ </span><span class="c1"># model directory (i.e., modeldir)</span>
+</span><span id="__span-21-6"><a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="w">  </span>--target<span class="w"> </span>docker<span class="w"> </span><span class="se">\ </span><span class="c1"># the target platform (--help will show all available targets)</span>
+</span><span id="__span-21-7"><a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a><span class="w">  </span>--mlcube-root<span class="w"> </span>./my_new_mlcube_dir<span class="w"> </span><span class="se">\ </span><span class="c1"># Directory containing mlcube.yaml (used to configure your image base)</span>
+</span><span id="__span-21-8"><a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a><span class="w">  </span>-o<span class="w"> </span>./output_dir<span class="w"> </span><span class="c1"># Output directory where a  new mlcube.yaml file to be distributed with your image will be created</span>
+</span><span id="__span-21-9"><a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a><span class="w">  </span>--mlcube-type<span class="w"> </span>model<span class="w"> </span><span class="c1"># deploy as a model MLCube.</span>
+</span></code></pre></div>
+<h3 id="deploy-as-a-metrics-generator">Deploy as a Metrics Generator<a class="headerlink" href="#deploy-as-a-metrics-generator" title="Permanent link">&para;</a></h3>
+<p>You can also deploy GaNDLF as a metrics generator (see the <a href="#generate-metrics">Generate Metrics</a> section) as follows:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="o">(</span>venv_gandlf<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>gandlf<span class="w"> </span>deploy<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="w">  </span><span class="c1">## -h, --help         show help message and exit</span>
+</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="w">  </span>--target<span class="w"> </span>docker<span class="w"> </span><span class="se">\ </span><span class="c1"># the target platform (--help will show all available targets)</span>
+</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="w">  </span>--mlcube-root<span class="w"> </span>./my_new_mlcube_dir<span class="w"> </span><span class="se">\ </span><span class="c1"># Directory containing mlcube.yaml (used to configure your image base)</span>
+</span><span id="__span-22-5"><a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="w">  </span>-o<span class="w"> </span>./output_dir<span class="w"> </span><span class="c1"># Output directory where a  new mlcube.yaml file to be distributed with your image will be created</span>
+</span><span id="__span-22-6"><a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="w">  </span>-e<span class="w"> </span>./my_custom_script.py<span class="w"> </span><span class="c1"># An optional custom script used as an entrypoint for your MLCube</span>
+</span><span id="__span-22-7"><a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a><span class="w">  </span>--mlcube-type<span class="w"> </span>metrics<span class="w"> </span><span class="c1"># deploy as a metrics MLCube.</span>
+</span></code></pre></div>
+<p>The resulting MLCube can be used to calculate any metrics supported in GaNDLF. You can configure which metrics to be calculated by passing a GaNDLF config file when running the MLCube.</p>
+<p>For more information about using a custom entrypoint script, see the examples <a href="https://github.com/mlcommons/GaNDLF/tree/master/mlcube">here</a>.</p>
+<h2 id="federating-your-model-using-openfl">Federating your model using OpenFL<a class="headerlink" href="#federating-your-model-using-openfl" title="Permanent link">&para;</a></h2>
+<p>Once you have a model definition, it is easy to perform federated learning using the <a href="https://github.com/securefederatedai/openfl">Open Federated Learning (OpenFL) library</a>. Follow the tutorial in <a href="https://openfl.readthedocs.io/en/latest/developer_guide/running_the_federation_with_gandlf.html">this page</a> to get started.</p>
+<h2 id="federating-your-model-evaluation-using-medperf">Federating your model evaluation using MedPerf<a class="headerlink" href="#federating-your-model-evaluation-using-medperf" title="Permanent link">&para;</a></h2>
+<p>Once you have a trained model, you can perform <a href="https://flower.dev/docs/tutorial/Flower-0-What-is-FL.html#Federated-evaluation">federated evaluation</a> using <a href="https://medperf.org/">MedPerf</a>. Follow the tutorial in <a href="https://docs.medperf.org/mlcubes/gandlf_mlcube/">this page</a> to get started.</p>
+<p><strong>Notes</strong>:
+-  To create a GaNDLF MLCube, for technical reasons, you need write access to the GaNDLF package. This should be automatic while using a virtual environment that you have set up. See the <a href="../setup/#installation">installation instructions</a> for details.
+-  This needs GaNDLF to be initialized as an MLCube. See <a href="https://docs.medperf.org/mlcubes/gandlf_mlcube/">the mlcube instructions</a> for details.</p>
+<h2 id="running-with-docker">Running with Docker<a class="headerlink" href="#running-with-docker" title="Permanent link">&para;</a></h2>
+<p>The usage of GaNDLF remains generally the same even from Docker, but there are a few extra considerations.</p>
+<p>Once you have pulled the GaNDLF image, it will have a tag, such as <code>cbica/gandlf:latest-cpu</code>. Run the following command to list your images and ensure GaNDLF is present:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="o">(</span>main<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>docker<span class="w"> </span>image<span class="w"> </span>ls
+</span></code></pre></div>
+<p>You can invoke <code>docker run</code> with the appropriate tag to run GaNDLF:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="o">(</span>main<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span>--name<span class="w"> </span>gandlf<span class="w"> </span>cbica/gandlf:latest-cpu<span class="w"> </span><span class="si">${</span><span class="nv">gandlf</span><span class="p"> command and parameters go here!</span><span class="si">}</span>
+</span></code></pre></div>
+<p>Remember that arguments/options for <em>Docker itself</em> go <em>before</em> the image tag, while the command and arguments for GaNDLF go <em>after</em> the image tag. For more details and options, see the <a href="https://docs.docker.com/engine/reference/commandline/run/">Docker run documentation</a>.</p>
+<p>However, most commands that require files or directories as input or output will fail, because the container, by default, cannot read or write files on your machine for <a href="https://docs.docker.com/develop/security-best-practices/">security considerations</a>. In order to fix this, you need to <a href="#mounting-input-and-output">mount specific locations in the filesystem</a>. </p>
+<h3 id="mounting-input-and-output">Mounting Input and Output<a class="headerlink" href="#mounting-input-and-output" title="Permanent link">&para;</a></h3>
+<p>The container is basically a filesystem of its own. To make your data available to the container, you will need to mount in files and directories. Generally, it is useful to mount at least input directory (as read-only) and an output directory. See the <a href="https://docs.docker.com/storage/bind-mounts/">Docker bind mount instructions</a> for more information.</p>
+<p>For example, you might run:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="o">(</span>main<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span>--name<span class="w"> </span>gandlf<span class="w"> </span>--volume<span class="w"> </span>/home/researcher/gandlf_input:/input:ro<span class="w"> </span>--volume<span class="w"> </span>/home/researcher/gandlf_output:/output<span class="w"> </span>cbica/gandlf:latest-cpu<span class="w"> </span><span class="o">[</span><span class="nb">command</span><span class="w"> </span>and<span class="w"> </span>args<span class="w"> </span>go<span class="w"> </span>here<span class="o">]</span>
+</span></code></pre></div>
+<p>Remember that the process running in the container only considers the filesystem inside the container, which is structured differently from that of your host machine. Therefore, you will need to give paths relative to the mount point <em>destination</em>. Additionally, any paths used internally by GaNDLF will refer to locations inside the container. This means that data CSVs produced by the <code>gandlf construct-csv</code> command will need to be made from the container and with input in the same locations. Expanding on our last example:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="o">(</span>main<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span>--name<span class="w"> </span>dataprep<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="w">  </span>--volume<span class="w"> </span>/home/researcher/gandlf_input:/input:ro<span class="w"> </span><span class="se">\ </span><span class="c1"># input data is mounted as read-only</span>
+</span><span id="__span-26-3"><a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="w">  </span>--volume<span class="w"> </span>/home/researcher/gandlf_output:/output<span class="w"> </span><span class="se">\ </span><span class="c1"># output data is mounted as read-write</span>
+</span><span id="__span-26-4"><a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a><span class="w">  </span>cbica/gandlf:latest-cpu<span class="w"> </span><span class="se">\ </span><span class="c1"># change to appropriate docker image tag</span>
+</span><span id="__span-26-5"><a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a><span class="w">  </span>construct-csv<span class="w"> </span><span class="se">\ </span><span class="c1"># standard construct CSV API starts</span>
+</span><span id="__span-26-6"><a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a><span class="w">  </span>--input-dir<span class="w"> </span>/input/data<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-26-7"><a id="__codelineno-26-7" name="__codelineno-26-7" href="#__codelineno-26-7"></a><span class="w">  </span>--output-file<span class="w"> </span>/output/data.csv<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-26-8"><a id="__codelineno-26-8" name="__codelineno-26-8" href="#__codelineno-26-8"></a><span class="w">  </span>--channels-id<span class="w"> </span>_t1.nii.gz<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-26-9"><a id="__codelineno-26-9" name="__codelineno-26-9" href="#__codelineno-26-9"></a><span class="w">  </span>--label-id<span class="w"> </span>_seg.nii.gz
+</span></code></pre></div>
+<p>The previous command will generate a data CSV file that you can safely edit outside the container (such as by adding a <code>ValueToPredict</code> column). Then, you can refer to the same file when running again:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="o">(</span>main<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span>--name<span class="w"> </span>training<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-27-2"><a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="w">  </span>--volume<span class="w"> </span>/home/researcher/gandlf_input:/input:ro<span class="w"> </span><span class="se">\ </span><span class="c1"># input data is mounted as read-only</span>
+</span><span id="__span-27-3"><a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a><span class="w">  </span>--volume<span class="w"> </span>/home/researcher/gandlf_output:/output<span class="w"> </span><span class="se">\ </span><span class="c1"># output data is mounted as read-write</span>
+</span><span id="__span-27-4"><a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a><span class="w">  </span>cbica/gandlf:latest-cpu<span class="w"> </span><span class="se">\ </span><span class="c1"># change to appropriate docker image tag</span>
+</span><span id="__span-27-5"><a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a><span class="w">  </span>gandlf<span class="w"> </span>run<span class="w"> </span>--train<span class="w"> </span><span class="se">\ </span><span class="c1"># standard training API starts</span>
+</span><span id="__span-27-6"><a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a><span class="w">  </span>--config<span class="w"> </span>/input/config.yml<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-27-7"><a id="__codelineno-27-7" name="__codelineno-27-7" href="#__codelineno-27-7"></a><span class="w">  </span>--inputdata<span class="w"> </span>/output/data.csv<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-27-8"><a id="__codelineno-27-8" name="__codelineno-27-8" href="#__codelineno-27-8"></a><span class="w">  </span>--modeldir<span class="w"> </span>/output/model
+</span></code></pre></div>
+<h4 id="special-case-for-training">Special Case for Training<a class="headerlink" href="#special-case-for-training" title="Permanent link">&para;</a></h4>
+<p>Considering that you want to train on an existing model that is inside the GaNDLF container (such as in an MLCube container created by <code>gandlf deploy</code>), the output will be to a location embedded inside the container. Since you cannot mount something into that spot without overwriting the model, you can instead use the built-in <code>docker cp</code> command to extract the model afterward. For example, you can fine-tune a model on your own data using the following commands as a starting point:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="c1"># Run training on your new data</span>
+</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="o">(</span>main<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>--name<span class="w"> </span>gandlf_training<span class="w"> </span>mlcommons/gandlf-pretrained:0.0.1<span class="w"> </span>-v<span class="w"> </span>/my/input/data:/input<span class="w"> </span>gandlf<span class="w"> </span>run<span class="w"> </span>-m<span class="w"> </span>/embedded_model/<span class="w"> </span><span class="o">[</span>...<span class="o">]</span><span class="w"> </span><span class="c1"># Do not include &quot;--rm&quot; option!</span>
+</span><span id="__span-28-3"><a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a><span class="c1"># Copy the finetuned model out of the container, to a location on the host</span>
+</span><span id="__span-28-4"><a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="o">(</span>main<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>docker<span class="w"> </span>cp<span class="w"> </span>gandlf_training:/embedded_model<span class="w"> </span>/home/researcher/extracted_model
+</span><span id="__span-28-5"><a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a><span class="c1"># Now you can remove the container to clean up</span>
+</span><span id="__span-28-6"><a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a><span class="o">(</span>main<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>docker<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>gandlf_training
+</span></code></pre></div>
+<h3 id="enabling-gpus">Enabling GPUs<a class="headerlink" href="#enabling-gpus" title="Permanent link">&para;</a></h3>
+<p>Some special arguments need to be passed to Docker to enable it to use your GPU. With Docker version &gt; 19.03 You can use <code>docker run --gpus all</code> to expose all GPUs to the container. See the <a href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/user-guide.html#gpu-enumeration">NVIDIA Docker documentation</a> for more details.</p>
+<p>If using CUDA, GaNDLF also expects the environment variable <code>CUDA_VISIBLE_DEVICES</code> to be set. To use the same settings as your host machine, simply add <code>-e CUDA_VISIBLE_DEVICES</code> to your docker run command. For example:</p>
+<p>For example:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="o">(</span>main<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>--gpus<span class="w"> </span>all<span class="w"> </span>-e<span class="w"> </span>CUDA_VISIBLE_DEVICES<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span>--name<span class="w"> </span>gandlf<span class="w"> </span>cbica/gandlf:latest-cuda113<span class="w"> </span>gandlf<span class="w"> </span>run<span class="w"> </span>--device<span class="w"> </span>cuda<span class="w"> </span><span class="o">[</span>...<span class="o">]</span>
+</span></code></pre></div></p>
+<p>This can be replicated for ROCm for AMD , by following the <a href="https://rocmdocs.amd.com/en/latest/ROCm_Virtualization_Containers/ROCm-Virtualization-&amp;-Containers.html?highlight=docker">instructions to set up the ROCm Container Toolkit</a>.</p>
+<h2 id="mlcubes">MLCubes<a class="headerlink" href="#mlcubes" title="Permanent link">&para;</a></h2>
+<p>GaNDLF, and GaNDLF-created models, may be distributed as an <a href="https://mlcommons.github.io/mlcube/">MLCube</a>. This involves distributing an <code>mlcube.yaml</code> file. That file can be specified when using the <a href="https://mlcommons.github.io/mlcube/runners/">MLCube runners</a>. The runner will perform many aspects of configuring your container for you. Currently, only the <code>mlcube_docker</code> runner is supported. </p>
+<p>See the <a href="https://mlcommons.github.io/mlcube/">MLCube documentation</a> for more details.</p>
+<h2 id="huggingface-cli">HuggingFace CLI<a class="headerlink" href="#huggingface-cli" title="Permanent link">&para;</a></h2>
+<p>This tool allows you to interact with the Hugging Face Hub directly from a terminal. For example, you can create a repository, upload and download files, etc.</p>
+<h3 id="download-an-entire-repository">Download an entire repository<a class="headerlink" href="#download-an-entire-repository" title="Permanent link">&para;</a></h3>
+<p>GaNDLF's Hugging Face CLI allows you to download repositories through the command line. This can be done by just specifying the repo id:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="o">(</span>main<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>gandlf<span class="w"> </span>hf<span class="w"> </span>--download<span class="w"> </span>--repo-id<span class="w"> </span>HuggingFaceH4/zephyr-7b-beta
+</span></code></pre></div>
+<p>Apart from the Repo Id you can also provide other arguments.</p>
+<h3 id="revision">Revision<a class="headerlink" href="#revision" title="Permanent link">&para;</a></h3>
+<p>To download from a specific revision (commit hash, branch name or tag), use the --revision option:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="o">(</span>main<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>gandlf<span class="w"> </span>hf<span class="w"> </span>--download<span class="w"> </span>--repo-id<span class="w"> </span>distilbert-base-uncased<span class="w"> </span>revision<span class="w"> </span>--revision<span class="w"> </span>v1.1
+</span></code></pre></div></p>
+<h3 id="specify-a-token">Specify a token<a class="headerlink" href="#specify-a-token" title="Permanent link">&para;</a></h3>
+<p>To access private or gated repositories, you must use a token. You can do this using the --token option:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="o">(</span>main<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>gandlf<span class="w"> </span>hf<span class="w"> </span>--download<span class="w"> </span>--repo-id<span class="w"> </span>distilbert-base-uncased<span class="w"> </span>revision<span class="w"> </span>--revision<span class="w"> </span>v1.1<span class="w"> </span>--token<span class="w"> </span>hf_****
+</span></code></pre></div>
+<h3 id="specify-cache-directory">Specify cache directory<a class="headerlink" href="#specify-cache-directory" title="Permanent link">&para;</a></h3>
+<p>If not using --local-dir, all files will be downloaded by default to the cache directory defined by the HF_HOME environment variable. You can specify a custom cache using --cache-dir:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="o">(</span>main<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>gandlf<span class="w"> </span>hf<span class="w"> </span>--download<span class="w"> </span>--repo-id<span class="w"> </span>distilbert-base-uncased<span class="w"> </span>revision<span class="w"> </span>--revision<span class="w"> </span>v1.1<span class="w"> </span>--token<span class="w"> </span>hf_****<span class="w"> </span>--cache-dir<span class="w"> </span>./path/to/cache
+</span></code></pre></div>
+<h3 id="download-to-a-local-folder">Download to a local folder<a class="headerlink" href="#download-to-a-local-folder" title="Permanent link">&para;</a></h3>
+<p>The recommended (and default) way to download files from the Hub is to use the cache-system. However, in some cases you want to download files and move them to a specific folder. This is useful to get a workflow closer to what git commands offer. You can do that using the --local-dir option.</p>
+<p>A ./huggingface/ folder is created at the root of your local directory containing metadata about the downloaded files. This prevents re-downloading files if they’re already up-to-date. If the metadata has changed, then the new file version is downloaded. This makes the local-dir optimized for pulling only the latest changes.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="o">(</span>main<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>gandlf<span class="w"> </span>hf<span class="w"> </span>--download<span class="w"> </span>--repo-id<span class="w"> </span>distilbert-base-uncased<span class="w"> </span>revision<span class="w"> </span>--revision<span class="w"> </span>v1.1<span class="w"> </span>--token<span class="w"> </span>hf_****<span class="w"> </span>--cache-dir<span class="w"> </span>./path/to/cache<span class="w"> </span>--local-dir<span class="w"> </span>./path/to/dir
+</span></code></pre></div>
+<h3 id="force-download">Force Download<a class="headerlink" href="#force-download" title="Permanent link">&para;</a></h3>
+<p>To specify if the files should be downloaded even if it already exists in the local cache.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="o">(</span>main<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>gandlf<span class="w"> </span>hf<span class="w"> </span>--download<span class="w"> </span>--repo-id<span class="w"> </span>distilbert-base-uncased<span class="w"> </span>revision<span class="w"> </span>--revision<span class="w"> </span>v1.1<span class="w"> </span>--token<span class="w"> </span>hf_****<span class="w"> </span>--cache-dir<span class="w"> </span>./path/to/cache<span class="w"> </span>--local-dir<span class="w"> </span>./path/to/dir<span class="w"> </span>--force-download
+</span></code></pre></div>
+<h3 id="upload-an-entire-folder">Upload an entire folder<a class="headerlink" href="#upload-an-entire-folder" title="Permanent link">&para;</a></h3>
+<p>Use the <code>gandlf hf --upload</code> upload command to upload files to the Hub directly.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="o">(</span>main<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>gandlf<span class="w"> </span>hf<span class="w"> </span>--upload<span class="w"> </span>--repo-id<span class="w"> </span>Wauplin/my-cool-model<span class="w"> </span>--folder-path<span class="w"> </span>./model<span class="w"> </span>--token<span class="w"> </span>hf_****
+</span></code></pre></div>
+<h3 id="upload-to-a-specific-path-in-repo">Upload to a Specific Path in Repo<a class="headerlink" href="#upload-to-a-specific-path-in-repo" title="Permanent link">&para;</a></h3>
+<p>Relative path of the directory in the repo. Will default to the root folder of the repository.
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="o">(</span>main<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>gandlf<span class="w"> </span>hf<span class="w"> </span>--upload<span class="w"> </span>--repo-id<span class="w"> </span>Wauplin/my-cool-model<span class="w"> </span>--folder-path<span class="w"> </span>./model/data<span class="w"> </span>--path-in-repo<span class="w"> </span>./data<span class="w"> </span>--token<span class="w"> </span>hf_****
+</span></code></pre></div></p>
+<h3 id="upload-multiple-files">Upload multiple files<a class="headerlink" href="#upload-multiple-files" title="Permanent link">&para;</a></h3>
+<p>To upload multiple files from a folder at once without uploading the entire folder, use the --allow-patterns and --ignore-patterns patterns. It can also be combined with the --delete-patterns option to delete files on the repo while uploading new ones. In the example below, we sync the local Space by deleting remote files and uploading all files except the ones in /logs:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="o">(</span>main<span class="o">)</span><span class="w"> </span>$&gt;<span class="w"> </span>gandlf<span class="w"> </span>hf<span class="w"> </span>Wauplin/space-example<span class="w"> </span>--repo-type<span class="o">=</span>space<span class="w"> </span>--exclude<span class="o">=</span><span class="s2">&quot;/logs/*&quot;</span><span class="w"> </span>--delete<span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="w"> </span>--commit-message<span class="o">=</span><span class="s2">&quot;Sync local Space with Hub&quot;</span>
+</span></code></pre></div>
+<h3 id="specify-a-token_1">Specify a token<a class="headerlink" href="#specify-a-token_1" title="Permanent link">&para;</a></h3>
+<p>To upload files, you must use a token. By default, the token saved locally will be used. If you want to authenticate explicitly, use the --token option:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-39-1"><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="o">(</span>main<span class="o">)</span><span class="w"> </span>$&gt;gandlf<span class="w"> </span>hf<span class="w"> </span>--upload<span class="w"> </span>Wauplin/my-cool-model<span class="w"> </span>--folder-path<span class="w"> </span>./model<span class="w">  </span>--token<span class="o">=</span>hf_****
+</span></code></pre></div>
+<h3 id="specify-a-commit-message">Specify a commit message<a class="headerlink" href="#specify-a-commit-message" title="Permanent link">&para;</a></h3>
+<p>Use the --commit-message and --commit-description to set a custom message and description for your commit instead of the default one</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-40-1"><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="o">(</span>main<span class="o">)</span><span class="w"> </span>$&gt;gandlf<span class="w"> </span>hf<span class="w"> </span>--upload<span class="w"> </span>Wauplin/my-cool-model<span class="w"> </span>--folder-path<span class="w"> </span>./model<span class="w">  </span>--token<span class="o">=</span>hf_****
+</span><span id="__span-40-2"><a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>--commit-message<span class="w"> </span><span class="s2">&quot;Epoch 34/50&quot;</span><span class="w"> </span>--commit-description<span class="o">=</span><span class="s2">&quot;Val accuracy: 68%. Check tensorboard for more details.&quot;</span>
+</span></code></pre></div>
+<h3 id="upload-to-a-dataset-or-space">Upload to a dataset or Space<a class="headerlink" href="#upload-to-a-dataset-or-space" title="Permanent link">&para;</a></h3>
+<p>To upload to a dataset or a Space, use the --repo-type option:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-41-1"><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="o">(</span>main<span class="o">)</span><span class="w"> </span>$&gt;gandlf<span class="w"> </span>hf<span class="w"> </span>--upload<span class="w"> </span>Wauplin/my-cool-model<span class="w"> </span>--folder-path<span class="w"> </span>./model<span class="w">  </span>--token<span class="o">=</span>hf_****
+</span><span id="__span-41-2"><a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>--repo-type<span class="w"> </span>dataset
+</span></code></pre></div>
+<h3 id="huggingface-template-for-upload">Huggingface Template For Upload<a class="headerlink" href="#huggingface-template-for-upload" title="Permanent link">&para;</a></h3>
+<h4 id="design-and-modify-template">Design and Modify Template<a class="headerlink" href="#design-and-modify-template" title="Permanent link">&para;</a></h4>
+<p>To design the huggingface template use the hugging_face.md file change the mandatory field 
+[REQUIRED_FOR_GANDLF] to it's respective name don't  leave it blank other wise it may through error, other field can be modeified by the user as per his convenience</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-42-1"><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="c1"># Here the required field change  from [REQUIRED_FOR_GANDLF] to [GANDLF]</span>
+</span><span id="__span-42-2"><a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a>**Developed<span class="w"> </span>by:**<span class="w"> </span><span class="o">{{</span><span class="w"> </span>developers<span class="w"> </span><span class="p">|</span><span class="w"> </span>default<span class="o">(</span><span class="s2">&quot;[GANDLF]&quot;</span>,<span class="w"> </span><span class="nb">true</span><span class="o">)}}</span>
+</span></code></pre></div>
+<h4 id="mentioned-the-huggingface-template">Mentioned The Huggingface Template<a class="headerlink" href="#mentioned-the-huggingface-template" title="Permanent link">&para;</a></h4>
+<p>To mentioned the Huggingface Template , use the --hf-template option:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-43-1"><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="o">(</span>main<span class="o">)</span><span class="w"> </span>$&gt;gandlf<span class="w"> </span>hf<span class="w"> </span>--upload<span class="w"> </span>Wauplin/my-cool-model<span class="w"> </span>--folder-path<span class="w"> </span>./model<span class="w">  </span>--token<span class="o">=</span>hf_****
+</span><span id="__span-43-2"><a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a>--repo-type<span class="w"> </span>dataset<span class="w"> </span>--hf-template<span class="w"> </span>/hugging_face.md
+</span></code></pre></div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../setup/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Installation" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Installation
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../migration_guide/" class="md-footer__link md-footer__link--next" aria-label="Next: Migration Guide" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Migration Guide
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["toc.integrate", "search.suggest", "search.highlight", "search.share", "content.code.annotate"], "search": "../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.8492ddcf.min.js"></script>
+      
+    
+  </body>
+</html>
