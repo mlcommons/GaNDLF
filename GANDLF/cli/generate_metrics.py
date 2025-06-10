@@ -287,7 +287,7 @@ def generate_metrics_dict(
                 pred_array = pred_tensor.squeeze(0).numpy().astype(int)
 
             overall_stats_dict[current_subject_id] = generate_instance_segmentation(
-                prediction=pred_array, target=label_array
+                prediction=pred_array, target=label_array, parameters=parameters
             )
 
     elif problem_type == "synthesis":
