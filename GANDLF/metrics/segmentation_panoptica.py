@@ -1,5 +1,5 @@
 from pathlib import Path
-import tempfile
+import os, tempfile
 
 import numpy as np
 
@@ -24,6 +24,8 @@ def generate_instance_segmentation(
     Returns:
         dict: The evaluation results.
     """
+
+    os.environ["PANOPTICA_CITATION_REMINDER"] = "False"
 
     cwd = Path(__file__).parent.absolute()
     # the parameters dict takes precedence over the panoptica_config_path
