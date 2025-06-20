@@ -25,7 +25,7 @@ def _parseConfig(
     try:
         if not isinstance(config_file_path, dict):
             params = yaml.safe_load(open(config_file_path, "r"))
-    except:
+    except yaml.YAMLError as e:
         # this is a special case for config files with panoptica parameters
         from panoptica.utils.config import _load_yaml
 
