@@ -3139,11 +3139,9 @@ def test_generic_cli_function_metrics_cli_rad_nd():
 
     # read and initialize parameters for specific data dimension
     parameters = ConfigManager(
-        testingDir + "/config_segmentation.yaml", version_check_flag=False
+        baseConfigDir + "/config_segmentation_metrics_brats_default.yaml",
+        version_check_flag=False,
     )
-    parameters["modality"] = "rad"
-    parameters["patch_size"] = patch_size["3D"]
-    parameters["model"]["dimension"] = 3
     parameters["verbose"] = False
     temp_config = write_temp_config_path(parameters)
 
