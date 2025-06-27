@@ -81,7 +81,6 @@ requirements = [
     "click==8.1.8",
     "deprecated",
     "packaging==24.0",
-    "typer==0.9.0",
     "colorlog",
     "opacus==1.5.2",
     "huggingface-hub==0.25.1",
