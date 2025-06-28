@@ -81,7 +81,6 @@ requirements = [
     "click==8.1.8",
     "deprecated",
     "packaging==24.0",
-    "typer==0.9.0",
     "colorlog",
     "opacus==1.5.2",
     "huggingface-hub==0.25.1",
@@ -89,7 +88,7 @@ requirements = [
     "openslide-python==1.4.1",
     "lion-pytorch==0.2.2",
     "pydantic==2.10.6",
-    "panoptica>=1.3.3",
+    "panoptica>=1.4.1",
 ]
 
 if __name__ == "__main__":
