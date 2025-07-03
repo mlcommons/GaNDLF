@@ -8,7 +8,7 @@ from tqdm import tqdm
 from pathlib import Path
 import pandas as pd
 import openslide
-
+from typing import Union
 
 class PatchManager:
     def __init__(self, filename, output_dir):
@@ -19,6 +19,7 @@ class PatchManager:
         self.output_dir = output_dir
         self.set_slide_path(filename)
         self.patches = list()
+        self.lm_patches = list()
         self.slide_folder = Path(filename).stem
         self.valid_mask = None
         self.mined_mask = None
@@ -283,6 +284,7 @@ class PatchManager:
         n_jobs = config["num_workers"]
         save = config["save_patches"]
         value_map = config["value_map"]
+        tissue_threshold = config.get("tissue_threshold", 0.5)  # Minimum tissue content threshold
 
         csv_filename = os.path.join(self.output_dir, "list.csv")
 
@@ -331,192 +333,321 @@ class PatchManager:
 
                 saturated = self._is_patch_extraction_done(n_patches, n_completed)
 
+            # Create label map patches for valid patches
+            if self.label_map is not None:
+                for patch in self.patches:
+                    lm_patch = self.pull_from_label_map(patch)
+                    self.label_map_patches.append(lm_patch)
+
             # Save patches
             output_dir_slide_folder = os.path.join(self.output_dir, self.slide_folder)
             Path(output_dir_slide_folder).mkdir(parents=True, exist_ok=True)
-            _save_patch_partial = partial(
-                _save_patch,
-                output_directory=self.output_dir,
-                save=save,
-                check_if_valid=True,
-            )
+            
+            if self.label_map is not None:
+                output_dir_mask_folder = os.path.join(
+                    self.output_dir, self.label_map_folder
+                )
+                Path(output_dir_mask_folder).mkdir(parents=True, exist_ok=True)
+
+            # Define data type for storing results
+            dt = np.dtype([
+                ('bool_val', bool),
+                ('patch_obj', Patch),
+                ('string_val', 'U100'),
+                ('label_obj', object)
+            ])
+
+            def _save_patch_wrapper(patch_and_lm):
+                patch, lm_patch = patch_and_lm
+                return _save_patch(
+                    patch=patch,
+                    label_map_patch=lm_patch,
+                    output_directory=self.output_dir,
+                    save=save,
+                    check_if_valid=True,
+                    patch_processor=get_patch_class_proportions if self.label_map is not None else None,
+                    value_map=value_map,
+                )
 
             print("Saving patches:")
+
+            # Process patches in parallel
+            if len(self.label_map_patches) > 0:
+                patch_iterable = zip(self.patches, self.label_map_patches)
+            else:
+                patch_iterable = zip(self.patches, [None] * len(self.patches))
 
             with concurrent.futures.ThreadPoolExecutor(n_jobs) as executor:
                 np_slide_futures = list(
                     tqdm(
-                        executor.map(_save_patch_partial, self.patches),
+                        executor.map(_save_patch_wrapper, patch_iterable),
                         total=len(self.patches),
                         unit="pchs",
                     )
                 )
 
                 self.patches = list()
-                np_slide_futures = np.array(np_slide_futures)
+                self.label_map_patches = list()
+                
+                # Convert to structured numpy array
+                np_slide_futures = np.array([(f[0], f[1], f[2], f[3] if len(f) > 3 else None)
+                                             for f in np_slide_futures], dtype=dt)
+                
                 try:
-                    successful_indices = np.argwhere(np_slide_futures[:, 0]).ravel()
+                    successful_indices = np.argwhere(np_slide_futures['bool_val']).ravel()
                 except Exception as e:
                     print("Error:", e, "Setting successful indices to []")
                     successful_indices = []
-
-            # Find all successfully saved patches, copy and extract from label map.
-            if self.label_map is not None:
-                for i in successful_indices:
-                    slide_patch = np_slide_futures[i, 1]
-                    lm_patch = self.pull_from_label_map(slide_patch)
-                    self.label_map_patches.append(lm_patch)
-
-                print("Saving label maps:")
-                output_dir_mask_folder = os.path.join(
-                    self.output_dir, self.label_map_folder
-                )
-                Path(output_dir_mask_folder).mkdir(parents=True, exist_ok=True)
-
-                _lm_save_patch_partial = partial(
-                    _save_patch,
-                    output_directory=self.output_dir,
-                    save=save,
-                    check_if_valid=False,
-                    patch_processor=get_patch_class_proportions,
-                    value_map=value_map,
-                )
-                with concurrent.futures.ThreadPoolExecutor(
-                    config["num_workers"]
-                ) as executor:
-                    lm_futures = list(
-                        tqdm(
-                            executor.map(
-                                _lm_save_patch_partial, self.label_map_patches
-                            ),
-                            total=len(self.label_map_patches),
-                            unit="pchs",
-                        )
-                    )
-                np_lm_futures = np.array(lm_futures)
-            successful = np.count_nonzero(np_slide_futures[:, 0])
+            successful = np.count_nonzero(np_slide_futures['bool_val'])
             print(
-                "{}/{} valid patches found in this run.".format(successful, n_patches)
+                "{}/{} valid patches found in this run.".format(successful, len(np_slide_futures))
             )
             n_completed += successful
 
+            # Generate CSV with patch information
+            if len(successful_indices) > 0:
+                new_df_rows = []
+                for index in successful_indices:
+                    new_row = {}
+                    if self.save_subjectID:
+                        new_row.update({"SubjectID": self.subjectID})
+
+                    slide_patch = np_slide_futures[index]['patch_obj']
+                    
+                    # Add slide patch information
+                    slide_patch_path = slide_patch.get_patch_path(self.output_dir, False)
+                    new_row.update({"SlidePatchPath": slide_patch_path})
+                    
+                    # Add label map information if available
+                    if self.label_map is not None and np_slide_futures[index]['label_obj'] is not None:
+                        # Create label map patch path based on slide patch
+                        lm_patch = self.pull_from_label_map(slide_patch)
+                        lm_patch_path = lm_patch.get_patch_path(self.output_dir, False)
+                        lm_result = np_slide_futures[index]['string_val']
+                        new_row.update({
+                            self.mask_header: lm_patch_path,
+                            "PatchComposition": lm_result,
+                        })
+
+                    # Add coordinates
+                    patch_coords = slide_patch.coordinates
+                    new_row.update({"PatchCoordinatesX": patch_coords[1]})
+                    new_row.update({"PatchCoordinatesY": patch_coords[0]})
+
+                    new_df_rows.append(new_row)
+
+                # Create and save dataframe
+                new_df = pd.DataFrame(new_df_rows)
+                output_df = pd.concat([output_df, new_df])
+
+        output_df.to_csv(csv_filename, index=False)
+
+        print("Done!")
+        return np_slide_futures
+
+
+    def mine_patch_grid(self, config, output_csv=None):
+        # Parse configuration
+        patch_size = config["patch_size"]
+        overlap = config["overlap_factor"]
+        n_jobs = config["num_workers"]
+        save_images = config["save_patches"]
+        value_map = config["value_map"]
+        tissue_threshold = config.get("tissue_threshold", 0.5)  # Minimum tissue content threshold
+
+        # Calculate stride (step size) based on patch size and overlap
+        stride_y = int(patch_size[0] * (1 - overlap))
+        stride_x = int(patch_size[1] * (1 - overlap))
+
+        # Ensure minimum stride of 1 pixel
+        stride_y = max(1, stride_y)
+        stride_x = max(1, stride_x)
+
+        # Set default CSV filename if not provided
+        csv_filename = os.path.join(self.output_dir, "list.csv")
+        if output_csv is not None:
+            csv_filename = output_csv
+
+        # Read existing CSV if it exists
+        output_df = pd.DataFrame()
+        try:
+            if os.path.exists(csv_filename) and os.path.isfile(csv_filename):
+                output_df = pd.read_csv(csv_filename)
+            else:
+                output_df = pd.DataFrame()
+        except pd.errors.EmptyDataError as e:
+            print(e)
+
+        print("Generating tissue-containing patches...")
+
+        # Get slide dimensions
+        slide_height, slide_width = self.slide_dims[1], self.slide_dims[0]
+
+        # Use the precomputed tissue mask if available, otherwise generate it
+        if self.valid_mask is None:
+            print("Warning: No tissue mask provided, processing all patches (inefficient)")
+            tissue_mask = np.ones((slide_height // self.valid_mask_scale[1],
+                                   slide_width // self.valid_mask_scale[0]), dtype=bool)
+            mask_scale = (self.valid_mask_scale[0], self.valid_mask_scale[1])
+        else:
+            print("Using precomputed tissue mask")
+            tissue_mask = self.valid_mask
+            mask_scale = self.valid_mask_scale
+
+        # Create a list to store all of our patches
+        valid_patch_positions = []
+
+        # Calculate downsampled grid parameters
+        ds_patch_height = int(patch_size[0] / mask_scale[1])
+        ds_patch_width = int(patch_size[1] / mask_scale[0])
+        ds_stride_y = int(stride_y / mask_scale[1])
+        ds_stride_x = int(stride_x / mask_scale[0])
+
+        # Calculate number of tiles in downsampled space
+        ds_height, ds_width = tissue_mask.shape
+        n_tiles_y = (ds_height - ds_patch_height + ds_stride_y) // ds_stride_y
+        n_tiles_x = (ds_width - ds_patch_width + ds_stride_x) // ds_stride_x
+
+        print(f"Searching {n_tiles_y} × {n_tiles_x} positions in downsampled space")
+
+        # Identify tissue-containing positions
+        total_positions = 0
+        tissue_positions = 0
+
+        for y in range(0, ds_height - ds_patch_height + 1, ds_stride_y):
+            for x in range(0, ds_width - ds_patch_width + 1, ds_stride_x):
+                total_positions += 1
+
+                # Extract the patch from the mask
+                mask_patch = tissue_mask[y:y + ds_patch_height, x:x + ds_patch_width]
+
+                # Calculate tissue percentage
+                if mask_patch.size > 0:
+                    tissue_percentage = np.sum(mask_patch) / mask_patch.size
+                else:
+                    tissue_percentage = 0
+
+                # If patch meets threshold, add to valid positions
+                if tissue_percentage >= tissue_threshold:
+                    tissue_positions += 1
+
+                    # Convert coordinates back to original resolution
+                    orig_y = int(y * mask_scale[1])
+                    orig_x = int(x * mask_scale[0])
+
+                    valid_patch_positions.append((orig_y, orig_x))
+
+        print(f"Found {tissue_positions}/{total_positions} positions with sufficient tissue content")
+
+        # Create Patch objects for valid positions
+        self.patches = []
+        for y, x in valid_patch_positions:
+            # Create a patch at this position
+            patch = Patch(
+                slide_path=self.img_path,
+                slide_object=self.slide_object,
+                manager=self,
+                coordinates=np.array([y, x]),
+                level=0,
+                size=patch_size,
+                output_suffix="_patch_{}-{}.png",
+            )
+
+            self.patches.append(patch)
+
+            if self.label_map is not None:
+                self.label_map_patches.append(self.pull_from_label_map(patch))
+
+        print(f"Created {len(self.patches)} patch objects. Validating and saving patches...")
+
+        # Create output directories
+        output_dir_slide_folder = os.path.join(self.output_dir, self.slide_folder)
+        Path(output_dir_slide_folder).mkdir(parents=True, exist_ok=True)
+
+        # Define data type for storing results
+        dt = np.dtype([
+            ('bool_val', bool),
+            ('patch_obj', Patch),
+            ('string_val', 'U100'),
+            ('label_obj', object)# Unicode string
+        ])
+
+
+        # Prepare the save function with partial
+        if save_images:
+            _save_patch_partial = partial(
+                _save_patch,
+                output_directory=self.output_dir,
+                check_if_valid=True,
+            )
+        else:
+            _save_patch_partial = partial(
+                _get_patch,
+                value_map=value_map
+            )
+
+        print(f"Processing and saving {len(self.patches)} patches:")
+
+        # Process patches in parallel
+        if len(self.label_map_patches) > 0:
+            patch_iterable = zip(self.patches, self.label_map_patches)
+        else:
+            patch_iterable = zip(self.patches, [None] * len(self.patches))
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=n_jobs) as executor:
+            np_slide_futures = list(
+                tqdm(
+                    executor.map(lambda args: _save_patch_partial(*args),
+                                 patch_iterable),
+                    total=len(self.patches),
+                    unit="pchs",
+                )
+            )
+
+            self.patches = []  # Clear patches to free memory
+
+            # Convert to structured numpy array
+            np_slide_futures = np.array([(f[0], f[1], f[2], f[3] if len(f) > 2 else "")
+                                         for f in np_slide_futures], dtype=dt)
+
+            try:
+                successful_indices = np.argwhere(np_slide_futures['bool_val']).ravel()
+            except Exception as e:
+                print("Error:", e, "Setting successful indices to []")
+                successful_indices = []
+
+        # Generate CSV with patch information
+        if len(successful_indices) > 0:
             new_df_rows = []
             for index in successful_indices:
                 new_row = {}
                 if self.save_subjectID:
                     new_row.update({"SubjectID": self.subjectID})
-                if self.label_map is not None:
-                    slide_patch_path = np_slide_futures[index, 1].get_patch_path(
-                        self.output_dir, False
-                    )
-                    lm_patch_path = np_lm_futures[index, 1].get_patch_path(
-                        self.output_dir, False
-                    )
-                    lm_result = np_lm_futures[index, 2]
-                    new_row.update(
-                        {
-                            self.image_header: slide_patch_path,
-                            self.mask_header: lm_patch_path,
-                            "PatchComposition": lm_result,
-                        }
-                    )
 
-                slide_patch_path = np_slide_futures[index, 1].get_patch_path(
-                    self.output_dir, False
-                )
+                slide_patch = np_slide_futures[index]['patch_obj']
+
+                # Add slide patch information
+                slide_patch_path = slide_patch.get_patch_path(self.output_dir, False)
                 new_row.update({"SlidePatchPath": slide_patch_path})
 
-                patch_coords = np_slide_futures[index, 1].coordinates
+                # Add coordinates
+                patch_coords = slide_patch.coordinates
                 new_row.update({"PatchCoordinatesX": patch_coords[1]})
                 new_row.update({"PatchCoordinatesY": patch_coords[0]})
 
                 new_df_rows.append(new_row)
 
+            # Create and save dataframe
             new_df = pd.DataFrame(new_df_rows)
-            # Concatenate in case there is a pre-existing dataframe
             output_df = pd.concat([output_df, new_df])
+            output_df.to_csv(csv_filename, index=False)
 
-        output_df.to_csv(csv_filename, index=False)
+        # Report statistics
+        successful = np.count_nonzero(np_slide_futures['bool_val'])
+        print(f"{successful}/{len(np_slide_futures)} valid patches found in this run.")
 
-        print("Done!")
+        return np_slide_futures
 
-    ### commenting out functionality for now, will be ported to a separate script
-    # def save_predefined_patches(
-    #     self,
-    #     patch_coord_csv,
-    #     config,
-    #     x_coord_col="PatchCoordinatesX",
-    #     y_coord_col="PatchCoordinatesY",
-    # ):
-    #     """
-
-    #     @param output_directory:
-    #     @param patch_coord_csv:
-    #     @param value_map:
-    #     @param n_jobs:
-    #     @return:
-    #     """
-
-    #     value_map = config["value_map"]
-    #     patch_size = config["patch_size"]
-    #     n_jobs = config["num_workers"]
-
-    #     output_dir_slide_folder = os.path.join(self.output_dir, self.slide_folder)
-    #     Path(output_dir_slide_folder).mkdir(parents=True, exist_ok=True)
-    #     # Todo, port to pandas or something more sophisticated?
-    #     input_df = pd.read_csv(patch_coord_csv)
-    #     for idx, row in input_df.iterrows():
-    #         x, y = row[x_coord_col], row[y_coord_col]
-    #         patch = Patch(
-    #             self.img_path,
-    #             self.slide_object,
-    #             self,
-    #             [y, x],
-    #             0,
-    #             patch_size,
-    #             "_patch_{}-{}.png",
-    #         )
-    #         self.patches.append(patch)
-
-    #         if self.label_map is not None:
-    #             lm_patch = self.pull_from_label_map(patch)
-    #             self.label_map_patches.append(lm_patch)
-
-    #     _save_patch_partial = partial(
-    #         _save_patch,
-    #         output_directory=output_dir_slide_folder,
-    #         save=True,
-    #         check_if_valid=False,
-    #     )
-
-    #     print("Saving slide patches:")
-    #     with concurrent.futures.ThreadPoolExecutor(n_jobs) as executor:
-    #         list(
-    #             tqdm(
-    #                 executor.map(_save_patch_partial, self.patches),
-    #                 total=len(self.patches),
-    #                 unit="pchs",
-    #             )
-    #         )
-
-    #     if self.label_map is not None:
-    #         print("Saving label maps:")
-    #         _lm_save_patch_partial = partial(
-    #             _save_patch,
-    #             output_directory=output_dir_slide_folder,
-    #             save=True,
-    #             check_if_valid=False,
-    #             patch_processor=get_patch_class_proportions,
-    #             value_map=value_map,
-    #         )
-    #         with concurrent.futures.ThreadPoolExecutor(n_jobs) as executor:
-    #             list(
-    #                 tqdm(
-    #                     executor.map(_lm_save_patch_partial, self.label_map_patches),
-    #                     total=len(self.label_map_patches),
-    #                     unit="pchs",
-    #                 )
-    #             )
 
     def pull_from_label_map(self, slide_patch):
         """
@@ -533,17 +664,33 @@ class PatchManager:
 
 
 def _save_patch(
-    patch,
-    output_directory,
-    save,
+    patch: Patch,
+    label_map_patch: Patch = None,
+    output_directory=None,
+    save=True,
     check_if_valid=True,
     patch_processor=None,
     value_map=None,
 ):
-    return patch.save(
-        out_dir=output_directory,
-        save=save,
-        check_if_valid=check_if_valid,
-        process_method=patch_processor,
-        value_map=value_map,
-    )
+    if save:
+        return patch.save(
+            out_dir=output_directory,
+            check_if_valid=check_if_valid,
+            process_method=patch_processor,
+            value_map=value_map,
+        )
+    else:
+        return patch.validate(
+            label_map=label_map_patch,
+            process_method=patch_processor,
+            value_map=value_map,
+            check_validity=check_if_valid
+        )
+
+def _get_patch(
+    patch: Patch,
+    label_map_patch: Patch,
+    value_map=None,
+    process_method=None
+):
+    return patch.validate(label_map=label_map_patch, process_method=process_method, value_map=value_map)

@@ -94,7 +94,6 @@ class Patch:
     def save(
         self,
         out_dir,
-        save=True,
         check_if_valid=True,
         process_method=None,
         value_map=None,
@@ -122,20 +121,69 @@ class Patch:
             for check_function in self.manager.valid_patch_checks:
                 if not check_function(patch):
                     print("Patch failed check", check_function)
-                    return [False, self, ""]
+                    return [False, self, "", None]
 
         try:
-            if save:
-                if isinstance(value_map, dict):
-                    patch = self.read_patch()[:, :, 0]
-                    patch = map_values(patch, value_map)
-                    imsave(fname=self.get_patch_path(out_dir), arr=patch)
-                elif value_map is None:
-                    patch = self.read_patch()
-                    imsave(fname=self.get_patch_path(out_dir), arr=patch)
+            if isinstance(value_map, dict):
+                patch = self.read_patch()[:, :, 0]
+                patch = map_values(patch, value_map)
+                imsave(fname=self.get_patch_path(out_dir), arr=patch)
+            elif value_map is None:
+                patch = self.read_patch()
+                imsave(fname=self.get_patch_path(out_dir), arr=patch)
 
-            return [True, self, process_method(patch)]
+            return [True, self, process_method(patch), None]
 
         except Exception as e:
             print("Exception while saving patch:", e)
-            return [False, self, ""]
+            return [False, self, "", None]
+
+    def get_data(self, value_map=None):
+        """
+        Read patch data and optionally apply value mapping.
+
+        Args:
+            value_map (dict, optional): Map key values in patch to alternate value.
+                Dict of {key: value} pairs where key and value are ints.
+
+        Returns:
+            numpy.ndarray: The patch data.
+        """
+        patch = self.read_patch()
+
+        if isinstance(value_map, dict):
+            if len(patch.shape) == 3 and patch.shape[2] >= 3:
+                patch = patch[:, :, 0]
+
+            from .utils import map_values
+            patch = map_values(patch, value_map)
+
+        return patch
+
+    def validate(self, label_map, process_method=None, value_map=None, check_validity=True):
+        """
+        Validate a patch using the provided check functions.
+
+        Args:
+            check_functions (list): List of functions to check patch validity.
+
+        Returns:
+            bool: True if the patch passes all checks, False otherwise.
+        """
+        patch = self.read_patch()
+        if process_method is None:
+            process_method = pass_method
+
+        label_values = None
+        if label_map is not None:
+            label_values = label_map.read_patch()
+            if value_map is not None:
+                label_values = map_values(label_values, value_map)
+
+        if check_validity:
+            for check_function in self.manager.valid_patch_checks:
+                if not check_function(patch):
+                    print("Patch failed check", check_function)
+                    return [False, self, process_method(patch), label_values]
+
+        return [True, self, process_method(patch), label_values]
