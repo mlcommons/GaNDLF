@@ -107,7 +107,7 @@ q_samples_per_volume: 1
 
 q_num_workers: 0
 
-panoptica: !Panoptica_Evaluator
+panoptica_config: !Panoptica_Evaluator
   decision_metric: null
   decision_threshold: null
   edge_case_handler: !EdgeCaseHandler
