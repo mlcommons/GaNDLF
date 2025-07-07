@@ -3137,18 +3137,12 @@ def test_generic_cli_function_metrics_cli_rad_nd():
     temp_infer_csv = os.path.join(outputDir, "temp_csv.csv")
     df.to_csv(temp_infer_csv, index=False)
 
-    # read and initialize parameters for specific data dimension
-    parameters = ConfigManager(
-        testingDir + "/config_segmentation.yaml", version_check_flag=False
-    )
-    parameters["modality"] = "rad"
-    parameters["patch_size"] = patch_size["3D"]
-    parameters["model"]["dimension"] = 3
-    parameters["verbose"] = False
-    temp_config = write_temp_config_path(parameters)
-
     output_file = os.path.join(outputDir, "output_single-csv.json")
-    generate_metrics_dict(temp_infer_csv, temp_config, output_file)
+    generate_metrics_dict(
+        temp_infer_csv,
+        os.path.join(baseConfigDir, "config_segmentation_metrics_brats_default.yaml"),
+        output_file,
+    )
 
     assert os.path.isfile(
         output_file
