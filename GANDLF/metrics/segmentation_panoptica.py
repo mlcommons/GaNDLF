@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 from typing import Optional
 import numpy as np
@@ -19,11 +20,14 @@ def generate_instance_segmentation(
         prediction (np.ndarray): The input prediction containing objects.
         label_path (str): The path to the reference label.
         target (np.ndarray): The input target containing objects.
+        parameters (dict): The GaNDLF parameters from which panoptica config is to be extracted.
         panoptica_config_path (str): The path to the Panoptica configuration file.
 
     Returns:
         dict: The evaluation results.
     """
+
+    os.environ["PANOPTICA_CITATION_REMINDER"] = "False"
 
     # the parameters dict takes precedence over the panoptica_config_path
     evaluator = parameters.get("panoptica_config", None)
