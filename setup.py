@@ -89,6 +89,7 @@ requirements = [
     "lion-pytorch==0.2.2",
     "pydantic==2.10.6",
     "panoptica>=1.4.1",
+    "shapely",
 ]
 
 if __name__ == "__main__":
