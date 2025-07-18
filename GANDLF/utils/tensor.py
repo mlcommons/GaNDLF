@@ -290,7 +290,8 @@ def get_class_imbalance_weights_classification(
         np.fromiter(penalty_dict.values(), dtype=np.float64).sum()
         + sys.float_info.epsilon
     )
-    for i in range(params["model"]["num_classes"]):
+    # Only normalize penalties for classes that actually exist in penalty_dict
+    for i in penalty_dict.keys():
         penalty_dict[i] /= penalty_sum
 
     # passing None for sampling_weights because there is no clear way to calculate this for classification tasks which do not have a label
