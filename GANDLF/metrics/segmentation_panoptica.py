@@ -1,6 +1,7 @@
 from pathlib import Path
-import tempfile
+import os
 
+from typing import Optional
 import numpy as np
 
 from panoptica import Panoptica_Evaluator
@@ -9,8 +10,8 @@ from panoptica import Panoptica_Evaluator
 def generate_instance_segmentation(
     prediction: np.ndarray,
     target: np.ndarray,
-    parameters: dict = None,
-    panoptica_config_path: str = None,
+    parameters: dict,
+    panoptica_config_path: Optional[str] = None,
 ) -> dict:
     """
     Evaluate a single exam using Panoptica.
@@ -19,29 +20,27 @@ def generate_instance_segmentation(
         prediction (np.ndarray): The input prediction containing objects.
         label_path (str): The path to the reference label.
         target (np.ndarray): The input target containing objects.
+        parameters (dict): The GaNDLF parameters from which panoptica config is to be extracted.
         panoptica_config_path (str): The path to the Panoptica configuration file.
 
     Returns:
         dict: The evaluation results.
     """
 
-    cwd = Path(__file__).parent.absolute()
+    os.environ["PANOPTICA_CITATION_REMINDER"] = "False"
+
     # the parameters dict takes precedence over the panoptica_config_path
-    panoptica_config = parameters.get("panoptica_config", None)
-    if panoptica_config is None:
+    evaluator = parameters.get("panoptica_config", None)
+    if evaluator is None:
+        cwd = Path(__file__).parent.absolute()
         panoptica_config_path = (
-            cwd / "panoptica_config_brats.yaml"
+            str(cwd / "panoptica_config_brats.yaml")
             if panoptica_config_path is None
             else panoptica_config_path
         )
-    else:
-        # write the panoptica config to a file
-        panoptica_config_path = tempfile.NamedTemporaryFile(
-            mode="w", delete=False, suffix=".yaml"
-        ).name
-        with open(panoptica_config_path, "w") as f:
-            f.write(panoptica_config)
-    evaluator = Panoptica_Evaluator.load_from_config(panoptica_config_path)
+        evaluator = Panoptica_Evaluator.load_from_config(panoptica_config_path)
+
+    assert evaluator is not None, "Panoptica evaluator could not be initialized."
 
     # call evaluate
     group2result = evaluator.evaluate(prediction_arr=prediction, reference_arr=target)
