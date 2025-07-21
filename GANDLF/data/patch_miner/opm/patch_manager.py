@@ -431,7 +431,7 @@ class PatchManager:
                         lm_result = np_slide_futures[index]['string_val']
                         new_row.update({
                             self.mask_header: lm_patch_path,
-                            "PatchComposition": lm_result,
+                            "Summary": lm_result,
                         })
 
                     # Add coordinates
@@ -444,7 +444,6 @@ class PatchManager:
                 # Create and save dataframe
                 new_df = pd.DataFrame(new_df_rows)
                 output_df = pd.concat([output_df, new_df])
-
         output_df.to_csv(csv_filename, index=False)
 
         print("Done!")
@@ -577,18 +576,16 @@ class PatchManager:
             ('label_obj', object)# Unicode string
         ])
 
-
-        # Prepare the save function with partial
-        if save_images:
-            _save_patch_partial = partial(
-                _save_patch,
+        def _save_patch_wrapper(patch_and_lm):
+            patch, lm_patch = patch_and_lm
+            return _save_patch(
+                patch=patch,
+                label_map_patch=lm_patch,
                 output_directory=self.output_dir,
+                save=save_images,
                 check_if_valid=True,
-            )
-        else:
-            _save_patch_partial = partial(
-                _get_patch,
-                value_map=value_map
+                patch_processor=get_patch_class_proportions if self.label_map is not None else None,
+                value_map=value_map,
             )
 
         print(f"Processing and saving {len(self.patches)} patches:")
@@ -602,7 +599,7 @@ class PatchManager:
         with concurrent.futures.ThreadPoolExecutor(max_workers=n_jobs) as executor:
             np_slide_futures = list(
                 tqdm(
-                    executor.map(lambda args: _save_patch_partial(*args),
+                    executor.map(lambda args: _save_patch_wrapper(args),
                                  patch_iterable),
                     total=len(self.patches),
                     unit="pchs",
@@ -634,6 +631,17 @@ class PatchManager:
                 # Add slide patch information
                 slide_patch_path = slide_patch.get_patch_path(self.output_dir, False)
                 new_row.update({"SlidePatchPath": slide_patch_path})
+                
+                # Add label map information if available
+                if self.label_map is not None and np_slide_futures[index]['label_obj'] is not None:
+                    # Create label map patch path based on slide patch
+                    lm_patch = self.pull_from_label_map(slide_patch)
+                    lm_patch_path = lm_patch.get_patch_path(self.output_dir, False)
+                    lm_result = np_slide_futures[index]['string_val']
+                    new_row.update({
+                        self.mask_header: lm_patch_path,
+                        "Summary": lm_result,
+                    })
 
                 # Add coordinates
                 patch_coords = slide_patch.coordinates
@@ -680,6 +688,7 @@ def _save_patch(
     if save:
         return patch.save(
             out_dir=output_directory,
+            label_map=label_map_patch,
             check_if_valid=check_if_valid,
             process_method=patch_processor,
             value_map=value_map,
@@ -687,9 +696,9 @@ def _save_patch(
     else:
         return patch.validate(
             label_map=label_map_patch,
+            check_if_valid=check_if_valid,
             process_method=patch_processor,
-            value_map=value_map,
-            check_validity=check_if_valid
+            value_map=value_map
         )
 
 def _get_patch(
