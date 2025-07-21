@@ -5,8 +5,10 @@ from skimage.io import imsave
 import os
 
 # from pathlib import Path
-from zarr.core import Array
-
+try:
+    from zarr.core import Array
+except ImportError as e:
+    from zarr.core import array as Array
 
 class Patch:
     def __init__(
@@ -94,7 +96,7 @@ class Patch:
     def save(
         self,
         out_dir,
-        save=True,
+        label_map=None,
         check_if_valid=True,
         process_method=None,
         value_map=None,
@@ -115,27 +117,88 @@ class Patch:
 
         patch = self.read_patch()
 
-        if process_method is None:
-            process_method = pass_method
-
-        if check_if_valid:
-            for check_function in self.manager.valid_patch_checks:
-                if not check_function(patch):
-                    print("Patch failed check", check_function)
-                    return [False, self, ""]
-
         try:
-            if save:
-                if isinstance(value_map, dict):
-                    patch = self.read_patch()[:, :, 0]
-                    patch = map_values(patch, value_map)
-                    imsave(fname=self.get_patch_path(out_dir), arr=patch)
-                elif value_map is None:
-                    patch = self.read_patch()
-                    imsave(fname=self.get_patch_path(out_dir), arr=patch)
+            imsave(fname=self.get_patch_path(out_dir), arr=patch)
+            if process_method is None:
+                process_method = pass_method
 
-            return [True, self, process_method(patch)]
+            if label_map is not None:
+                lm_patch = label_map.read_patch()
+                if isinstance(value_map, dict):
+                    lm_patch = map_values(lm_patch, value_map)
+                    imsave(fname=label_map.get_patch_path(out_dir), arr=lm_patch)
+                elif value_map is None:
+                    imsave(fname=label_map.get_patch_path(out_dir), arr=lm_patch)
+            else:
+                lm_patch = None
+
+
+            if check_if_valid:
+                for check_function in self.manager.valid_patch_checks:
+                    if not check_function(patch):
+                        print("Patch failed check", check_function)
+                        return [False, self, process_method(patch), lm_patch]
+
+            return [True, self, process_method(patch), lm_patch]
 
         except Exception as e:
             print("Exception while saving patch:", e)
-            return [False, self, ""]
+            return [False, self, "", None]
+
+    def get_data(self, value_map=None):
+        """
+        Read patch data and optionally apply value mapping.
+
+        Args:
+            value_map (dict, optional): Map key values in patch to alternate value.
+                Dict of {key: value} pairs where key and value are ints.
+
+        Returns:
+            numpy.ndarray: The patch data.
+        """
+        patch = self.read_patch()
+
+        if isinstance(value_map, dict):
+            if len(patch.shape) == 3 and patch.shape[2] >= 3:
+                patch = patch[:, :, 0]
+
+            from .utils import map_values
+            patch = map_values(patch, value_map)
+
+        return patch
+
+    def validate(self, label_map, process_method=None, value_map=None, check_if_valid=True):
+        """
+        Validate a patch using the provided check functions.
+
+        Args:
+            check_functions (list): List of functions to check patch validity.
+
+        Returns:
+            bool: True if the patch passes all checks, False otherwise.
+        """
+        patch = self.read_patch()
+
+        try:
+            if process_method is None:
+                process_method = pass_method
+
+            if label_map is not None:
+                lm_patch = label_map.read_patch()
+                if isinstance(value_map, dict):
+                    lm_patch = map_values(lm_patch, value_map)
+            else:
+                lm_patch = None
+
+
+            if check_if_valid:
+                for check_function in self.manager.valid_patch_checks:
+                    if not check_function(patch):
+                        print("Patch failed check", check_function)
+                        return [False, self, process_method(patch), lm_patch]
+
+            return [True, self, process_method(patch), lm_patch]
+
+        except Exception as e:
+            print("Exception while returning patch:", e)
+            return [False, self, "", None]
