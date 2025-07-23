@@ -34,7 +34,7 @@ class DefaultParameters(BaseModel):
         default=10, description="Number of samples per volume."
     )
     q_num_workers: int = Field(
-        default=4, description="Number of worker threads to use."
+        default=0, description="Number of worker threads to use."
     )
     num_epochs: int = Field(default=100, description="Total number of epochs to train.")
     patience: int = Field(

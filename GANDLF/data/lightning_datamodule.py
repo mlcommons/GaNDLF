@@ -49,7 +49,7 @@ class GandlfTrainingDatamodule(pl.LightningDataModule):
             dataset,
             batch_size=batch_size,
             shuffle=shuffle,
-            num_workers=self.updated_parameters_dict.get("num_workers_dataloader", 1),
+            num_workers=self.updated_parameters_dict.get("num_workers_dataloader", 0),
             pin_memory=self.updated_parameters_dict.get("pin_memory_dataloader", False),
             prefetch_factor=self.updated_parameters_dict.get(
                 "prefetch_factor_dataloader", 2
