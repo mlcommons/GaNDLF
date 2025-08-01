@@ -57,6 +57,10 @@ Please read the [migration guide](https://mlcommons.github.io/GaNDLF/migration_g
 
 This is a safety feature to ensure a tight integration between the configuration used to define a model and the code version used to perform the training. Ensure that you have all requirements satisfied, and then check the ``version`` key in the configuration, and ensure it appropriately matches the output of ``gandlf run --version``.
 
+### How to interpret seeing the same numbers for all classification metrics for under `global_*`?
+
+The classification metrics are based on TorchMetrics [[ref](https://lightning.ai/docs/torchmetrics/stable/classification/)], and this is an issue that is documented on their side [[ref](https://github.com/Lightning-AI/torchmetrics/issues/2280)]. Please use either `per_class_weighted` or `per_class_average` metrics for final evaluation.
+
 ### What if I have another question?
 
 Please [post a support request](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=).
