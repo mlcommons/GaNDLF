@@ -27,7 +27,7 @@ global_schedulers_dict = {
     "reduceonplateau": reduce_on_plateau,
     "cosineannealing": cosineannealingwarmrestarts,
     "cosineannealingwarmrestarts": cosineannealingwarmrestarts,
-    "cosineannealingLR": cosineannealingLR,
+    "cosineannealinglr": cosineannealingLR,
     "warmupcosineschedule": warmupcosineschedule,
     "wcs": warmupcosineschedule,
 }
