@@ -86,7 +86,7 @@ schedulers_dict_config = {
     "reduceonplateau": ReduceOnPlateauConfig,
     "cosineannealingwarmrestarts": CosineannealingConfig,
     "cosineannealing": CosineannealingConfig,
-    "cosineannealingLR": CosineannealingConfig,
+    "cosineannealinglr": CosineannealingConfig,
     "warmupcosineschedule": WarmupcosinescheduleConfig,
     "wcs": WarmupcosinescheduleConfig,
 }
