@@ -28,8 +28,6 @@ jobs:
         if: ${{steps.dependencies.outputs.other_modified_files_count > 0}} # Run on any non-docs change
         run: |
           pytest --cov=. --cov-report=xml --cov-append -k "classification and histology"
-        env:
-          PYTHONUNBUFFERED: "1"
       - name: Run classification unit tests
         if: ${{steps.dependencies.outputs.other_modified_files_count > 0}} # Run on any non-docs change
         run: |
