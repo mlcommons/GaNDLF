@@ -27,17 +27,12 @@ GaNDLF's primary computational foundation is built on PyTorch, and as such it su
 
 First, instantiate your environment
 ```bash
-(base) $> conda create -n venv_gandlf python=3.9 -y
+(base) $> conda create -n venv_gandlf python=3.11 -y
 (base) $> conda activate venv_gandlf
 (venv_gandlf) $> ### subsequent commands go here
 ```
 
-You may install pytorch to be compatible with CUDA, ROCm, or CPU-only. An exhaustive list of PyTorch installations for the specific version compatible with GaNDLF can be found here: https://pytorch.org/get-started/previous-versions/#v231
-Use one of the following depending on your needs:
-- CUDA 12.1
-```bash
-(venv_gandlf) $> pip install torch==2.5.0 torchvision==0.20.0 torchaudio==2.5.0 --index-url https://download.pytorch.org/whl/cu121
-```
+You may install pytorch to be compatible with CUDA, ROCm, or CPU-only. An exhaustive list of PyTorch installations for the [specific version compatible with GaNDLF](https://github.com/mlcommons/GaNDLF/blob/master/setup.py#L41) can be found here: https://pytorch.org/get-started/previous-versions/
 
 ### Optional Dependencies 
 
@@ -45,7 +40,6 @@ The following dependencies are **optional**, and are only needed to access speci
 
 ```bash
 (venv_gandlf) $> pip install openvino-dev==2023.0.1 # [OPTIONAL] to generate post-training optimized models for inference
-(venv_gandlf) $> pip install mlcube_docker # [OPTIONAL] to deploy GaNDLF models as MLCube-compliant Docker containers
 ```
 
 ### Install from Package Managers
