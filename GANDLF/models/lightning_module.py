@@ -313,12 +313,14 @@ class GandlfLightningModule(pl.LightningModule):
             try:
                 print("===going into try-except")
                 checkpoint_dict = load_model(load_path, self.device)
+                print(f"===checkpoint_dict:{checkpoint_dict}")
                 version_check(
                     self.params["version"], version_to_check=checkpoint_dict["version"]
                 )
                 # I am purposefully omitting the line below, as "previous_parameters" are not used anywhere
                 # params["previous_parameters"] = main_dict.get("parameters", None)
                 state_dict = checkpoint_dict["model_state_dict"]
+                print(f"===state_dict:{state_dict}")
                 if self.params.get("differential_privacy"):
                     # this is required for torch==1.11 and for DP inference
                     new_state_dict = {}
