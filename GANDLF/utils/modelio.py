@@ -175,7 +175,9 @@ def load_model(
     Returns:
         dict: Model dictionary containing model parameters and metadata.
     """
+    print(f"===load_model path:{path}")
     model_dict = torch.load(path, map_location=device)
+    print(f"===model_dict:{model_dict}")
 
     # check if the model dictionary is complete
     if full_sanity_check:
@@ -192,6 +194,7 @@ def load_model(
     incomplete_required_keys = [
         key for key in model_dict_required.keys() if key not in model_dict.keys()
     ]
+    print(f"===incomplete_required_keys:{incomplete_required_keys}")
     assert (
         len(incomplete_required_keys) == 0
     ), "Model dictionary is incomplete; the following keys are missing: " + str(
