@@ -40,7 +40,7 @@ black_version = "23.11.0"
 requirements = [
     "torch==2.7.1",
     f"black=={black_version}",
-    "lightning==2.4.0",
+    "lightning==2.5.2",
     "numpy==1.26.4",
     "scipy",
     "SimpleITK!=2.0.*",
