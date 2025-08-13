@@ -2469,6 +2469,12 @@ def test_train_inference_classification_histology_2d(device):
     inference_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_histo_classification.csv", train=False
     )
+
+    ### debug
+    output_files = os.listdir(modelDir)
+    print("=== output_files:", output_files)
+    ### debug
+
     for model_type in all_model_type:
         parameters["nested_training"]["testing"] = 1
         parameters["nested_training"]["validation"] = -2
