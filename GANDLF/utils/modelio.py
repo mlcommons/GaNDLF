@@ -194,7 +194,6 @@ def load_model(
     incomplete_required_keys = [
         key for key in model_dict_required.keys() if key not in model_dict.keys()
     ]
-    print(f"===incomplete_required_keys:{incomplete_required_keys}")
     assert (
         len(incomplete_required_keys) == 0
     ), "Model dictionary is incomplete; the following keys are missing: " + str(
