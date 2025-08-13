@@ -102,5 +102,5 @@ runs:
           python -m pip install --upgrade setuptools
           python -m pip install wheel
           python -m pip install openvino-dev
-          pip install torch==2.5.0 torchvision==0.20.0 torchaudio==2.5.0 --index-url https://download.pytorch.org/whl/cpu
+          pip install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/cpu
           pip install -e .

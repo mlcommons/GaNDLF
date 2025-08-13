@@ -6,7 +6,7 @@
 # if runnning on a GPU machine, install the GPU version of pytorch
 if command -v nvidia-smi &> /dev/null
 then
-	pip install torch==2.5.0 torchvision==0.20.0 torchaudio==2.5.0 --index-url https://download.pytorch.org/whl/cu121
+	pip install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/cpu
 fi
 
 pip install -e .
