@@ -100,7 +100,7 @@ runs:
           sudo apt-get install libvips libvips-tools -y
           python -m pip install --upgrade pip==24.0
           python -m pip install --upgrade setuptools
-          python -m pip install uv
-          uv pip install wheel openvino-dev --system
-          uv pip install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/cpu --system
-          uv pip install -e . --system
+          # python -m pip install uv  ## this is slower
+          python -m pip install wheel openvino-dev
+          python -m pip install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -e .
