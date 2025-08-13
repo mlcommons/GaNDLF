@@ -307,8 +307,11 @@ class GandlfLightningModule(pl.LightningModule):
         Returns:
             bool: Whether the model was successfully loaded.
         """
+        print(f"===load_path:{load_path}")
         if os.path.exists(load_path):
+            print("===going into if loop")
             try:
+                print("===going into try-except")
                 checkpoint_dict = load_model(load_path, self.device)
                 version_check(
                     self.params["version"], version_to_check=checkpoint_dict["version"]

@@ -2471,9 +2471,8 @@ def test_train_inference_classification_histology_2d(device):
     )
 
     ### debug
-    print(f"all_model_type:{all_model_type}")
     output_files = os.listdir(modelDir)
-    print("=== output_files:", output_files)
+    print("=== BEFORE LOOP output_files:", output_files)
     for file in output_files:
         current_file = os.path.join(modelDir, file)
         print(f"current_file:{current_file}")
@@ -2485,6 +2484,12 @@ def test_train_inference_classification_histology_2d(device):
         parameters["nested_training"]["testing"] = 1
         parameters["nested_training"]["validation"] = -2
         parameters["output_dir"] = modelDir  # this is in inference mode
+        output_files = os.listdir(modelDir)
+        print("=== AFTER LOOP output_files:", output_files)
+        for file in output_files:
+            current_file = os.path.join(modelDir, file)
+            if not os.path.exists(current_file):
+                print("current_file did not get detected")
         inference_data, parameters["headers"] = parseTrainingCSV(
             inputDir + "/train_2d_histo_segmentation.csv", train=False
         )
