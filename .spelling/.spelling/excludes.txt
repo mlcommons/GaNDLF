@@ -8,7 +8,9 @@
 ^\QGANDLF/grad_clipping/__init__.py\E$
 ^\QGANDLF/models/seg_modules/__init__.py\E$
 ^\QGANDLF/privacy/__init__.py\E$
+^\QGANDLF/configuration/__init__.py\E$
 ^\Qtesting/__init__.py\E$
+^\Qsetup.py\E$
 ^\Qtutorials/classification_medmnist_notebook/tutorial.ipynb\E$
 ^samples/images_opm/
 ^tutorials/classification_medmnist_notebook/medmnist/dataset/
