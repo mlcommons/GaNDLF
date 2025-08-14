@@ -83,7 +83,7 @@ requirements = [
     "deprecated",
     "packaging==24.0",
     "colorlog",
-    "opacus==1.5.2",
+    "opacus==1.5.4",
     "huggingface-hub==0.25.1",
     "openslide-bin",
     "openslide-python==1.4.1",
@@ -124,7 +124,7 @@ if __name__ == "__main__":
             ]
         },
         classifiers=[
-            "Development Status :: 3 - Alpha",
+            "Development Status :: 4 - Beta",
             "Intended Audience :: Science/Research",
             "License :: OSI Approved :: Apache Software License",
             "Natural Language :: English",
