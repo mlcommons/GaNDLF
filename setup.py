@@ -41,7 +41,7 @@ requirements = [
     "torch==2.7.1",
     f"black=={black_version}",
     "lightning==2.5.2",
-    "numpy==1.26.4",
+    "numpy>=2.0.0",
     "scipy",
     "SimpleITK!=2.0.*",
     "SimpleITK!=2.2.1",  # https://github.com/mlcommons/GaNDLF/issues/536
@@ -97,7 +97,7 @@ if __name__ == "__main__":
         version=__version__,
         author="MLCommons",
         author_email="gandlf@mlcommons.org",
-        python_requires=">3.9, <3.13",
+        python_requires=">3.9, <=3.13",
         packages=find_packages(
             where=os.path.dirname(os.path.abspath(__file__)),
             exclude=toplevel_package_excludes,
@@ -131,6 +131,7 @@ if __name__ == "__main__":
             "Programming Language :: Python :: 3.10",
             "Programming Language :: Python :: 3.11",
             "Programming Language :: Python :: 3.12",
+            "Programming Language :: Python :: 3.13",
             "Topic :: Scientific/Engineering :: Medical Science Apps.",
         ],
         description=(
