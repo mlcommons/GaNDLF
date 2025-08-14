@@ -41,7 +41,7 @@ requirements = [
     "torch==2.7.1",
     f"black=={black_version}",
     "lightning==2.5.2",
-    "numpy>=2.0.0",
+    "numpy<2.0.0",  # panoptica still needs a numpy fully compatible with 1.20
     "scipy",
     "SimpleITK!=2.0.*",
     "SimpleITK!=2.2.1",  # https://github.com/mlcommons/GaNDLF/issues/536
@@ -77,8 +77,8 @@ requirements = [
     "dicom-anonymizer==1.0.12",
     "twine",
     "keyring",
-    # "monai==1.5.0", ### TEMPORARY fix until 1.5.1 comes out
-    "monai @ git+https://github.com/Project-MONAI/MONAI.git@8ee3f89b1db3c28f7056235dfd1b1b8bf435bf67",
+    # "monai==1.5.0", ### TEMPORARY fix until 1.5.1 comes out with torch 2.7 compatibility
+    # "monai @ git+https://github.com/Project-MONAI/MONAI.git@8ee3f89b1db3c28f7056235dfd1b1b8bf435bf67",
     "click==8.1.8",
     "deprecated",
     "packaging==24.0",
@@ -89,7 +89,7 @@ requirements = [
     "openslide-python==1.4.1",
     "lion-pytorch==0.2.2",
     "pydantic==2.10.6",
-    "panoptica>=1.4.1",
+    "panoptica>=1.5.0",
 ]
 
 if __name__ == "__main__":
