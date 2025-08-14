@@ -12,6 +12,8 @@ jobs:
   # Matrix strategy for parallel test execution
   test-matrix:
     runs-on: ubuntu-latest
+    outputs:
+      other_modified_files_count: ${{ steps.dependencies.outputs.other_modified_files_count }}
     strategy:
       fail-fast: false
       matrix:
@@ -81,7 +83,7 @@ jobs:
   combine-coverage:
     needs: test-matrix
     runs-on: ubuntu-latest
-    if: always() && (needs.test-matrix.result == 'success' || needs.test-matrix.result == 'failure')
+    if: ${{ needs.test-matrix.outputs.other_modified_files_count > 0 && (always() && (needs.test-matrix.result == 'success' || needs.test-matrix.result == 'failure')) }}
     
     steps:
       - name: Checkout code
