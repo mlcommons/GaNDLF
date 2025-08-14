@@ -22,8 +22,6 @@ jobs:
           "segmentation",
           "regression",
           "transunet",
-          "entrypoints",
-          "update_version"
         ]
 
     steps:
@@ -41,6 +39,10 @@ jobs:
             "generic")
               pytest --cov=. --cov-report=xml -k "generic" --cov-context=test
               ;;
+              pytest --cov=. --cov-report=xml -k "entrypoints" --cov-context=test
+              ;;
+              pytest --cov=. --cov-report=xml -k "update_version" --cov-context=test
+              ;;
             "classification-histology")
               pytest --cov=. --cov-report=xml -k "classification and histology" --cov-context=test
               ;;
@@ -55,12 +57,6 @@ jobs:
               ;;
             "transunet")
               pytest --cov=. --cov-report=xml -k "transunet" --cov-context=test
-              ;;
-            "entrypoints")
-              pytest --cov=. --cov-report=xml -k "entrypoints" --cov-context=test
-              ;;
-            "update_version")
-              pytest --cov=. --cov-report=xml -k "update_version" --cov-context=test
               ;;
           esac
         shell: bash
