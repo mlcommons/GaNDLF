@@ -39,28 +39,31 @@ jobs:
         run: |
           case "${{ matrix.test-group }}" in
             "generic")
-              pytest --cov=. --cov-report=xml -k "generic" --cov-context=test
+              pytest --cov=. --cov-report=xml:coverage-generic.xml -k "generic" --cov-context=test | tee pytest-generic.log
               ;;
             "classification-histology")
-              pytest --cov=. --cov-report=xml -k "classification and histology" --cov-context=test
+              pytest --cov=. --cov-report=xml:coverage-classification-histology.xml -k "classification and histology" --cov-context=test | tee pytest-classification-histology.log
               ;;
             "classification-standard")
-              pytest --cov=. --cov-report=xml -k "classification and not histology" --cov-context=test
+              pytest --cov=. --cov-report=xml:coverage-classification-standard.xml -k "classification and not histology" --cov-context=test | tee pytest-classification-standard.log
               ;;
-            "segmentation")
-              pytest --cov=. --cov-report=xml -k "segmentation and not transunet" --cov-context=test
+            "segmentation-2d")
+              pytest --cov=. --cov-report=xml:coverage-segmentation-2d.xml -k "segmentation and 2d and not transunet" --cov-context=test | tee pytest-segmentation-2d.log
+              ;;
+            "segmentation-3d")
+              pytest --cov=. --cov-report=xml:coverage-segmentation-3d.xml -k "segmentation and 3d and not transunet" --cov-context=test | tee pytest-segmentation-3d.log
               ;;
             "regression")
-              pytest --cov=. --cov-report=xml -k "regression" --cov-context=test
+              pytest --cov=. --cov-report=xml:coverage-regression.xml -k "regression" --cov-context=test | tee pytest-regression.log
               ;;
             "transunet")
-              pytest --cov=. --cov-report=xml -k "transunet" --cov-context=test
+              pytest --cov=. --cov-report=xml:coverage-transunet.xml -k "transunet" --cov-context=test | tee pytest-transunet.log
               ;;
             "entrypoints")
-              pytest --cov=. --cov-report=xml -k "entrypoints" --cov-context=test
+              pytest --cov=. --cov-report=xml:coverage-entrypoints.xml -k "entrypoints" --cov-context=test | tee pytest-entrypoints.log
               ;;
             "update_version")
-              pytest --cov=. --cov-report=xml -k "update_version" --cov-context=test
+              pytest --cov=. --cov-report=xml:coverage-update_version.xml -k "update_version" --cov-context=test | tee pytest-update_version.log
               ;;
           esac
         shell: bash
@@ -69,8 +72,8 @@ jobs:
         if: ${{steps.dependencies.outputs.other_modified_files_count > 0}}
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-${{ matrix.os }}-${{ matrix.test-group }}
-          path: coverage.xml
+          name: coverage-${{ matrix.test-group }}
+          path: coverage-${{ matrix.test-group }}.xml
           retention-days: 1
 
   # Job to combine all coverage reports
