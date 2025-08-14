@@ -31,7 +31,7 @@ RUN python3.11 -c "from setup import requirements; file = open('requirements.txt
 
 COPY . /GaNDLF
 WORKDIR /GaNDLF
-RUN uv pip install -e .
+RUN uv pip install -e . --system
 # Entrypoint forces all commands given via "docker run" to go through python, CMD forces the default entrypoint script argument to be gandlf run
 # If a user calls "docker run gandlf:[tag] anonymize", it will resolve to running "gandlf anonymize" instead.
 # CMD is inherently overridden by args to "docker run", entrypoint is constant.

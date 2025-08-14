@@ -9,6 +9,7 @@ then
 	pip install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/cpu
 fi
 
-pip install -e .
+pip install uv
+uv pip install -e . --system
 gandlf verify-install
 gzip -dk -r tutorials/classification_medmnist_notebook/medmnist/dataset
