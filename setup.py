@@ -77,7 +77,8 @@ requirements = [
     "dicom-anonymizer==1.0.12",
     "twine",
     "keyring",
-    "monai==1.5.0",
+    # "monai==1.5.0", ### TEMPORARY fix until 1.5.1 comes out
+    "monai @ git+https://github.com/Project-MONAI/MONAI.git@8ee3f89b1db3c28f7056235dfd1b1b8bf435bf67",
     "click==8.1.8",
     "deprecated",
     "packaging==24.0",
