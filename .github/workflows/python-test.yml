@@ -9,8 +9,176 @@ on:
   pull_request: {}
 
 jobs:
+  # Matrix strategy for parallel test execution
+  test-matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        test-group: [
+          "generic",
+          "classification-histology",
+          "classification-standard",
+          "segmentation",
+          "regression",
+          "transunet",
+          "entrypoints",
+          "update_version"
+        ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Call reusable workflow to install dependencies
+        id: dependencies
+        uses: ./.github/workflows/dependencies
+
+      - name: Run test group - ${{ matrix.test-group }}
+        if: ${{steps.dependencies.outputs.other_modified_files_count > 0}}
+        run: |
+          case "${{ matrix.test-group }}" in
+            "generic")
+              pytest --cov=. --cov-report=xml -k "generic" --cov-context=test
+              ;;
+            "classification-histology")
+              pytest --cov=. --cov-report=xml -k "classification and histology" --cov-context=test
+              ;;
+            "classification-standard")
+              pytest --cov=. --cov-report=xml -k "classification and not histology" --cov-context=test
+              ;;
+            "segmentation")
+              pytest --cov=. --cov-report=xml -k "segmentation and not transunet" --cov-context=test
+              ;;
+            "regression")
+              pytest --cov=. --cov-report=xml -k "regression" --cov-context=test
+              ;;
+            "transunet")
+              pytest --cov=. --cov-report=xml -k "transunet" --cov-context=test
+              ;;
+            "entrypoints")
+              pytest --cov=. --cov-report=xml -k "entrypoints" --cov-context=test
+              ;;
+            "update_version")
+              pytest --cov=. --cov-report=xml -k "update_version" --cov-context=test
+              ;;
+          esac
+        shell: bash
+
+      - name: Upload coverage artifact
+        if: ${{steps.dependencies.outputs.other_modified_files_count > 0}}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.os }}-${{ matrix.test-group }}
+          path: coverage.xml
+          retention-days: 1
+
+  # Job to combine all coverage reports
+  combine-coverage:
+    needs: test-matrix
+    runs-on: ubuntu-latest
+    if: always() && (needs.test-matrix.result == 'success' || needs.test-matrix.result == 'failure')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install coverage tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install coverage[toml] coverage-python-reporter
+
+      - name: Download all coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: coverage-*
+          path: coverage-reports
+          merge-multiple: true
+
+      - name: List downloaded coverage files
+        run: |
+          find coverage-reports -name "*.xml" -type f
+
+      - name: Combine coverage reports
+        run: |
+          # Install coverage tools if not already available
+          pip install coverage
+
+          # Create combined coverage directory
+          mkdir -p combined-coverage
+          
+          # Combine all XML coverage reports
+          python -c "
+          import xml.etree.ElementTree as ET
+          import glob
+          import os
+          
+          coverage_files = glob.glob('coverage-reports/**/*.xml', recursive=True)
+          print(f'Found {len(coverage_files)} coverage files')
+          
+          if not coverage_files:
+              print('No coverage files found')
+              exit(1)
+          
+          # Use the first file as base
+          combined_tree = ET.parse(coverage_files[0])
+          combined_root = combined_tree.getroot()
+          
+          # Merge coverage from other files
+          for coverage_file in coverage_files[1:]:
+              tree = ET.parse(coverage_file)
+              root = tree.getroot()
+              
+              # Merge packages
+              for package in root.findall('.//package'):
+                  package_name = package.get('name')
+                  existing_package = combined_root.find(f'.//package[@name=\"{package_name}\"]')
+                  
+                  if existing_package is None:
+                      # Add new package
+                      packages = combined_root.find('.//packages')
+                      if packages is not None:
+                          packages.append(package)
+                  else:
+                      # Merge classes within package
+                      for class_elem in package.findall('classes/class'):
+                          class_name = class_elem.get('name')
+                          existing_class = existing_package.find(f'.//class[@name=\"{class_name}\"]')
+                          
+                          if existing_class is None:
+                              classes = existing_package.find('classes')
+                              if classes is not None:
+                                  classes.append(class_elem)
+          
+          # Write combined coverage
+          combined_tree.write('combined-coverage/coverage.xml', encoding='utf-8', xml_declaration=True)
+          print('Combined coverage report created')
+          "
+
+      - name: Upload combined coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./combined-coverage/coverage.xml
+          flags: unittests
+          name: combined-coverage
+
+      - name: Upload coverage to Codacy
+        if: github.ref == 'refs/heads/master'
+        uses: codacy/codacy-coverage-reporter-action@v1.3.0
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: ./combined-coverage/coverage.xml
+
+  # Legacy single-system job for backward compatibility (optional)
   full-test:
     runs-on: ubuntu-latest
+    if: false  # Disable this job since we are using the matrix approach
 
     steps:
       - name: Checkout code
