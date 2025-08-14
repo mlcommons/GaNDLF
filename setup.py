@@ -77,7 +77,7 @@ requirements = [
     "dicom-anonymizer==1.0.12",
     "twine",
     "keyring",
-    "monai==1.4.0",
+    "monai==1.5.0",
     "click==8.1.8",
     "deprecated",
     "packaging==24.0",
