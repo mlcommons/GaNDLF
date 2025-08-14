@@ -2,8 +2,8 @@
 # options: unet, resunet, fcn
 version:
   {
-    minimum: 0.0.14,
-    maximum: 0.1.5-dev
+    minimum: 0.1.5,
+    maximum: 0.1.5
   }
 model:
   {
