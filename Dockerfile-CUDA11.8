@@ -10,7 +10,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Explicitly install python3.11 (this uses 11.1 for now, as PyTorch LTS 1.8.2 is built against it)
 RUN apt-get update && apt-get install -y software-properties-common
-RUN apt install git
+RUN apt-get install -y git
 RUN add-apt-repository ppa:deadsnakes/ppa
 RUN apt install -y python3.11 
 RUN apt install -y libpython3.11-dev 
