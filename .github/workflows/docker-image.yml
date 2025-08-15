@@ -76,9 +76,8 @@ jobs:
       with:
         images: docker.io/mlcommons/gandlf, ghcr.io/mlcommons/gandlf # Push to both registries
         flavor: |
-          # Only tag 'cpu' builds as 'latest'
-          latest=${{ matrix.dockertag == 'cpu' }}
-          suffix=-${{ matrix.dockertag }},onlatest=${{ matrix.dockertag == 'cpu' }}
+          latest=true
+          suffix=-${{ matrix.dockertag }},onlatest=true
         tags: |
           type=semver,pattern={{version}}
           type=ref,event=branch
