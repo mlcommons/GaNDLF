@@ -83,7 +83,6 @@ jobs:
           type=ref,event=branch
           type=ref,event=pr
           type=ref,event=tag
-          ${{ matrix.dockertag == 'cpu' && 'type=raw,value=devcontainer' || '' }}
           ${{ matrix.dockertag == 'cpu' && 'type=raw,value=latest' || '' }}
           
     # Build Docker Image (but don't push yet -- wait for the test step first).
