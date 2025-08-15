@@ -52,17 +52,17 @@ jobs:
       uses: devcontainers/ci@v0.3
       with:
         imageName: ghcr.io/mlcommons/gandlf # This is the image name that will be built and pushed to the registry
-        cacheFrom: ghcr.io/mlcommons/gandlf # This is the image name that will be used as a cache source
-        imageTag: latest-cpu # This is the tag that will be used for the image
-        push: never
+        # cacheFrom: ghcr.io/mlcommons/gandlf # This is the image name that will be used as a cache source
+        imageTag: devcontainer # This is the tag that will be used for the image
+        push: always
     
     - name: Build and run dev container task
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       uses: devcontainers/ci@v0.3
       with:
         imageName: ghcr.io/mlcommons/gandlf # This is the image name that will be built and pushed to the registry
-        cacheFrom: ghcr.io/mlcommons/gandlf # This is the image name that will be used as a cache source
+        # cacheFrom: ghcr.io/mlcommons/gandlf # This is the image name that will be used as a cache source
         imageTag: devcontainer # This is the tag that will be used for the image
-        push: always
+        push: never
         # Change this to be your CI task/script
         runCmd: pytest --cov=. --cov-report=xml -k "generic and not docker"
