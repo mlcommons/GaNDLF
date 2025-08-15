@@ -4,11 +4,12 @@
 # we will check for the presence of the nvidia-smi command as that signifies the presence of a gpu
 
 pip install uv
-# if runnning on a GPU machine, install the GPU version of pytorch
-if command -v nvidia-smi &> /dev/null
-then
-	uv pip install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/cpu --system
-fi
+## testing this for space issues
+# # if runnning on a GPU machine, install the GPU version of pytorch
+# if command -v nvidia-smi &> /dev/null
+# then
+# 	uv pip install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/cpu --system
+# fi
 
 uv pip install -e . --system
 gandlf verify-install
