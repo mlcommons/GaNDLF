@@ -30,6 +30,8 @@ jobs:
             dockertag: cuda118
           - platform: CPU
             dockertag: cpu
+          - platform: CPU
+            dockertag: latest
           # - platform: ROCm
           #   dockertag: rocm
 
