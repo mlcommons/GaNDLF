@@ -30,8 +30,6 @@ jobs:
             dockertag: cuda118
           - platform: CPU
             dockertag: cpu
-          - platform: CPU
-            dockertag: latest
           # - platform: ROCm
           #   dockertag: rocm
 
@@ -77,9 +75,10 @@ jobs:
       uses: docker/metadata-action@v3
       with:
         images: docker.io/mlcommons/gandlf, ghcr.io/mlcommons/gandlf # Push to both registries
-        flavor: | # Handle prefixing and "latest" generation -- use "tags" property to specify events/tags further
-          latest=true
-          suffix=-${{ matrix.dockertag }},onlatest=true
+        flavor: |
+          # Only tag 'cpu' builds as 'latest'
+          latest=${{ matrix.dockertag == 'cpu' }}
+          suffix=-${{ matrix.dockertag }},onlatest=${{ matrix.dockertag == 'cpu' }}
         tags: |
           type=semver,pattern={{version}}
           type=ref,event=branch
