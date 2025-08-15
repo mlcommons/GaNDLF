@@ -11,6 +11,10 @@ then
 	# uv pip install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/cpu --system
 fi
 
+### temp fix for monai to prevent it from pullin all nvidia stuff
+pip install -r https://raw.githubusercontent.com/Project-MONAI/MONAI/8ee3f89b1db3c28f7056235dfd1b1b8bf435bf67/requirements-min.txt
+pip install git+https://github.com/Project-MONAI/MONAI.git@8ee3f89b1db3c28f7056235dfd1b1b8bf435bf67
+### temp fix for monai to prevent it from pullin all nvidia stuff
 pip install -e .
 # uv pip install -e . --system
 gandlf verify-install
