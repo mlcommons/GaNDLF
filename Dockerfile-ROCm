@@ -8,6 +8,7 @@ LABEL version=1.0
 
 # The base image contains ROCm, python 3.9 and pytorch already, no need to install those
 RUN apt-get update && apt-get install -y software-properties-common
+RUN apt-get install -y git
 RUN add-apt-repository ppa:deadsnakes/ppa
 RUN apt install -y python3.11 
 RUN apt install -y libpython3.11-dev 
@@ -19,17 +20,18 @@ RUN apt install -y python3-pip
 RUN apt-get install -y python3.11 python3-pip libjpeg8-dev zlib1g-dev python3-dev libpython3.11-dev libffi-dev libgl1
 # fix pip version because of weird PyYAML issue
 RUN python3.11 -m pip install --upgrade pip
-RUN python3.11 -m pip install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/rocm6.3
-RUN python3.11 -m pip install openvino-dev opencv-python-headless
+RUN python3.11 -m pip install uv
+RUN uv pip install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/rocm6.3 --system
+RUN uv pip install openvino-dev opencv-python-headless --system
 
 # Do some dependency installation separately here to make layer caching more efficient
 COPY ./setup.py ./setup.py
 RUN python3.11 -c "from setup import requirements; file = open('requirements.txt', 'w'); file.writelines([req + '\n' for req in requirements]); file.close()" \
-  && python3.11 -m pip install -r ./requirements.txt
+  && uv pip install -r ./requirements.txt --system
 
 COPY . /GaNDLF
 WORKDIR /GaNDLF
-RUN python3.11 -m pip install -e .
+RUN uv pip install -e . --system
 
 # Entrypoint forces all commands given via "docker run" to go through python, CMD forces the default entrypoint script argument to be gandlf run
 # If a user calls "docker run gandlf:[tag] anonymize", it will resolve to running "gandlf anonymize" instead.
