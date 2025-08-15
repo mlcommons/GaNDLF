@@ -75,7 +75,7 @@ jobs:
       uses: docker/metadata-action@v3
       with:
         images: docker.io/mlcommons/gandlf, ghcr.io/mlcommons/gandlf # Push to both registries
-        flavor: |
+        flavor: | # Handle prefixing and "latest" generation -- use "tags" property to specify events/tags further
           latest=true
           suffix=-${{ matrix.dockertag }},onlatest=true
         tags: |
