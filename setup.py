@@ -41,7 +41,7 @@ requirements = [
     "torch==2.7.1",
     f"black=={black_version}",
     "lightning==2.5.2",
-    "numpy<2.0.0",  # panoptica still needs a numpy fully compatible with 1.20
+    "numpy>=2.0.0",  # panoptica still needs a numpy fully compatible with 1.20
     "scipy",
     "SimpleITK!=2.0.*",
     "SimpleITK!=2.2.1",  # https://github.com/mlcommons/GaNDLF/issues/536
