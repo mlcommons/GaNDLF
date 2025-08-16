@@ -89,7 +89,7 @@ requirements = [
     "openslide-python==1.4.1",
     "lion-pytorch==0.2.2",
     "pydantic==2.10.6",
-    "panoptica>=1.5.0",
+    "panoptica>=1.5.1",
 ]
 
 if __name__ == "__main__":
