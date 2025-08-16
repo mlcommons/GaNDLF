@@ -64,11 +64,11 @@ requirements = [
     "medcam",
     "opencv-python",
     "torchmetrics==1.1.2",
-    "zarr==2.10.3",
+    "zarr==2.18.3",
     "numcodecs<0.16.0",
     "pydicom",
     "onnx",
-    "torchinfo==1.7.0",
+    "torchinfo==1.8.0",
     "segmentation-models-pytorch==0.4.0",
     "ACSConv==0.1.1",
     # https://github.com/docker/docker-py/issues/3256
