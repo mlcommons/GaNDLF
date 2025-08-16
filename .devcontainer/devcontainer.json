@@ -23,7 +23,7 @@
 
 	"hostRequirements": {
 		"memory": "4gb",
-		"storage": "16gb"
+		"storage": "32gb"
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.

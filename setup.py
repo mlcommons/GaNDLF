@@ -41,7 +41,7 @@ requirements = [
     "torch==2.7.1",
     f"black=={black_version}",
     "lightning==2.5.2",
-    "numpy==1.26.4",
+    "numpy>=2.0.0",  # panoptica still needs a numpy fully compatible with 1.20
     "scipy",
     "SimpleITK!=2.0.*",
     "SimpleITK!=2.2.1",  # https://github.com/mlcommons/GaNDLF/issues/536
@@ -64,11 +64,11 @@ requirements = [
     "medcam",
     "opencv-python",
     "torchmetrics==1.1.2",
-    "zarr==2.10.3",
+    "zarr==2.18.3",
     "numcodecs<0.16.0",
     "pydicom",
     "onnx",
-    "torchinfo==1.7.0",
+    "torchinfo==1.8.0",
     "segmentation-models-pytorch==0.4.0",
     "ACSConv==0.1.1",
     # https://github.com/docker/docker-py/issues/3256
@@ -77,18 +77,19 @@ requirements = [
     "dicom-anonymizer==1.0.12",
     "twine",
     "keyring",
-    "monai==1.4.0",
+    # "monai==1.5.0", ### TEMPORARY fix until 1.5.1 comes out with torch 2.7 compatibility
+    "monai @ git+https://github.com/Project-MONAI/MONAI.git@8ee3f89b1db3c28f7056235dfd1b1b8bf435bf67",
     "click==8.1.8",
     "deprecated",
     "packaging==24.0",
     "colorlog",
-    "opacus==1.5.2",
+    "opacus==1.5.4",
     "huggingface-hub==0.25.1",
     "openslide-bin",
     "openslide-python==1.4.1",
     "lion-pytorch==0.2.2",
     "pydantic==2.10.6",
-    "panoptica>=1.4.1",
+    "panoptica>=1.5.1",
 ]
 
 if __name__ == "__main__":
@@ -97,7 +98,7 @@ if __name__ == "__main__":
         version=__version__,
         author="MLCommons",
         author_email="gandlf@mlcommons.org",
-        python_requires=">3.9, <3.13",
+        python_requires=">3.9, <=3.13",
         packages=find_packages(
             where=os.path.dirname(os.path.abspath(__file__)),
             exclude=toplevel_package_excludes,
@@ -123,7 +124,7 @@ if __name__ == "__main__":
             ]
         },
         classifiers=[
-            "Development Status :: 3 - Alpha",
+            "Development Status :: 4 - Beta",
             "Intended Audience :: Science/Research",
             "License :: OSI Approved :: Apache Software License",
             "Natural Language :: English",
@@ -131,6 +132,7 @@ if __name__ == "__main__":
             "Programming Language :: Python :: 3.10",
             "Programming Language :: Python :: 3.11",
             "Programming Language :: Python :: 3.12",
+            "Programming Language :: Python :: 3.13",
             "Topic :: Scientific/Engineering :: Medical Science Apps.",
         ],
         description=(
