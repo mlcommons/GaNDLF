@@ -12,8 +12,10 @@ then
 fi
 
 ### temp fix for monai to prevent it from pullin all nvidia stuff
-pip install -r https://raw.githubusercontent.com/Project-MONAI/MONAI/8ee3f89b1db3c28f7056235dfd1b1b8bf435bf67/requirements-min.txt
-pip install git+https://github.com/Project-MONAI/MONAI.git@8ee3f89b1db3c28f7056235dfd1b1b8bf435bf67
+git clone https://github.com/Project-MONAI/MONAI.git
+cd MONAI
+pip install -e .
+cd ..
 ### temp fix for monai to prevent it from pullin all nvidia stuff
 pip install -e .
 # uv pip install -e . --system
