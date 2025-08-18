@@ -298,14 +298,14 @@ class PatchManager:
         except pd.errors.EmptyDataError as e:
             print(e)
 
-        n_patches = np.Inf if n_patches == -1 else n_patches
+        n_patches = np.inf if n_patches == -1 else n_patches
 
         n_completed = 0
         saturated = False
 
         while n_patches - n_completed > 0 and not saturated:
             # If there is a patch quota given...
-            if n_patches != np.Inf:
+            if n_patches != np.inf:
                 # Generate feasible patches until quota is reached or error is raised
                 for _ in range(n_patches - n_completed):
                     if not self.find_next_patch(
