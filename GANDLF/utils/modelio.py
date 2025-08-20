@@ -175,7 +175,9 @@ def load_model(
     Returns:
         dict: Model dictionary containing model parameters and metadata.
     """
-    model_dict = torch.load(path, map_location=device)
+    # For PyTorch 2.7+, use weights_only=False to maintain backward compatibility
+    # This prevents the new security warning in PyTorch 2.7+
+    model_dict = torch.load(path, map_location=device, weights_only=False)
 
     # check if the model dictionary is complete
     if full_sanity_check:

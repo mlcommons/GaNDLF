@@ -6,7 +6,8 @@ from .wrap_torch import (
     exp,
     step,
     reduce_on_plateau,
-    cosineannealing,
+    cosineannealingwarmrestarts,
+    cosineannealingLR,
 )
 
 from .wrap_monai import warmupcosineschedule
@@ -24,7 +25,9 @@ global_schedulers_dict = {
     "reduce-on-plateau": reduce_on_plateau,
     "plateau": reduce_on_plateau,
     "reduceonplateau": reduce_on_plateau,
-    "cosineannealing": cosineannealing,
+    "cosineannealing": cosineannealingwarmrestarts,
+    "cosineannealingwarmrestarts": cosineannealingwarmrestarts,
+    "cosineannealinglr": cosineannealingLR,
     "warmupcosineschedule": warmupcosineschedule,
     "wcs": warmupcosineschedule,
 }

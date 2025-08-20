@@ -1713,7 +1713,7 @@ class GandlfLightningModule(pl.LightningModule):
             print(f"Previous latest model loaded from {self.model_paths['latest']}.")
         else:
             raise RuntimeError(
-                "No model found to load. Please train the model before running inference."
+                f"Best/latest models not found to load: {self.model_paths}"
             )
 
     @rank_zero_only

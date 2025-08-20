@@ -17,4 +17,5 @@ omit = [
   "./testing/conftest.py",
   "./tutorials/*",
   "./GANDLF/optimizers/thirdparty/*",
+  "./mlcube/*"
 ]

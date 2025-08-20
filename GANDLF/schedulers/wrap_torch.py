@@ -5,6 +5,7 @@ from torch.optim.lr_scheduler import (
     StepLR,
     ReduceLROnPlateau,
     CosineAnnealingWarmRestarts,
+    CosineAnnealingLR,
 )
 import math
 
@@ -169,14 +170,25 @@ def reduce_on_plateau(parameters):
     )
 
 
-def cosineannealing(parameters):
+def cosineannealingwarmrestarts(parameters):
     parameters["scheduler"]["T_0"] = parameters["scheduler"].get("T_0", 5)
     parameters["scheduler"]["T_mult"] = parameters["scheduler"].get("T_mult", 1)
-    parameters["scheduler"]["min_lr"] = parameters["scheduler"].get("min_lr", 0.001)
+    parameters["scheduler"]["eta_min"] = parameters["scheduler"].get("eta_min", 0.001)
 
     return CosineAnnealingWarmRestarts(
         parameters["optimizer_object"],
         T_0=parameters["scheduler"]["T_0"],
         T_mult=parameters["scheduler"]["T_mult"],
-        eta_min=parameters["scheduler"]["min_lr"],
+        eta_min=parameters["scheduler"]["eta_min"],
+    )
+
+
+def cosineannealingLR(parameters):
+    parameters["scheduler"]["T_max"] = parameters["scheduler"].get("T_max", 50)
+    parameters["scheduler"]["eta_min"] = parameters["scheduler"].get("eta_min", 0.001)
+
+    return CosineAnnealingLR(
+        parameters["optimizer_object"],
+        T_max=parameters["scheduler"]["T_max"],
+        eta_min=parameters["scheduler"]["eta_min"],
     )

@@ -50,7 +50,7 @@ This file contains mid-level information regarding various parameters that can b
 - This parameter controls the metrics to be used for model evaluation for the training/validation/testing datasets. All options can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/metrics/__init__.py). Most of these metrics are calculated using [TorchMetrics](https://torchmetrics.readthedocs.io/). Some examples are:
     - Segmentation: dice (`dice` and `dice_per_label`), hausdorff distances (`hausdorff` or `hausdorff100` and `hausdorff100_per_label`), hausdorff distances including on the 95th percentile of distances (`hausdorff95` and `hausdorff95_per_label`)  - 
     - Classification/regression: mean squared error (`mse`) calculated per sample
-    - Metrics calculated per cohort (these are automatically calculated for classification and regression):
+    - Metrics calculated per cohort (these are automatically calculated for classification and regression **and cannot be disabled**):
         - Classification: accuracy, precision, recall, f1, for the entire cohort ("global"), per classified class ("per_class"), per classified class averaged ("per_class_average"), per classified class weighted/balanced ("per_class_weighted")
         - Regression: mean absolute error, pearson and spearman coefficients, calculated as mean, sum, or standard.
 
