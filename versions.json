@@ -1,0 +1,18 @@
+{
+  "python": "3.11",
+  "pytorch": {
+    "version": "2.7.1",
+    "torchvision": "0.22.1",
+    "torchaudio": "2.7.1",
+    "index": {
+      "cpu": "cpu",
+      "cuda118": "cu118",
+      "cuda126": "cu126",
+      "rocm": "rocm6.3"
+    }
+  },
+  "dependencies": {
+    "pip": "latest",
+    "uv": "latest"
+  }
+}

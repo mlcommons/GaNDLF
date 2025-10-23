@@ -1,29 +1,56 @@
 FROM nvidia/cuda:11.8.0-devel-ubuntu22.04
+
 LABEL github="https://github.com/mlcommons/GaNDLF"
 LABEL docs="https://mlcommons.github.io/GaNDLF/"
 LABEL version=1.0
-# ARG SETUPTOOLS_USE_DISTUTILS=local
 
 # Install instructions for NVIDIA Container Toolkit allowing you to use the host's GPU: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html
 # Note that to do this on a Windows host you need experimental feature "CUDA on WSL" -- not yet stable.
-ENV DEBIAN_FRONTEND=noninteractive 
+ENV DEBIAN_FRONTEND=noninteractive
+ARG BUILD_TYPE=cuda118
 
-# Explicitly install python3.11 (this uses 11.1 for now, as PyTorch LTS 1.8.2 is built against it)
-RUN apt-get update && apt-get install -y software-properties-common
-RUN apt-get install -y git
-RUN add-apt-repository ppa:deadsnakes/ppa
-RUN apt install -y python3.11 
-RUN apt install -y libpython3.11-dev 
-RUN apt install -y libpython3.11 
-# RUN apt install -y python-distutils-extra
-RUN apt install -y python3.11-venv 
-# RUN apt install -y python-setuptools
-RUN apt install -y python3-pip 
+# Install jq early to parse JSON
+RUN apt-get update && apt-get install -y jq
+
+# Copy and read versions file
+COPY versions.json /tmp/versions.json
+
+# Display versions being used
+RUN echo "=== Building ${BUILD_TYPE} version with the following versions ===" && \
+    cat /tmp/versions.json && \
+    echo "==========================================="
+
+# Explicitly install python3.11
+RUN apt-get install -y software-properties-common git
+
+# Install Python using version from JSON
+RUN PYTHON_VERSION=$(jq -r '.python' /tmp/versions.json) && \
+    echo "Installing Python ${PYTHON_VERSION}" && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt install -y python${PYTHON_VERSION} \
+                   libpython${PYTHON_VERSION}-dev \
+                   libpython${PYTHON_VERSION} \
+                   python${PYTHON_VERSION}-venv \
+                   python3-pip
+
+# Install additional dependencies
 RUN apt-get install -y libjpeg8-dev zlib1g-dev libffi-dev libgl1
-# fix pip version because of weird PyYAML issue
+
+# Fix pip version because of weird PyYAML issue
 RUN python3.11 -m pip install --upgrade pip
 RUN python3.11 -m pip install uv
-RUN uv pip install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/cu118 --system
+
+# Install PyTorch packages with CUDA 11.8 support using versions from JSON
+RUN PYTORCH_VERSION=$(jq -r '.pytorch.version' /tmp/versions.json) && \
+    TORCHVISION_VERSION=$(jq -r '.pytorch.torchvision' /tmp/versions.json) && \
+    TORCHAUDIO_VERSION=$(jq -r '.pytorch.torchaudio' /tmp/versions.json) && \
+    PYTORCH_INDEX=$(jq -r '.pytorch.index.cuda118' /tmp/versions.json) && \
+    echo "Installing PyTorch ${PYTORCH_VERSION} (${PYTORCH_INDEX}), TorchVision ${TORCHVISION_VERSION}, TorchAudio ${TORCHAUDIO_VERSION}" && \
+    uv pip install torch==${PYTORCH_VERSION} \
+                   torchvision==${TORCHVISION_VERSION} \
+                   torchaudio==${TORCHAUDIO_VERSION} \
+                   --index-url https://download.pytorch.org/whl/${PYTORCH_INDEX} --system
+
 RUN uv pip install openvino-dev opencv-python-headless --system
 
 # Do some dependency installation separately here to make layer caching more efficient
