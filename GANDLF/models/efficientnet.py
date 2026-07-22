@@ -155,6 +155,7 @@ class _MBConv6(nn.Sequential):
             Conv(
                 6 * num_in_feats,
                 6 * num_in_feats,
+                groups=6 * num_in_feats,
                 kernel_size=kernel_size,
                 stride=stride,
                 padding=int((kernel_size - 1) / 2),
